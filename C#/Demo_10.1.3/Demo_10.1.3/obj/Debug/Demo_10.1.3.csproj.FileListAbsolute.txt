@@ -1,0 +1,6 @@
+E:\Project_MSVS\C#\Demo_10.1.3\Demo_10.1.3\bin\Debug\Demo_10.1.3.exe.config
+E:\Project_MSVS\C#\Demo_10.1.3\Demo_10.1.3\bin\Debug\Demo_10.1.3.exe
+E:\Project_MSVS\C#\Demo_10.1.3\Demo_10.1.3\bin\Debug\Demo_10.1.3.pdb
+E:\Project_MSVS\C#\Demo_10.1.3\Demo_10.1.3\obj\Debug\Demo_10.1.3.csprojResolveAssemblyReference.cache
+E:\Project_MSVS\C#\Demo_10.1.3\Demo_10.1.3\obj\Debug\Demo_10.1.3.exe
+E:\Project_MSVS\C#\Demo_10.1.3\Demo_10.1.3\obj\Debug\Demo_10.1.3.pdb
