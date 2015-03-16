@@ -1,0 +1,10 @@
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\bin\Debug\Demo_12.1.2.exe.config
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\bin\Debug\Demo_12.1.2.exe
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\bin\Debug\Demo_12.1.2.pdb
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\obj\Debug\Demo_12.1.2.csprojResolveAssemblyReference.cache
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\obj\Debug\Demo_12._1._2.WinForm1.resources
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\obj\Debug\Demo_12._1._2.Properties.Resources.resources
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\obj\Debug\Demo_12.1.2.csproj.GenerateResource.Cache
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\obj\Debug\Demo_12.1.2.exe
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\obj\Debug\Demo_12.1.2.pdb
+E:\Project_MSVS\C#\Demo_12.1.2\Demo_12.1.2\obj\Debug\Demo_12._1._2.WinForm2.resources
