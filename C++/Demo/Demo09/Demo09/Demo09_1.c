@@ -16,8 +16,10 @@ int Print_SLIST(SLIST * const pHead);
 int Insert_SLIST(SLIST * const pHead, int x, int y);
 //删除节点数据为X的节点
 int Delete_SLIST(SLIST * const pHead, int x);
+//链表逆置
+int Reverse_SLIST(SLIST *pHead);
 //释放链表
-int Destory_SLIST(SLIST * pHead);
+int Destory_SLIST(SLIST *pHead);
 
 int Creat_SLIST(SLIST **p)
 {
@@ -137,6 +139,31 @@ int Delete_SLIST(SLIST * const pHead, int x)
 	return ret;
 }
 
+int Reverse_SLIST(SLIST * pHead)
+{
+	int ret = 0;
+	if (pHead == NULL)
+	{
+		printf("\nError: Function Reverse_SLIST pHead值为NULL !");
+		ret = -1;
+		return ret;
+	}
+	SLIST *pCur = NULL, *pPre = NULL;
+	pPre = pHead->next;
+	pCur = pHead->next->next;
+	pPre->next = NULL;
+	while (pCur != NULL)
+	{
+		SLIST *pTmp = NULL;
+		pTmp = pCur->next;
+		pCur->next = pPre;
+		pPre = pCur;
+		pCur = pTmp;
+	}
+	pHead->next = pPre;
+	return ret;
+}
+
 int Destory_SLIST(SLIST * pHead)
 {
 	int ret = 0;
@@ -178,6 +205,10 @@ void main()
 	printf("\n输入x删除节点：");
 	scanf("%d", &x);
 	ret = Delete_SLIST(pHead, x);
+	ret = Print_SLIST(pHead);
+	/**/
+	printf("\n链表逆置：");
+	ret = Reverse_SLIST(pHead);
 	ret = Print_SLIST(pHead);
 	/**/
 	ret = Destory_SLIST(pHead);
