@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void main_10_1()
+void main10_11()
 {
 	double r;
 	double s;
@@ -32,7 +32,7 @@ public:
 	}
 };
 
-void main()
+void main10_12()
 {
 	circle c;
 	double r;
