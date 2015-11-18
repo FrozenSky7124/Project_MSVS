@@ -13,7 +13,7 @@ int& test2() //返回值是引用类型，也就是常量指针。
 	int a = 123;
 	return a;
 }
-void main()
+void main10_31()
 {
 	int b1 = 0, b2 = 0;
 	b1 = test1();
