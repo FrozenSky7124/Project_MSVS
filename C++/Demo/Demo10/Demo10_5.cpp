@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int main()
+int main10_51()
 {
 	bool bA = true;
 	printf("True:ba=%d\n", bA);
