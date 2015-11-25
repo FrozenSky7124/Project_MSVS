@@ -15,9 +15,12 @@ public:
 	{
 		cout << a << " " << b << endl;
 	}
-public:
+	Complex operator - (Complex &temp);
+	
+private:
 	int a;
 	int b;
+	friend Complex operator + (Complex &c1, Complex &c2);
 };
 
 Complex::Complex()
@@ -39,11 +42,21 @@ Complex operator + (Complex &c1, Complex &c2)
 	tmp.b = c1.b + c2.b;
 	return tmp;
 }
-void main()
+Complex Complex::operator - (Complex &temp)
+{
+	Complex tmp;
+	tmp.a = this->a - temp.a;
+	tmp.b = this->b - temp.b;
+	return tmp;
+}
+void main2()
 {
 	Complex c1(1, 2), c2(3, 4);
 	Complex c3;
 	c3 = c1 + c2;
 	c3.printComplex();
+	Complex c4;
+	c4 = c1 - c2;
+	c4.printComplex();
 	system("pause");
 }

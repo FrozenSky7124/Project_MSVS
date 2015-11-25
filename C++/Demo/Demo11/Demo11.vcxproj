@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="Demo1.cpp" />
     <ClCompile Include="Demo2.cpp" />
+    <ClCompile Include="Demo3.cpp" />
     <ClCompile Include="MyCircle.cpp" />
     <ClCompile Include="MyPoint.cpp" />
   </ItemGroup>
