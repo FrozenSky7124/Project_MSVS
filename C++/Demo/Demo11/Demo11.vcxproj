@@ -149,12 +149,18 @@
     <ClCompile Include="Demo1.cpp" />
     <ClCompile Include="Demo2.cpp" />
     <ClCompile Include="Demo3.cpp" />
+    <ClCompile Include="Demo4.cpp" />
     <ClCompile Include="MyCircle.cpp" />
     <ClCompile Include="MyPoint.cpp" />
+    <ClCompile Include="SocketImp1.cpp" />
+    <ClCompile Include="SocketImp2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyCircle.h" />
     <ClInclude Include="MyPoint.h" />
+    <ClInclude Include="SocketImp1.h" />
+    <ClInclude Include="SocketImp2.h" />
+    <ClInclude Include="SocketProtocol.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

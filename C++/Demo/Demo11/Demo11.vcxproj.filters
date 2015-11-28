@@ -30,12 +30,30 @@
     <ClCompile Include="Demo3.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Demo4.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketImp1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketImp2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyPoint.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MyCircle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketImp1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketImp2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketProtocol.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

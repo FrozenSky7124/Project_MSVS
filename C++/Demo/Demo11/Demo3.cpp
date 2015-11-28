@@ -43,7 +43,7 @@ void openFire(HeroFighter *pHero, EnemyFighter *pEnemy)
 	}
 }
 
-void main()
+void main3()
 {
 	HeroFighter h1;
 	EnemyFighter e1;
