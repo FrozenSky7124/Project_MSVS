@@ -19,10 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A10CE3FB-8FAB-4A11-9370-B50EE7787942}</ProjectGuid>
-    <RootNamespace>Demo14_DataStructure</RootNamespace>
+    <ProjectGuid>{83FC267F-0AEF-46DC-BEBD-28310FF22700}</ProjectGuid>
+    <RootNamespace>Demo14_CircleList</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>Demo14_SeqList</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -119,11 +118,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Demo_Test.c" />
-    <ClCompile Include="seqlist.c" />
+    <ClInclude Include="circlelist.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="seqlist.h" />
+    <ClCompile Include="circlelist.c" />
+    <ClCompile Include="maincirclelist01.c" />
+    <ClCompile Include="maincirclelist01_约瑟夫问题求解.c" />
+    <ClCompile Include="maincirclelist02.c" />
+    <ClCompile Include="maincirclelist02_基本功能测试01.c" />
+    <ClCompile Include="maincirclelist03.c" />
+    <ClCompile Include="maincirclelist03_基本功能测试.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

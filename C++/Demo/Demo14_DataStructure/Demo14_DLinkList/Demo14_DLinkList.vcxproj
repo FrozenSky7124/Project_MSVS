@@ -19,10 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A10CE3FB-8FAB-4A11-9370-B50EE7787942}</ProjectGuid>
-    <RootNamespace>Demo14_DataStructure</RootNamespace>
+    <ProjectGuid>{1838BA84-64D7-44B2-9438-EB1824619215}</ProjectGuid>
+    <RootNamespace>Demo14_DLinkList</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>Demo14_SeqList</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -119,11 +118,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Demo_Test.c" />
-    <ClCompile Include="seqlist.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="seqlist.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
