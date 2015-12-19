@@ -1,4 +1,7 @@
-void printArray05(int array[], int len)
+#include <stdio.h>
+#include <stdlib.h>
+
+void printArray(int array[], int len)
 {
 	int i = 0;
 
@@ -10,7 +13,7 @@ void printArray05(int array[], int len)
 	printf("\n");
 }
 
-void swap5(int array[], int i, int j)
+void swap(int array[], int i, int j)
 {
 	int temp = array[i];
 	array[i] = array[j];
@@ -19,20 +22,20 @@ void swap5(int array[], int i, int j)
 
 int partition(int array[], int low, int high)
 {
-	int pv = array[low];
+	int pv = array[low]; //å®šä¹‰åŸºå‡†å€¼
 
-	while (low < high)
+	while (low < high) //æ•´ç†æ•°ç»„ï¼Œæ ¹æ®åŸºå‡†æ•°é‡æ’
 	{
 		while ((low < high) && (array[high] >= pv))
 		{
-			high--; //±È»ù×¼´ó£¬±¾À´¾ÍÔÚÓÒ±ß£¬ËùÒÔhighÇ°ÒÆ¶¯
+			high--;
 		}
-		swap5(array, low, high);
+		swap(array, low, high);
 		while ((low < high) && (array[low] <= pv))
 		{
 			low++;
 		}
-		swap5(array, low, high);
+		swap(array, low, high);
 	}
 
 	return low;
@@ -56,11 +59,10 @@ void QuickSort(int array[], int len) // O(n*logn)
 
 int main()
 {
-	int array[] = { 12, 5, 433, 253, 216, 7 };
+	int array[] = { 12, 5, 433, 7, 253, 216, 7, 101, 777, 5, 433, 216, 1024 };
 	int len = sizeof(array) / sizeof(*array);
-	printArray05(array, len);
+	printArray(array, len);
 	QuickSort(array, len);
-	printArray05(array, len);
-	system("pause");
+	printArray(array, len);
 	return 0;
 }
