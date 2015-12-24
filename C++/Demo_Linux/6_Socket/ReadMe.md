@@ -32,3 +32,10 @@ Linux网络编程
 	//设置IP地址
 	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 ```
+
+```c
+	//获得远端sockaddr
+	int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+	//获得自身sockaddr
+	int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+```
