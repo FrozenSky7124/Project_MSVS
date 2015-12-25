@@ -39,3 +39,35 @@ Linux网络编程
 	//获得自身sockaddr
 	int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 ```
+
+**非阻塞Socket**
+
+非阻塞(nonblocking)调用，在调用后立即返回。
+
+nonblocking状态下，accept函数，没有客户端连接请求返回-1，同时error值为EAGAIN或者EWOULDBLOCK（宏定义都为整数11）
+
+nonblocking状态下，recv,recvfrom函数，如果没有接收到数据，返回-1，error值为11。如果socket关闭，函数返回0。
+
+nonblocking状态下，对已经关闭的socket调用send函数，将触发SIGPIPE信号，如果不对SIGPIPE信号进行捕获，操作系统默认会将进程关闭。
+
+```c
+	//参数cmd：[F_GETFL]得到当前状态  [F_SETFL]设置状态
+	//宏定义： O_NONBLOCK代表非阻塞状态  0代表阻塞状态
+	//返回值表示描述符当前状态
+	int fcntl(int fd, int cmd, ... /* arg */ );
+```
+**Linux下的多路复用：epoll**
+
+```c
+	#include <sys/epoll.h>
+	int epoll_create(int size);
+	int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+	int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+```
+
+**Linux下的多路复用：select**
+
+```c
+	#include <sys/select.h>
+	int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+```
