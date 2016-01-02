@@ -32,7 +32,7 @@ MySQL
 
 **索引**
 
-```c
+```sql
 	//普通索引
 	CREATE INDEX table1_index ON table1 (age);
 	//唯一索引
