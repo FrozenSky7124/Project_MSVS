@@ -1,0 +1,26 @@
+.SUFFIXES: .c .o
+
+CC=gcc
+SERVERSRCS=server.c\
+			pub.c
+CLIENTSRCS=client.c\
+			pub.c
+		
+SERVEROBJS=$(SERVERSRCS:.c=.o)
+CLIENTOBJS=$(CLIENTSRCS:.c=.o)
+SERVEREXEC=server.exe
+CLIENTEXEC=client.exe
+
+all:$(SERVEROBJS) $(CLIENTOBJS)
+	$(CC) -static -o $(SERVEREXEC) $(SERVEROBJS) -lWs2_32
+	$(CC) -static -o $(CLIENTEXEC) $(CLIENTOBJS) -lWs2_32 
+	@echo '-------------ok--------------'
+
+.c.o:
+	$(CC) -Wall -DWIN -o $@ -c $< 
+
+clean:
+	rm -f $(SERVEROBJS)
+	rm -f $(CLIENTOBJS)
+	rm -f core*
+
