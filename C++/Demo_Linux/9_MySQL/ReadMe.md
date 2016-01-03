@@ -15,11 +15,20 @@ MySQL
 	CREATE TABLE table1 (name varchar(100), sex varchar(10), age int);
 	CREATE TABLE table2 (id int(10) NOT NULL auto_increment,
 						name varchar(20), age int, PRIMARY KEY(id));
+	CREATE TABLE pal_people (ID int(10) NOT NULL auto_increment, name varchar(50), 
+							sex varchar(10), age int, race varchar(50), school varchar(100), 
+							PRIMARY KEY(ID));
 
 	//增
 	INSERT INTO table1 (name, sex, age) VALUES ('name', 'man', '50');
 	INSERT INTO table2 (name, age) VALUES ('name', '50');
 
+	//删
+	DELETE FROM _TableName_ where _Field_ = _Value_;
+
+	//改
+	UPDATE _TableName_ SET _Field_ = _Value_ where IDENTIFY;
+	
 	//查
 	SELECT name, sex, age FROM table1;
 	SELECT * FROM table1 LIMIT m,n;

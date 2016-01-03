@@ -1,0 +1,13 @@
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('赵灵儿', '女', '16', '女娲族', '仙灵岛');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('林月如', '女', '18', '人族', '林家堡');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('阿奴', '女', '14', '人族', '巫月神教');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('王小虎', '男', '18', '人族', '神眼魔刀');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('沈欺霜', '女', '16', '人族', '峨眉山仙霞派');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('景天', '男', '19', '人族', '无');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('唐雪见', '女', '18', '人族&神族', '唐家堡');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('重楼', '男', '0', '魔族', '不明');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('云天河', '男', '18', '人族', '昆仑山琼华派');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('韩菱纱', '女', '17', '人族', '昆仑山琼华派');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('慕容紫英', '男', '19', '人族', '昆仑山琼华派');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('柳梦璃', '女', '20', '妖族', '幻瞑界');
+INSERT INTO pal_people (name, sex, age, race, school) VALUES ('姜云凡', '男', '19', '人族&魔族', '蜀山仙剑派');
