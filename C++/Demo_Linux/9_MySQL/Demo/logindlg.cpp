@@ -51,6 +51,8 @@ loginDlg::loginDlg()
     layout1->setMargin(15);
     layout1->setSpacing(10);
     layout1->setSizeConstraint(QLayout::SetFixedSize);//设置无法更改大小
+    //图标设置
+    this->setWindowIcon(QIcon("img_Icon.jpg"));
     //背景图片设置
     this->setAutoFillBackground(true);
     QPalette palette;

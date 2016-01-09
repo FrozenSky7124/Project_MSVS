@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "logindlg.h"
 #include "scriptdlg.h"
+#include "insertdlg.h"
 #include <QMessageBox>
 #include <QMdiSubWindow>
 #include <QStandardItemModel>
@@ -85,6 +86,7 @@ void MainWindow::createMenus()
     adminMenu->addAction(exitAction);
 
     dataMenu = this->menuBar()->addMenu(tr("数据"));
+    dataMenu->addAction(dbinsertAction);
     dataMenu->addSeparator();
     dataMenu->addAction(scriptAction);
 
@@ -116,6 +118,11 @@ void MainWindow::createActions()
     scriptAction->setShortcut(tr("Ctrl+P"));
     scriptAction->setEnabled(false);//设置初始化时，执行脚本菜单为不可用
     connect(scriptAction, SIGNAL(triggered(bool)), this,SLOT(on_script()));
+
+    dbinsertAction = new QAction(tr("插入数据"), this);
+    dbinsertAction->setShortcut(tr("Ctrl+I"));
+    dbinsertAction->setEnabled(false);
+    connect(dbinsertAction, SIGNAL(triggered(bool)), this, SLOT(on_dbinsert()));
 
     cascadeAction = new QAction(tr("层叠"),this);
     cascadeAction->setShortcut(tr("Ctrl+Q"));
@@ -152,6 +159,7 @@ void MainWindow::on_login()
         else
         {
             scriptAction->setEnabled(true);
+            dbinsertAction->setEnabled(true);
             QMessageBox::information(this, "", "登录成功！");
         }
     }
@@ -165,6 +173,7 @@ void MainWindow::on_logout()
     {
         db.sql_disconnect();
         scriptAction->setEnabled(false);
+        dbinsertAction->setEnabled(false);
     }
     else
     {
@@ -219,6 +228,17 @@ void MainWindow::on_script()
     //showView();
 }
 
+void MainWindow::on_dbinsert()
+{
+    insertDlg dlg;
+    dlg.exec();
+    if (dlg.isokBtn)
+    {
+        script_msg(dlg.SQL.toStdString().data());
+        //QMessageBox::information(this, "OK", dlg.SQL.toStdString().data());
+    }
+}
+
 void MainWindow::cascadeSubWindows()
 {
     mdiArea->cascadeSubWindows();//调用QT层叠函数
@@ -236,5 +256,5 @@ void MainWindow::on_help()
 
 void MainWindow::on_about()
 {
-    QMessageBox::about(this, "关于", "版权所有！随便盗版！");
+    QMessageBox::about(this, "关于", "NTSS控制中心 DEMO\n\n\tPowered By FrozenSky");
 }

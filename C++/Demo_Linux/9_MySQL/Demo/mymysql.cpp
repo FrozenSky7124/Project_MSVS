@@ -83,7 +83,7 @@ int mymysql::sql_open(const char *SQL, QStandardItemModel **p)
     }
     for(i=0;i<rowcount;i++)
     {
-        MYSQL_ROW row = mysql_fetch_row(result);
+        MYSQL_ROW row = mysql_fetch_row(result);//从SQL结果集中获取一行
         for(j=0;j<fieldcount;j++)
         {
             (*p)->setData((*p)->index(i, j, QModelIndex()), row[j]);

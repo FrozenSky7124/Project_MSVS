@@ -36,6 +36,7 @@ private:
     QMenu *helpMenu;
 
     QAction *scriptAction;
+    QAction *dbinsertAction;
 
     QAction *cascadeAction;
     QAction *tileAction;
@@ -53,6 +54,7 @@ private slots:
     void on_exit();
 
     void on_script();
+    void on_dbinsert();
 
     void cascadeSubWindows();
     void tileSubWindows();

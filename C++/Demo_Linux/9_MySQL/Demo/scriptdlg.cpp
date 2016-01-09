@@ -12,6 +12,7 @@ scriptDlg::scriptDlg()
     cancelBtn = new QPushButton;
     okBtn->setText(tr("GO！"));
     cancelBtn->setText(tr("Cancel"));
+    textEditSQL->setText("SELECT * FROM pal_people");
 
     QGridLayout *layout1 = new QGridLayout(this);
     layout1->addWidget(label0, 0, 0);
@@ -22,6 +23,15 @@ scriptDlg::scriptDlg()
     layout2->addWidget(cancelBtn);
 
     layout1->addLayout(layout2, 1, 1);
+
+    //美工代码区
+    this->setWindowTitle(tr("SQL Script"));
+    this->setWindowIcon(QIcon("img_Icon.jpg"));
+    this->setAutoFillBackground(true);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, QBrush(QPixmap("img_Dlg.jpg")));
+    this->setPalette(palette);
+    layout1->setSizeConstraint(QLayout::SetFixedSize);
 
     connect(okBtn, SIGNAL(clicked(bool)), this, SLOT(okBtnOnclick()));
     connect(cancelBtn, SIGNAL(clicked(bool)), this, SLOT(cancelBtnOnclick()));
