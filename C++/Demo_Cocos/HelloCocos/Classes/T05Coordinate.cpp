@@ -36,6 +36,11 @@ bool T05Coordinate::init()
 	//¼ÓÈë´¥Ãþ
 	setTouchEnabled(true);
 
+	CCMoveBy *by1 = CCMoveBy::create(2, ccp(200, 0));
+	CCMoveBy *by2 = by1->reverse();
+	CCSequence *seq = CCSequence::create(by1, by2, NULL);
+	layercolor->runAction(CCRepeatForever::create(seq));
+
 	return true;
 }
 

@@ -5,6 +5,11 @@
 #include "T03LayerZorder.h"
 #include "T04LayerColor.h"
 #include "T05Coordinate.h"
+#include "T06BatchNode.h"
+#include "T07Schedule.h"
+#include "T08Touch.h"
+#include "T09Memory.h"
+#include "T10Label.h"
 
 USING_NS_CC;
 
@@ -87,7 +92,12 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//auto scene = T02LayerSprite::scene();
 	//auto scene = T03LayerZorder::scene();
 	//auto scene = T04LayerColor::scene();
-	auto scene = T05Coordinate::scene();
+	//auto scene = T05Coordinate::scene();
+	//auto scene = T06BatchNode::scene();
+	//auto scene = T07Schedule::scene();
+	//auto scene = T08Touch::scene();
+	//auto scene = T09Memory::scene();
+	auto scene = T10Label::scene();
 
     // run
     director->runWithScene(scene);
