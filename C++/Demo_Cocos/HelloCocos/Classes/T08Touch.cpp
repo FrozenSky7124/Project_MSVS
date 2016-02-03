@@ -11,7 +11,7 @@ CCScene * T08Touch::scene()
 
 bool T08Touch::init()
 {
-	CCLayer::init();
+	TBack::init();
 
 	CCSprite *spr = CCSprite::create("HelloWorld.png");
 	spr->setPosition(ccp(winSize.width / 2, winSize.height / 2));

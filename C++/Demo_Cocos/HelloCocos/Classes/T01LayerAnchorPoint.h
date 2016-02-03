@@ -2,10 +2,11 @@
 #define __T01LayerAnchorPoint_H__
 
 #include "cocos2d.h"
+#include "TBack.h"
 
 USING_NS_CC;
 
-class T01LayerAnchorPoint : public CCLayer
+class T01LayerAnchorPoint : public TBack
 {
 public:
 	static T01LayerAnchorPoint * create();

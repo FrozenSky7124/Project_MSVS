@@ -2,10 +2,11 @@
 #define __T10Label_H__
 
 #include "cocos2d.h"
+#include "TBack.h"
 
 USING_NS_CC;
 
-class T10Label : public CCLayer
+class T10Label : public TBack
 {
 public:
 	static CCScene * scene();

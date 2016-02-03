@@ -11,7 +11,7 @@ CCScene * T05Coordinate::scene()
 
 bool T05Coordinate::init()
 {
-	CCLayer::init();
+	TBack::init();
 	/*
 		GL坐标体系：左下角为原点
 		UI坐标体系：左上角为原点

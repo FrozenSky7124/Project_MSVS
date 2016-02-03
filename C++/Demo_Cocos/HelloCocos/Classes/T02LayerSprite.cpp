@@ -11,7 +11,7 @@ CCScene * T02LayerSprite::scene()
 
 bool T02LayerSprite::init()
 {
-	if (!CCLayer::init())
+	if (!TBack::init())
 		return false;
 
 	//CCSprite *bg = CCSprite::create("bg_001.jpg");

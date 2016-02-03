@@ -17,7 +17,7 @@ T01LayerAnchorPoint * T01LayerAnchorPoint::create()
 
 bool T01LayerAnchorPoint::init()
 {
-	if(!CCLayer::init())
+	if(!TBack::init())
 		return false;
 
 	CCSize winSize = CCDirector::sharedDirector()->getWinSize();

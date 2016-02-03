@@ -11,7 +11,7 @@ CCScene * T10Label::scene()
 
 bool T10Label::init()
 {
-	CCLayer::init();
+	TBack::init();
 
 	//CCLabelTTF
 

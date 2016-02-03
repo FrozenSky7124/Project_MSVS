@@ -11,7 +11,7 @@ CCScene * T06BatchNode::scene()
 
 bool T06BatchNode::init()
 {
-	CCLayer::init();
+	TBack::init();
 	/* Demo1
 	batchNode = CCSpriteBatchNode::create("hero2_001.png");
 	*/

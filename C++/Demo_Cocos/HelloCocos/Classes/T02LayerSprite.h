@@ -2,10 +2,11 @@
 #define __T02LayerSprite_H__
 
 #include "cocos2d.h"
+#include "TBack.h"
 
 USING_NS_CC;
 
-class T02LayerSprite : public CCLayer
+class T02LayerSprite : public TBack
 {
 public:
 	static CCScene * scene();

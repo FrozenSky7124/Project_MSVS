@@ -2,10 +2,11 @@
 #define __T09Memory_H__
 
 #include "cocos2d.h"
+#include "TBack.h"
 
 USING_NS_CC;
 
-class T09Memory : public CCLayer
+class T09Memory : public TBack
 {
 public:
 	static CCScene * scene();

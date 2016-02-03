@@ -18,13 +18,15 @@ CCScene * T04LayerColor::scene()
 	CCScene *scene = CCScene::create();
 	//T04LayerColor *layer = T04LayerColor::create();
 	MyLayerGradient *layer = MyLayerGradient::create();
+	TBack *layerback = TBack::create();
 	scene->addChild(layer);
+	scene->addChild(layerback);
 	return scene;
 }
 
 bool T04LayerColor::init()
 {
 	CCLayerColor::initWithColor(ccc4(0, 0, 255, 150));
-
+	CCLOG("T04LayerColor::init()");
 	return true;
 }

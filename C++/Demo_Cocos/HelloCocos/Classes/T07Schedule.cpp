@@ -11,7 +11,7 @@ CCScene * T07Schedule::scene()
 
 bool T07Schedule::init()
 {
-	CCLayer::init();
+	TBack::init();
 
 	//帧循环定时器-调用update()方法
 	//scheduleUpdate();

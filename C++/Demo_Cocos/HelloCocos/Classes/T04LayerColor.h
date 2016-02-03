@@ -2,6 +2,7 @@
 #define __T04LayerColor_H__
 
 #include "cocos2d.h"
+#include "TBack.h"
 
 USING_NS_CC;
 

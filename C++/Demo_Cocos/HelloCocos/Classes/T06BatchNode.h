@@ -2,10 +2,11 @@
 #define __T06BatchNode_H__
 
 #include "cocos2d.h"
+#include "TBack.h"
 
 USING_NS_CC;
 
-class T06BatchNode : public CCLayer
+class T06BatchNode : public TBack
 {
 public:
 	static CCScene * scene();

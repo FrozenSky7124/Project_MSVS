@@ -11,7 +11,7 @@ CCScene * T09Memory::scene()
 
 bool T09Memory::init()
 {
-	CCLayer::init();
+	TBack::init();
 	
 	array = CCArray::create();
 	array->retain();

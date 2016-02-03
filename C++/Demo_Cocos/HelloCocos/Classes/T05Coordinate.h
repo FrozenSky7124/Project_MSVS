@@ -2,10 +2,11 @@
 #define __T05Coordinate_H__
 
 #include "cocos2d.h"
+#include "TBack.h"
 
 USING_NS_CC;
 
-class T05Coordinate : public CCLayer
+class T05Coordinate : public TBack
 {
 public:
 	static CCScene * scene();
