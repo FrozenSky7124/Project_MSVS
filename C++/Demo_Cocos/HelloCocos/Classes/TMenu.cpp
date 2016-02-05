@@ -12,6 +12,10 @@
 #include "T10Label.h"
 #include "T11CCMenu.h"
 #include "T12UI.h"
+#include "T13Action.h"
+#include "T14Animation.h"
+#include "T15Speed.h"
+#include "T16Follow.h"
 
 static char* menu_array[] =
 {
@@ -26,7 +30,11 @@ static char* menu_array[] =
 	"T09Memory.h",
 	"T10Label.h",
 	"T11CCMenu.h",
-	"T12UI.h"
+	"T12UI.h",
+	"T13Action.h",
+	"T14Animation.h",
+	"T15Speed.h",
+	"T16Follow.h"
 };
 
 Scene* TMenu::createScene()
@@ -112,6 +120,18 @@ void TMenu::menuCallBack(Ref *ref)
 		break;
 	case 12:
 		scene = T12UI::scene();
+		break;
+	case 13:
+		scene = T13Action::scene();
+		break;
+	case 14:
+		scene = T14Animation::scene();
+		break;
+	case 15:
+		scene = T15Speed::scene();
+		break;
+	case 16:
+		scene = T16Follow::scene();
 		break;
 	default:
 		break;
