@@ -12,6 +12,9 @@ public:
 	static CCScene * scene();
 	CREATE_FUNC(T14Animation);
 	bool init();
+
+	void onEnter();
+	void onEnterTransitionDidFinish();
 };
 
 #endif

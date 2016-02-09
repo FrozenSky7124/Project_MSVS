@@ -12,6 +12,19 @@ bool T14Animation::init()
 {
 	TBack::init();
 
+	return true;
+}
+
+void T14Animation::onEnter()
+{
+	TBack::onEnter();
+
+	
+}
+
+void T14Animation::onEnterTransitionDidFinish()
+{
+	TBack::onEnterTransitionDidFinish();
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("hero1_move_r.plist");
 
 	Sprite *background = Sprite::create("scenebg.jpg");
@@ -19,7 +32,7 @@ bool T14Animation::init()
 	addChild(background, -255, "background");
 
 	Sprite *hero0 = Sprite::createWithSpriteFrameName("hero1_move_r1.png");
-	hero0->setPosition(ccp(winSize.width / 2, winSize.height / 2));
+	hero0->setPosition(ccp(winSize.width / 2 - 100, winSize.height / 2));
 	addChild(hero0, 0, "hero0");
 
 	Animation *hero0_ation = Animation::create();
@@ -31,7 +44,7 @@ bool T14Animation::init()
 		SpriteFrame *frame = SpriteFrameCache::getInstance()->spriteFrameByName(filename);
 		hero0_ation->addSpriteFrame(frame);
 	}
-	
+
 	hero0_ation->setDelayPerUnit(0.12f);
 	hero0_ation->setLoops(-1);
 
@@ -43,6 +56,4 @@ bool T14Animation::init()
 								 NULL);
 
 	hero0->runAction(spawn);
-
-	return true;
 }

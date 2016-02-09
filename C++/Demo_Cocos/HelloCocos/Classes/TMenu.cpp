@@ -16,6 +16,11 @@
 #include "T14Animation.h"
 #include "T15Speed.h"
 #include "T16Follow.h"
+#include "T17ProgressTo.h"
+#include "T18Grid3D.h"
+#include "T19Draw.h"
+#include "T20Music.h"
+#include "T21Particle.h"
 
 static char* menu_array[] =
 {
@@ -34,7 +39,12 @@ static char* menu_array[] =
 	"T13Action.h",
 	"T14Animation.h",
 	"T15Speed.h",
-	"T16Follow.h"
+	"T16Follow.h",
+	"T17ProgressTo.h",
+	"T18Grid3D.h",
+	"T19Draw.h",
+	"T20Music.h",
+	"T21Particle.h"
 };
 
 Scene* TMenu::createScene()
@@ -133,12 +143,28 @@ void TMenu::menuCallBack(Ref *ref)
 	case 16:
 		scene = T16Follow::scene();
 		break;
+	case 17:
+		scene = T17ProgressTo::scene();
+		break;
+	case 18:
+		scene = T18Grid3D::scene();
+		break;
+	case 19:
+		scene = T19Draw::scene();
+		break;
+	case 20:
+		scene = T20Music::scene();
+		break;
+	case 21:
+		scene = T21Particle::scene();
+		break;
 	default:
 		break;
 	}
 	if(scene!=NULL)
 	{
-		Director::getInstance()->replaceScene(scene);
+		TransitionScene *pScene = TransitionTurnOffTiles::create(2, scene);
+		Director::getInstance()->replaceScene(pScene);
 
 	}
 }
