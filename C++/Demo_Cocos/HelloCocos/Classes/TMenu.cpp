@@ -21,6 +21,7 @@
 #include "T19Draw.h"
 #include "T20Music.h"
 #include "T21Particle.h"
+#include "T22UserDefault.h"
 
 static char* menu_array[] =
 {
@@ -44,7 +45,8 @@ static char* menu_array[] =
 	"T18Grid3D.h",
 	"T19Draw.h",
 	"T20Music.h",
-	"T21Particle.h"
+	"T21Particle.h",
+	"T22UserDefault.h"
 };
 
 Scene* TMenu::createScene()
@@ -157,6 +159,9 @@ void TMenu::menuCallBack(Ref *ref)
 		break;
 	case 21:
 		scene = T21Particle::scene();
+		break;
+	case 22:
+		scene = T22UserDefault::scene();
 		break;
 	default:
 		break;
