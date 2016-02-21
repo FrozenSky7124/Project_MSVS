@@ -21,6 +21,11 @@ public:
 	void setIndex(int index);
 	int getIndex();
 
+	void onSelect();
+	void offSelect();
+
+	Sprite *bg;
+
 private:
 	int _x;
 	int _y;

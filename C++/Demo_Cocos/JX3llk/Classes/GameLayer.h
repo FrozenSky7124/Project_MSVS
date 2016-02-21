@@ -17,6 +17,7 @@ public:
 
 	int _level;
 	int _score;
+	int _remainNum;
 
 private:
 	ProgressTimer * _progressBar;
@@ -24,6 +25,8 @@ private:
 	Sprite * _timebar_dot;
 	MapLayer * _map;
 	MenuItem *goBackMenuItem;
+	LabelBMFont *scorettf;
+	LabelBMFont *levelttf;
 	
 	void initUI();
 	void initData();
@@ -35,6 +38,7 @@ private:
 	void playSound4(float dt);
 	void playSound5(float dt);
 	void updateProgress(float delta);
+	void update(float delta);
 
 	void goBackCallBack(Ref *ref);
 	void pauseCallBack(Ref *ref);

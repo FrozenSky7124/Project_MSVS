@@ -2,6 +2,7 @@
 #include "AppMacro.h"
 #include "SimpleAudioEngine.h"
 #include "StartMenu.h"
+#include "FailLayer.h"
 
 Scene* GameLayer::createScene()
 {
@@ -43,7 +44,7 @@ void GameLayer::initUI()
 	addChild(level, 1);
 
 	String *strlevel = String::createWithFormat("%d", _level);
-	LabelBMFont *levelttf = LabelBMFont::create(strlevel->getCString(), "num.fnt");
+	levelttf = LabelBMFont::create(strlevel->getCString(), "num.fnt");
 	levelttf->setPosition(winSize.width / 16 * 1.9, winSize.height / 12 * 11 - levelttf->getBoundingBox().size.height / 4);
 	levelttf->setAnchorPoint(Point(0.5, 0.5));
 	levelttf->setScale(0.7f);
@@ -56,7 +57,7 @@ void GameLayer::initUI()
 	addChild(score, 1);
 
 	String *strscore = String::createWithFormat("%03d", _score);
-	LabelBMFont *scorettf = LabelBMFont::create(strscore->getCString(), "num.fnt");
+	scorettf = LabelBMFont::create(strscore->getCString(), "num.fnt");
 	scorettf->setPosition(winSize.width / 16 * 4.3, winSize.height / 12 * 11 - scorettf->getBoundingBox().size.height / 4);
 	scorettf->setAnchorPoint(Point(0.5, 0.5));
 	scorettf->setScale(0.7f);
@@ -94,6 +95,9 @@ void GameLayer::initUI()
 	//进度条定时器
 	schedule(SEL_SCHEDULE(&GameLayer::updateProgress), 1);
 
+	//全局帧定时器
+	scheduleUpdate();
+
 	//剩余时间标签
 	_timebar_dot = Sprite::create("timebar_dot.png");
 	_timebar_dot->setScale(1.2f);
@@ -110,22 +114,26 @@ void GameLayer::initData()
 {
 	_level = _map->getLevel();
 	_score = _map->getScore();
+	_remainNum = _map->_remainNum;
 }
 
 void GameLayer::initMap()
 {
-	_map = MapLayer::create(1);
+	_map = MapLayer::create(1, 0);
 	addChild(_map, 1, 10003);
 }
 
 void GameLayer::initSound()
 {
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg1.mp3");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg2.mp3");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg1.mp3");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg2.mp3");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/yangzhoubg.mp3");
-	CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0.3f);
+	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg1.mp3");
+	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg2.mp3");
+	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg1.mp3");
+	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg2.mp3");
+	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/yangzhoubg.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/success.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/fail.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0.7f);
+	CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.3f);
 	this->playSound1(0.0f);
 }
 
@@ -141,10 +149,51 @@ void GameLayer::updateProgress(float delta)
 	_timeTTF->setPosition(_progressBar->getPosition().x + _progressBar->getContentSize().width / 2 - (100 - currTime) / 100 * _progressBar->getContentSize().width, _timeTTF->getPosition().y);
 }
 
+void GameLayer::update(float delta)
+{
+	_score = _map->getScore();
+	_level = _map->getLevel();
+	_remainNum = _map->_remainNum;
+	float _remainTime = _progressBar->getPercentage();
+	CCString *tempStr1 = String::createWithFormat("%03d", _score);
+	CCString *tempStr2 = String::createWithFormat("%d", _level);
+	scorettf->setString(tempStr1->getCString());
+	levelttf->setString(tempStr2->getCString());
+	
+	//超时
+	if (_remainTime <= 0)
+	{
+		CCLOG("Fail!");
+		SAE->stopBackgroundMusic();
+
+		//停止帧定时器
+		unscheduleUpdate();
+		_map->removeFromParentAndCleanup(true);
+		Scene *scene = FailLayer::createScene();
+		auto transition = TransitionTurnOffTiles::create(0.8f, scene);
+		SAE->playEffect("Sound/fail.wav");
+		Director::getInstance()->replaceScene(transition);	
+	}
+
+	//全部消除
+	if (_remainNum == 0)
+	{
+		CCLOG("Success!");
+		//重新布局
+		int templevel = ++_level;
+		SAE->playEffect("Sound/success.wav");
+		_map->removeFromParentAndCleanup(true);
+		_map = MapLayer::create(templevel, _score);
+		this->addChild(_map);
+		//重置计时器
+		_progressBar->setPercentage(100);
+	}
+}
+
 void GameLayer::playSound1(float dt)
 {
 	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/qixiubg1.mp3", false);
+	//SAE->playBackgroundMusic("Sound/qixiubg1.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound2), 140.0f);
 
 	//GameBackground Change
@@ -160,7 +209,7 @@ void GameLayer::playSound2(float dt)
 {
 	CCLOG("into playSound2");
 	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/qixiubg2.mp3", false);
+	//SAE->playBackgroundMusic("Sound/qixiubg2.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound3), 100.0f);
 
 	//GameBackground Change
@@ -175,7 +224,7 @@ void GameLayer::playSound2(float dt)
 void GameLayer::playSound3(float dt)
 {
 	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/wanhuabg1.mp3", false);
+	//SAE->playBackgroundMusic("Sound/wanhuabg1.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound4), 135.0f);
 
 	//GameBackground Change
@@ -190,7 +239,7 @@ void GameLayer::playSound3(float dt)
 void GameLayer::playSound4(float dt)
 {
 	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/wanhuabg2.mp3", false);
+	//SAE->playBackgroundMusic("Sound/wanhuabg2.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound5), 105.0f);
 
 	//GameBackground Change
@@ -205,7 +254,7 @@ void GameLayer::playSound4(float dt)
 void GameLayer::playSound5(float dt)
 {
 	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/yangzhoubg.mp3", false);
+	//SAE->playBackgroundMusic("Sound/yangzhoubg.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound1), 95.0f);
 
 	//GameBackground Change
@@ -219,7 +268,9 @@ void GameLayer::playSound5(float dt)
 
 void GameLayer::goBackCallBack(Ref *ref)
 {
-	((MapLayer*)this->getChildByTag(10003))->removeFromParentAndCleanup(true);
+	//停止帧定时器
+	unscheduleUpdate();
+	_map->removeFromParentAndCleanup(true);
 
 	Scene *scene = StartMenu::createScene();
 	auto transition = TransitionFadeBL::create(0.8f, scene);

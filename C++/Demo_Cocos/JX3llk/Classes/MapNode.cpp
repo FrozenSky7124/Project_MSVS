@@ -13,6 +13,11 @@ bool MapNode::init(int index)
 	String *strIndex = String::createWithFormat("NodeImg%d.png", index);
 	this->setTexture(strIndex->getCString());
 
+	bg = Sprite::create("NodeImgBg.png");
+	bg->setAnchorPoint(Vec2(0, 0));
+	bg->setVisible(false);
+	addChild(bg, 5);
+
 	return true;
 }
 
@@ -59,4 +64,14 @@ void MapNode::setIndex(int index)
 int MapNode::getIndex()
 {
 	return this->_index;
+}
+
+void MapNode::onSelect()
+{
+	bg->setVisible(true);
+}
+
+void MapNode::offSelect()
+{
+	bg->setVisible(false);
 }
