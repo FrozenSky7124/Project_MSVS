@@ -13,7 +13,7 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
     this->setWindowTitle("天涯明月刀 答题器(离线版)");
-    //this->setWindowFlags(Qt::WindowStaysOnTopHint);
+    this->setWindowFlags(Qt::WindowStaysOnTopHint);
     SearchLine = new QLineEdit(this);
     SearchLine->setFont(QFont("微软雅黑", 15));
     SearchLine->setFixedHeight(30);
@@ -83,7 +83,7 @@ void Widget::onSearchChange()
             QString value2 = query.value(2).toString();
             QString value3 = query.value(3).toString();
 
-            //过滤重复的问题
+/*            //过滤重复的问题
             if(isRepeatQA(filter, value1) == true)
             {
                 continue;
@@ -95,7 +95,12 @@ void Widget::onSearchChange()
                 tempStr.sprintf("%s   【 %s 】", value2.toStdString().data(), value3.toStdString().data());
                 ResultTextEdit->append(tempStr);
                 ResultTextEdit->append("");
-            }
+            }*/
+
+            QString tempStr;
+            tempStr.sprintf("%6s   %s   【 %s 】", value0.toStdString().data(), value2.toStdString().data(), value3.toStdString().data());
+            ResultTextEdit->append(tempStr);
+            ResultTextEdit->append("");
         }
     }
 }
