@@ -21,7 +21,7 @@ private:
     QPushButton *importFileBtn;
     QPushButton *selectTableBtn;
     QTextEdit *mainTextEdit;
-    void insertToDB(QString id, QString pyquestion, QString question, QString answer);
+    void insertToDB(QString id, QString pyquestion, QString question, QString answer, QString rightnum);
 
 private slots:
     void showDBDrivers();
@@ -29,6 +29,8 @@ private slots:
     bool createTableQuery();
     void importFile();
     void selectTableQuery();
+    void updateDB();
+    void updateSql(int idStart, int idEnd, int newid);
 };
 
 #endif // MAINWINDOW_H

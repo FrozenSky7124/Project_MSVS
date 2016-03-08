@@ -5,16 +5,15 @@
 #include "Demo02_ReadSqlite.h"
 #include "MainDialog.h"
 #include "afxdialogex.h"
-#include "sqlite3.h"
 #include <mmsystem.h>
 
-#define dbPath "D:\\Project_MSVS\\C++\\Demo_Hack\\Demo02_ReadSqlite\\Debug\\dbQA.db"
-static sqlite3 *db;
-
-int CStringHexToInt(CString str);
+//#define dbPath "D:\\Project_MSVS\\C++\\Demo_Hack\\Demo02_ReadSqlite\\Debug\\dbQA.db"
+#define dbPath "C:\\dbQA.db"
 
 char* m_char;
 wchar_t* m_wchar;
+
+int CStringHexToInt(CString str);
 
 //动态释放内存
 void Release()
@@ -93,6 +92,15 @@ WCHAR * Utf8ToUnicode(char* unicode)
 	return szUtf8;
 }
 
+char* UnicodeToUtf8(WCHAR*  wszUtf8)
+{
+	int len = WideCharToMultiByte(CP_UTF8, 0, wszUtf8, -1, NULL, 0, NULL, NULL);
+	char* szUtf8 = new char[len + 1];
+	memset(szUtf8, 0, len + 1);
+	WideCharToMultiByte(CP_UTF8, 0, wszUtf8, -1, szUtf8, len, NULL, NULL);
+	return szUtf8;
+}
+
 //重复答案过滤
 bool isRepeat(CString *filter, int *num, CString key)
 {
@@ -115,10 +123,7 @@ IMPLEMENT_DYNAMIC(MainDialog, CDialogEx)
 MainDialog::MainDialog(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_MainDlg, pParent)
 {
-	if (!OpenDB())
-	{
-		MessageBox(_T("无法连接数据库！"), _T("错误"), MB_OK);
-	}
+	
 }
 
 MainDialog::~MainDialog()
@@ -136,58 +141,69 @@ BEGIN_MESSAGE_MAP(MainDialog, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &MainDialog::OnBnClickedStart)
 	ON_WM_ACTIVATE()
 	ON_EN_CHANGE(IDC_SearchEdit, &MainDialog::OnEnChangeSearchEdit)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 // MainDialog 回调函数
+/*
 void CALLBACK SearchMemory(
 	HWND hWnd,      // handle of CWnd that called SetTimer
 	UINT nMsg,      // WM_TIMER
 	UINT_PTR nIDEvent,   // timer identification
 	DWORD dwTime    // system time
 	)
+*/
+void MainDialog::OnTimer(UINT_PTR nIDEvent)
 {
 	//开始数据监控
-	static bool firstCall = true;
-	static bool confirmAddr = false;
-	static CString cAddrStr;
-	if (firstCall)
+	//TRACE(_T("FrozenDebug: Enter OnTimer."));
+	//this->confirmAddr = false;
+	CString cAddrStr;
+	if (this->firstCall)
 	{
-		firstCall = false;
+		this->firstCall = false;
 		LPWSTR lpAddrStr = new wchar_t[10];
 		memset(lpAddrStr, 0, sizeof(lpAddrStr));
-		GetDlgItemText(hWnd, IDC_AddrEdit, lpAddrStr, 9);
+		GetDlgItemText(IDC_AddrEdit, lpAddrStr, 9);
+		TRACE(_T("FrozenDebug: lpAddrStr = %s"), lpAddrStr);
 		cAddrStr = lpAddrStr;
 		delete[] lpAddrStr;
 		if (cAddrStr.IsEmpty() == true)
 		{
 			//需要自动寻找
 			TRACE(_T("FrozenDebug: AddrStr = NULL"));
-			confirmAddr = false;
+			this->confirmAddr = false;
 		}
 		else
 		{
 			//不需要自动寻找
 			TRACE(_T("FrozenDebug: AddrStr = %s"), cAddrStr);
-			confirmAddr = true;
+			this->confirmAddr = true;
+			this->idAddr = CStringHexToInt(cAddrStr);
 		}
 	}
 
 	if (confirmAddr)
 	{
 		//自动搜索数据库
-		static int idAddr = CStringHexToInt(cAddrStr);
-		static int preID = 0;
-		int curID = *((int *)idAddr);
-		//TRACE(_T("FrozenDebug: idAddr = %#010x"), idAddr);
-		if (curID != preID)
+
+		/*
+		static CString preStr = _T("");
+		CString curStr;
+		WCHAR* tempChar = Utf8ToUnicode((char*)idAddr);
+		curStr.Format(_T("%s"), tempChar);
+		delete[] tempChar;
+
+		if (preStr != curStr)
 		{
-			//题目已变
-			preID = curID;
-			//查询
+			preStr = curStr;
+			TRACE(_T("FrozenDebug: 检测到题目更改"));
 			char *dbErrMsg = 0;
 			char sqlQuery[128];
 			memset(sqlQuery, 0, sizeof(sqlQuery));
-			sprintf_s(sqlQuery, "SELECT * FROM qatable WHERE id = '%d';", curID);
+			char* tempChar = UnicodeToUtf8((WCHAR*)(curStr.GetString()));
+			sprintf_s(sqlQuery, "SELECT * FROM qatable WHERE question = '%s';", tempChar);
+			delete[] tempChar;
 			int nRow = 0, nColumn = 0; //查询结果集的行数、列数
 			char **dbResult; //二维数组存放结果
 			sqlite3_get_table(db, sqlQuery, &dbResult, &nRow, &nColumn, &dbErrMsg);
@@ -205,10 +221,6 @@ void CALLBACK SearchMemory(
 				resultCStr = _T("");
 				for (int i = 6; i < (nRow + 1) * nColumn; i = i + 4)
 				{
-					CString temp1;
-					WCHAR* tempwchar1 = Utf8ToUnicode(dbResult[i]);
-					temp1.Format(_T("%s  "), tempwchar1);
-					delete[] tempwchar1;
 					CString temp2;
 					WCHAR* tempwchar2 = Utf8ToUnicode(dbResult[i + 1]);
 					temp2.Format(_T("【 %s 】"), tempwchar2);
@@ -220,20 +232,68 @@ void CALLBACK SearchMemory(
 					resultCStr += temp2;
 				}
 				TRACE(_T("FrozenDebug: db Row=%d Column=%d"), nRow, nColumn);
-				SetDlgItemText(hWnd, IDC_ResultEdit, resultCStr);
-				CFont m_editFontF;
-				m_editFontF.CreatePointFont(300, _T("微软雅黑"));
-				((CEdit *)(GetDlgItem(hWnd, IDC_ResultEdit)))->SetFont(&m_editFontF);
+				SetDlgItemText(IDC_ResultEdit, resultCStr);
 				//MessageBeep(0x00000030L);
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetResourceHandle(), SND_ASYNC | SND_RESOURCE | SND_NODEFAULT);
 				delete[] filter;
 			}
-			//delete[] dbResult;
 		}
 		else
 		{
-			//题目未变
-			//NULL
+			//题目没变
+		}
+		*/
+		
+		int curID = *((int *)idAddr);
+
+		if (preID != curID)
+		{
+			preID = curID;
+			TRACE(_T("FrozenDebug: 检测到题目ID更改为：%d"), curID);
+			char *dbErrMsg = 0;
+			char sqlQuery[128];
+			memset(sqlQuery, 0, sizeof(sqlQuery));
+			sprintf_s(sqlQuery, "SELECT * FROM qatable WHERE id = '%d';", curID);
+			int nRow = 0, nColumn = 0; //查询结果集的行数、列数
+			char **dbResult; //二维数组存放结果
+			sqlite3_get_table(db, sqlQuery, &dbResult, &nRow, &nColumn, &dbErrMsg);
+			if (nRow == 0)
+			{
+				//没有找到
+				TRACE(_T("FrozenDebug: 无法根据ID:%d 找到对应题目"), curID);
+			}
+			else
+			{
+				//找到
+				CString resultCStr;
+				CString *filter;
+				int filterNum = 0;
+				filter = new CString[nRow + 1];
+				resultCStr = _T("");
+				for (int i = 7; i < (nRow + 1) * nColumn; i = i + 5)
+				{
+					CString temp2;
+					WCHAR* tempwchar2 = Utf8ToUnicode(dbResult[i + 2]);//i+2 取答案序号字段
+					temp2.Format(_T("【 %s 】"), tempwchar2);
+					delete[] tempwchar2;
+					if (isRepeat(filter, &filterNum, temp2))
+					{
+						continue;
+					}
+					resultCStr += temp2;
+				}
+				TRACE(_T("FrozenDebug: db Row=%d Column=%d"), nRow, nColumn);
+				(GetDlgItem(IDC_ResultEdit))->SetFont(&m_editFontH);
+				SetDlgItemText(IDC_ResultEdit, resultCStr);
+				//MessageBeep(0x00000030L);
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetResourceHandle(), SND_ASYNC | SND_RESOURCE | SND_NODEFAULT);
+				delete[] filter;
+			}
+		}
+		else
+		{
+			//题目没变
+			//TRACE(_T("FrozenDebug: 未检测到题目更改"));
 		}
 	}
 	else
@@ -241,15 +301,21 @@ void CALLBACK SearchMemory(
 		//自动查找题目基址
 		//找到基址则使confirmAddr=true;
 	}
+	CDialogEx::OnTimer(nIDEvent);
 }
 
 
 // MainDialog 消息处理程序
 void MainDialog::OnBnClickedStart()
 {
+	//如果已启动定时器，关闭
+	//KillTimer(7);
+	this->firstCall = true;
 	//启动定时器
 	//定时器编号为7，间隔1000ms，回调SearchMemory
-	UINT_PTR m_nCallbackTimer = SetTimer(7, 1000, &SearchMemory);
+	//UINT_PTR m_nCallbackTimer = SetTimer(7, 500, &SearchMemory);
+	UINT_PTR m_nCallbackTimer = SetTimer(7, 500, NULL);
+	PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetResourceHandle(), SND_ASYNC | SND_RESOURCE | SND_NODEFAULT);
 
 #ifdef _DEBUG
 	CString str;
@@ -268,7 +334,7 @@ void MainDialog::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
 		SetDlgItemText(IDC_SearchEdit, _T(""));
 		GetDlgItem(IDC_SearchEdit)->SetFocus();
 	}
-	
+
 #ifdef _DEBUG
 	CString debugStr;
 	debugStr.Format(_T("FrozenDebug: OnActivate nState = %d bMini = %d"), nState, bMinimized);
@@ -299,6 +365,7 @@ void MainDialog::OnEnChangeSearchEdit()
 	// 函数并调用 CRichEditCtrl().SetEventMask()，
 	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
 
+	(GetDlgItem(IDC_ResultEdit))->SetFont(&m_editFont);
 	// 取查询字符串
 	CString SearchCStr;
 	LPWSTR lpSearchStr = new wchar_t[15];
@@ -313,7 +380,7 @@ void MainDialog::OnEnChangeSearchEdit()
 	}
 
 	// 开始查找
-	(GetDlgItem(IDC_ResultEdit))->SetFont(&m_editFont);
+	//(GetDlgItem(IDC_ResultEdit))->SetFont(&m_editFont);
 	char *dbErrMsg = 0;
 	char sqlQuery[128];
 	memset(sqlQuery, 0, sizeof(sqlQuery));
@@ -327,14 +394,26 @@ void MainDialog::OnEnChangeSearchEdit()
 	int filterNum = 0;
 	filter = new CString[nRow + 1];
 	resultCStr = _T("");
-	for (int i = 6; i < (nRow + 1) * nColumn; i = i + 4)
+	for (int i = 7; i < (nRow + 1) * nColumn; i = i + 5)
 	{
+		CString tempID;
+		WCHAR* tempIDchar = Utf8ToUnicode(dbResult[i - 2]); //取出ID字符串
+		tempID.Format(_T("%s"), tempIDchar);
+		delete[] tempIDchar;
+		if (_ttoi(tempID) > 16000 && _ttoi(tempID) < 17000)
+		{
+			SetDlgItemText(IDC_CurID, tempID);
+		}
+		else
+		{
+			SetDlgItemText(IDC_CurID, _T("NULL"));
+		}
 		CString temp1;
-		WCHAR* tempwchar1 = Utf8ToUnicode(dbResult[i]);
+		WCHAR* tempwchar1 = Utf8ToUnicode(dbResult[i]); //取出问题字符串
 		temp1.Format(_T("%s  "), tempwchar1);
 		delete[] tempwchar1;
 		CString temp2;
-		WCHAR* tempwchar2 = Utf8ToUnicode(dbResult[i + 1]);
+		WCHAR* tempwchar2 = Utf8ToUnicode(dbResult[i + 1]); //取出答案字符串
 		temp2.Format(_T("【 %s 】\r\n"), tempwchar2);
 		delete[] tempwchar2;
 		if (isRepeat(filter, &filterNum, temp2))
@@ -357,11 +436,22 @@ BOOL MainDialog::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// 设置字体
-	m_editFont.CreatePointFont(150, _T("微软雅黑"));
+	m_editFont.CreatePointFont(120, _T("微软雅黑"));
+	m_editFontH.CreatePointFont(240, _T("微软雅黑"));
 	(GetDlgItem(IDC_ResultEdit))->SetFont(&m_editFont);
 	(GetDlgItem(IDC_SearchEdit))->SetFont(&m_editFont);
 	(GetDlgItem(IDC_AddrEdit))->SetFont(&m_editFont);
+	(GetDlgItem(IDC_CurID))->SetFont(&m_editFont);
 
+	if (!OpenDB())
+	{
+		MessageBox(_T("无法连接数据库！"), _T("错误"), MB_OK);
+	}
+	//firstCall = true;
+	this->firstCall = true;
+	this->confirmAddr = false;
+	this->idAddr = 0;
+	this->preID = 0;
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
 }

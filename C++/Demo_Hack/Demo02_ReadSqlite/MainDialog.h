@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sqlite3.h"
+
 // MainDialog 对话框
 
 class MainDialog : public CDialogEx
@@ -11,6 +13,7 @@ public:
 	virtual ~MainDialog();
 
 	CFont m_editFont;
+	CFont m_editFontH;
 	virtual BOOL OnInitDialog();
 
 // 对话框数据
@@ -26,6 +29,14 @@ public:
 	afx_msg void OnBnClickedStart();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg void OnEnChangeSearchEdit();
+	//afx_msg void OnTimer(UINT_PTR nIDEvent);
 private:
 	bool OpenDB();
+	sqlite3 *db;
+	bool firstCall;
+	bool confirmAddr;
+	int idAddr;
+	int preID;
+public:
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
