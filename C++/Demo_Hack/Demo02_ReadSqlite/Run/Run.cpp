@@ -6,7 +6,7 @@
 #include <direct.h>
 #include <string.h>
 
-#define WndClassName "Windows.UI.Core.CoreWindow"
+#define WndClassName "GEMAINWINDOWCLASS"
 #define WndTitleName "天涯明月刀" //模糊查找 窗口标题含有指定字串即可
 #define DLLName "Demo02_ReadSqlite.dll"
 

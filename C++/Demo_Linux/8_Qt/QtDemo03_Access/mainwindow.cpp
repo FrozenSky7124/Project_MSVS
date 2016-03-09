@@ -163,8 +163,13 @@ void Widget::importFile()
 //Update_20160306:新建更新数据库函数
 void Widget::updateDB()
 {
-    updateSql(147633, 147772, 16561);
-    updateSql(81817, 82096, 16281);
+    // 2016-03-06
+    // updateSql(147633, 147772, 16561);
+    // updateSql(81817, 82096, 16281);
+
+    // 2016-03-09
+    updateSql(148633, 148772, 17561);
+    updateSql(82817, 83096, 17281);
 }
 
 void Widget::updateSql(int idStart, int idEnd, int newid)

@@ -37,6 +37,7 @@ private:
 	bool confirmAddr;
 	int idAddr;
 	int preID;
+	bool timerStatus;
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

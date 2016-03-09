@@ -308,20 +308,23 @@ void MainDialog::OnTimer(UINT_PTR nIDEvent)
 // MainDialog 消息处理程序
 void MainDialog::OnBnClickedStart()
 {
-	//如果已启动定时器，关闭
-	//KillTimer(7);
-	this->firstCall = true;
-	//启动定时器
-	//定时器编号为7，间隔1000ms，回调SearchMemory
-	//UINT_PTR m_nCallbackTimer = SetTimer(7, 500, &SearchMemory);
-	UINT_PTR m_nCallbackTimer = SetTimer(7, 500, NULL);
-	PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetResourceHandle(), SND_ASYNC | SND_RESOURCE | SND_NODEFAULT);
-
-#ifdef _DEBUG
-	CString str;
-	str.Format(_T("FrozenDebug: ID = %d"), m_nCallbackTimer);
-	TRACE(str);
-#endif
+	if (this->timerStatus == true)
+	{
+		this->timerStatus = false;
+		KillTimer(7);
+		SetDlgItemText(IDC_BUTTON1, _T("Start"));
+	}
+	else
+	{
+		this->timerStatus = true;
+		SetDlgItemText(IDC_BUTTON1, _T("Stop"));
+		this->firstCall = true;
+		//启动定时器
+		//定时器编号为7，间隔1000ms，回调SearchMemory
+		//UINT_PTR m_nCallbackTimer = SetTimer(7, 500, &SearchMemory);
+		UINT_PTR m_nCallbackTimer = SetTimer(7, 500, NULL);
+		PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetResourceHandle(), SND_ASYNC | SND_RESOURCE | SND_NODEFAULT);
+	}
 }
 
 void MainDialog::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
@@ -400,7 +403,7 @@ void MainDialog::OnEnChangeSearchEdit()
 		WCHAR* tempIDchar = Utf8ToUnicode(dbResult[i - 2]); //取出ID字符串
 		tempID.Format(_T("%s"), tempIDchar);
 		delete[] tempIDchar;
-		if (_ttoi(tempID) > 16000 && _ttoi(tempID) < 17000)
+		if (_ttoi(tempID) > 16000 && _ttoi(tempID) < 18000)
 		{
 			SetDlgItemText(IDC_CurID, tempID);
 		}
@@ -452,6 +455,7 @@ BOOL MainDialog::OnInitDialog()
 	this->confirmAddr = false;
 	this->idAddr = 0;
 	this->preID = 0;
+	this->timerStatus = false;
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
 }
