@@ -12,7 +12,7 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    this->setWindowTitle("天涯明月刀 答题器(离线版)");
+    this->setWindowTitle("天刀答题器(离线版)");
     this->setWindowFlags(Qt::WindowStaysOnTopHint);
     SearchLine = new QLineEdit(this);
     SearchLine->setFont(QFont("微软雅黑", 15));
