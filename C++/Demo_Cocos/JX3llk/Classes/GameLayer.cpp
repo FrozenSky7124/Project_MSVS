@@ -125,11 +125,11 @@ void GameLayer::initMap()
 
 void GameLayer::initSound()
 {
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg1.mp3");
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg2.mp3");
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg1.mp3");
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg2.mp3");
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/yangzhoubg.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg1.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/qixiubg2.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg1.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/wanhuabg2.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/yangzhoubg.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/success.wav");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/fail.wav");
 	CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0.7f);
@@ -193,7 +193,7 @@ void GameLayer::update(float delta)
 void GameLayer::playSound1(float dt)
 {
 	SAE->stopBackgroundMusic();
-	//SAE->playBackgroundMusic("Sound/qixiubg1.mp3", false);
+	SAE->playBackgroundMusic("Sound/qixiubg1.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound2), 140.0f);
 
 	//GameBackground Change
@@ -209,7 +209,7 @@ void GameLayer::playSound2(float dt)
 {
 	CCLOG("into playSound2");
 	SAE->stopBackgroundMusic();
-	//SAE->playBackgroundMusic("Sound/qixiubg2.mp3", false);
+	SAE->playBackgroundMusic("Sound/qixiubg2.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound3), 100.0f);
 
 	//GameBackground Change
@@ -224,7 +224,7 @@ void GameLayer::playSound2(float dt)
 void GameLayer::playSound3(float dt)
 {
 	SAE->stopBackgroundMusic();
-	//SAE->playBackgroundMusic("Sound/wanhuabg1.mp3", false);
+	SAE->playBackgroundMusic("Sound/wanhuabg1.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound4), 135.0f);
 
 	//GameBackground Change
@@ -239,7 +239,7 @@ void GameLayer::playSound3(float dt)
 void GameLayer::playSound4(float dt)
 {
 	SAE->stopBackgroundMusic();
-	//SAE->playBackgroundMusic("Sound/wanhuabg2.mp3", false);
+	SAE->playBackgroundMusic("Sound/wanhuabg2.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound5), 105.0f);
 
 	//GameBackground Change
@@ -254,7 +254,7 @@ void GameLayer::playSound4(float dt)
 void GameLayer::playSound5(float dt)
 {
 	SAE->stopBackgroundMusic();
-	//SAE->playBackgroundMusic("Sound/yangzhoubg.mp3", false);
+	SAE->playBackgroundMusic("Sound/yangzhoubg.mp3", false);
 	this->scheduleOnce(schedule_selector(GameLayer::playSound1), 95.0f);
 
 	//GameBackground Change
@@ -284,7 +284,8 @@ void GameLayer::pauseCallBack(Ref *ref)
 	if (isPause == false)
 	{
 		//Òş²ØÖ÷½çÃæ
-		((MapLayer*)this->getChildByTag(10003))->setVisible(false);
+		//((MapLayer*)this->getChildByTag(10003))->setVisible(false);
+		_map->setVisible(false);
 		//Òş²Ø·µ»Ø¼ü
 		goBackMenuItem->setVisible(false);
 		SAE->pauseBackgroundMusic();
@@ -294,7 +295,8 @@ void GameLayer::pauseCallBack(Ref *ref)
 	else
 	{
 		//Òş²ØÖ÷½çÃæ
-		((MapLayer*)this->getChildByTag(10003))->setVisible(true);
+		//((MapLayer*)this->getChildByTag(10003))->setVisible(true);
+		_map->setVisible(true);
 		//Òş²Ø·µ»Ø¼ü
 		goBackMenuItem->setVisible(true);
 		Director::getInstance()->resume();
