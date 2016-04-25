@@ -14,27 +14,48 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
     this->setWindowTitle(tr("QT SQLite Control"));
-    showDBDriversBtn = new QPushButton(tr("Update Database"),this);
-    openDBBtn = new QPushButton(tr("Open Database"),this);
+    //天涯明月刀OL
+    openDBBtn = new QPushButton(tr("Open Database TY"),this);
     createTableBtn = new QPushButton(tr("Create Table"), this);
     importFileBtn = new QPushButton(tr("Import File"), this);
+    updateDBBtn = new QPushButton(tr("Update Database"),this);
     selectTableBtn = new QPushButton(tr("Select Table"), this);
+    //剑侠情缘网络版三
+    openDBBtn1 = new QPushButton(tr("Open Database JX3"), this);
+    createTableBtn1 = new QPushButton(tr("Create Table"), this);
+    importFileBtn1 = new QPushButton(tr("Import File"), this);
+    updateDBBtn1 = new QPushButton(tr("Update Database"),this);
+    selectTableBtn1 = new QPushButton(tr("Select Table"), this);
+    //主窗口
     mainTextEdit = new QTextEdit(this);
-    mainTextEdit->setFontPointSize(15.0f);
+    mainTextEdit->setFontPointSize(12.0f);
 
     QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(showDBDriversBtn,0,0,1,1);
-    layout->addWidget(openDBBtn,0,1,1,1);
-    layout->addWidget(createTableBtn,0,2,1,1);
-    layout->addWidget(importFileBtn,0,3,1,1);
-    layout->addWidget(selectTableBtn,0,4,1,1);
-    layout->addWidget(mainTextEdit,1,0,1,5);
 
-    connect(showDBDriversBtn,SIGNAL(clicked(bool)),this,SLOT(updateDB()));
+    layout->addWidget(openDBBtn,0,0,1,1);
+    layout->addWidget(createTableBtn,0,1,1,1);
+    layout->addWidget(importFileBtn,0,2,1,1);
+    layout->addWidget(updateDBBtn,0,3,1,1);
+    layout->addWidget(selectTableBtn,0,4,1,1);
+
+    layout->addWidget(openDBBtn1, 1, 0, 1, 1);
+    layout->addWidget(createTableBtn1, 1, 1, 1, 1);
+    layout->addWidget(importFileBtn1, 1, 2, 1, 1);
+    layout->addWidget(updateDBBtn1, 1, 3, 1, 1);
+    layout->addWidget(selectTableBtn1, 1, 4, 1, 1);
+
+    layout->addWidget(mainTextEdit,2,0,1,5);
+
     connect(openDBBtn,SIGNAL(clicked(bool)),this,SLOT(openDB()));
     connect(createTableBtn,SIGNAL(clicked(bool)),this,SLOT(createTableQuery()));
     connect(importFileBtn,SIGNAL(clicked(bool)),this,SLOT(importFile()));
+    connect(updateDBBtn,SIGNAL(clicked(bool)),this,SLOT(updateDB()));
     connect(selectTableBtn,SIGNAL(clicked(bool)),this,SLOT(selectTableQuery()));
+
+    connect(openDBBtn1, SIGNAL(clicked(bool)), this, SLOT(openDB1()));
+    connect(createTableBtn1, SIGNAL(clicked(bool)), this, SLOT(createTableQuery1()));
+    connect(importFileBtn1, SIGNAL(clicked(bool)), this, SLOT(importFile1()));
+    connect(selectTableBtn1, SIGNAL(clicked(bool)), this, SLOT(selectTableQuery1()));
 }
 
 Widget::~Widget()
@@ -71,6 +92,22 @@ bool Widget::openDB()
     return true;
 }
 
+bool Widget::openDB1()
+{
+    //添加数据库
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    //设置数据库名称
+    db.setDatabaseName("dbQA_JX3.db");
+    //打开数据库
+    if( !db.open() )
+    {
+        QMessageBox::information(this, "Error", "数据库连接失败！");
+        return false;
+    }
+    QMessageBox::information(this, "Success", "数据库已连接！");
+    return true;
+}
+
 bool Widget::createTableQuery()
 {
     //Sql语句
@@ -82,10 +119,20 @@ bool Widget::createTableQuery()
     return true;
 }
 
+bool Widget::createTableQuery1()
+{
+    //Sql语句
+    QSqlQuery query;
+    query.exec("CREATE TABLE qatable(pyquestion varchar, question varchar, answer varchar)");
+    QMessageBox::information(this, "Create", "数据表创建完成！");
+    return true;
+}
+
 void Widget::selectTableQuery()
 {
     QSqlQuery query;
-    query.exec("SELECT * FROM qatable where pyquestion like '%YLHD%'");
+    //query.exec("SELECT * FROM qatable where pyquestion like '%YLHD%'");
+    query.exec("SELECT * FROM qatable");
     mainTextEdit->clear();
     //query.next()指向查找到的第一条记录，然后每次后移一条记录
     while(query.next())
@@ -106,6 +153,27 @@ void Widget::selectTableQuery()
     }
 }
 
+void Widget::selectTableQuery1()
+{
+    QSqlQuery query;
+    //query.exec("SELECT * FROM qatable where pyquestion like '%YLHD%'");
+    query.exec("SELECT * FROM qatable");
+    mainTextEdit->clear();
+    //query.next()指向查找到的第一条记录，然后每次后移一条记录
+    while(query.next())
+    {
+        QString value0 = query.value(0).toString();
+        QString value1 = query.value(1).toString();
+        QString value2 = query.value(2).toString();
+        QString tempStr;
+        tempStr.sprintf("| %s | %s | %s |",
+                        value0.toStdString().data(),
+                        value1.toStdString().data(),
+                        value2.toStdString().data());
+        mainTextEdit->append(tempStr);
+    }
+}
+
 void Widget::insertToDB(QString id, QString pyquestion, QString question, QString answer, QString rightnum)
 {
     QSqlQuery query;
@@ -120,7 +188,19 @@ void Widget::insertToDB(QString id, QString pyquestion, QString question, QStrin
     query.exec(sqlstr);
 }
 
-//导入数据文件生成数据库
+void Widget::insertToDB1(QString pyquestion, QString question, QString answer)
+{
+    QSqlQuery query;
+    QString sqlstr;
+    sqlstr.sprintf("INSERT INTO qatable VALUES('%s', '%s', '%s')",
+                   pyquestion.toStdString().data(),
+                   question.toStdString().data(),
+                   answer.toStdString().data());
+
+    query.exec(sqlstr);
+}
+
+//导入数据文件生成数据库（天涯明月刀OL）
 void Widget::importFile()
 {
     //获得文件路径
@@ -160,6 +240,41 @@ void Widget::importFile()
     QMessageBox::information(this, "Import", "导入数据库完成！");
 }
 
+//导入数据文件生成数据库（剑侠情缘网络版三）
+void Widget::importFile1()
+{
+    //获得文件路径
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open DataFile"), QDir::currentPath());
+    if(filePath.isEmpty())
+    {
+        return;
+    }
+    mainTextEdit->append(filePath);
+    //打开文件
+    QFile file;
+    file.setFileName(filePath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::information(this, "Error", "打开文件出错！");
+        return;
+    }
+    QTextStream *stream = new QTextStream(&file);
+    QString tempStr = stream->readLine();
+    while(!tempStr.isEmpty())
+    {
+        QStringList tempList = tempStr.split("\"");
+        const QString question = tempList.at(1);
+        const QString answer = tempList.at(3);
+        QStringList tempList2 = question.split("单选题：");//再次分割题目
+        const QString question2 = tempList2.at(1);
+        mainTextEdit->append(ToChineseSpell(question2) + " " + question2 + " " + answer);
+        insertToDB1(ToChineseSpell(question2), question2, answer);
+        tempStr = stream->readLine();
+    }
+    file.close();
+    QMessageBox::information(this, "Import", "导入数据库完成！");
+}
+
 //Update_20160306:新建更新数据库函数
 void Widget::updateDB()
 {
@@ -168,8 +283,8 @@ void Widget::updateDB()
     // updateSql(81817, 82096, 16281);
 
     // 2016-03-09
-    updateSql(148633, 148772, 17561);
-    updateSql(82817, 83096, 17281);
+    //updateSql(148633, 148772, 17561);
+    //updateSql(82817, 83096, 17281);
 }
 
 void Widget::updateSql(int idStart, int idEnd, int newid)
