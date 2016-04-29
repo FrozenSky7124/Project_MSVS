@@ -39,13 +39,15 @@ private slots:
     void importFile();
     void selectTableQuery();
     void updateDB();
-    void updateSql(int idStart, int idEnd, int newid);
+    void updateSql_TY(int idStart, int idEnd, int newid);
 
     bool openDB1();
     bool createTableQuery1();
     void importFile1();
-//    void updateDB1();
+    void updateDB1();
     void selectTableQuery1();
+    void changeAnswerDB1(QString question, QString answer);
+    void changeQuestionDB1(QString questionOLD, QString questionNEW);
 };
 
 #endif // MAINWINDOW_H

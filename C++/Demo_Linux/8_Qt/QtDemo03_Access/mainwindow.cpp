@@ -55,6 +55,7 @@ Widget::Widget(QWidget *parent)
     connect(openDBBtn1, SIGNAL(clicked(bool)), this, SLOT(openDB1()));
     connect(createTableBtn1, SIGNAL(clicked(bool)), this, SLOT(createTableQuery1()));
     connect(importFileBtn1, SIGNAL(clicked(bool)), this, SLOT(importFile1()));
+    connect(updateDBBtn1, SIGNAL(clicked(bool)), this, SLOT(updateDB1()));
     connect(selectTableBtn1, SIGNAL(clicked(bool)), this, SLOT(selectTableQuery1()));
 }
 
@@ -200,6 +201,31 @@ void Widget::insertToDB1(QString pyquestion, QString question, QString answer)
     query.exec(sqlstr);
 }
 
+void Widget::changeAnswerDB1(QString question, QString answer)
+{
+    QSqlQuery query;
+    QString sqlstr;
+    sqlstr.sprintf("UPDATE qatable SET answer = '%s' WHERE question = '%s'",
+                   answer.toStdString().data(),
+                   question.toStdString().data());
+    query.exec(sqlstr);
+}
+
+void Widget::changeQuestionDB1(QString questionOLD, QString questionNEW)
+{
+    QSqlQuery query;
+    QString sqlstr1;
+    sqlstr1.sprintf("UPDATE qatable SET pyquestion = '%s' WHERE question = '%s'",
+                   ToChineseSpell(questionNEW).toStdString().data(),
+                   questionOLD.toStdString().data());
+    query.exec(sqlstr1);
+    QString sqlstr2;
+    sqlstr2.sprintf("UPDATE qatable SET question = '%s' WHERE question = '%s'",
+                   questionNEW.toStdString().data(),
+                   questionOLD.toStdString().data());
+    query.exec(sqlstr2);
+}
+
 //导入数据文件生成数据库（天涯明月刀OL）
 void Widget::importFile()
 {
@@ -279,15 +305,36 @@ void Widget::importFile1()
 void Widget::updateDB()
 {
     // 2016-03-06
-    // updateSql(147633, 147772, 16561);
-    // updateSql(81817, 82096, 16281);
+    // updateSql_TY(147633, 147772, 16561);
+    // updateSql_TY(81817, 82096, 16281);
 
     // 2016-03-09
-    //updateSql(148633, 148772, 17561);
-    //updateSql(82817, 83096, 17281);
+    //updateSql_TY(148633, 148772, 17561);
+    //updateSql_TY(82817, 83096, 17281);
 }
 
-void Widget::updateSql(int idStart, int idEnd, int newid)
+void Widget::updateDB1()
+{
+    //插入问答数据：insertToDB1(QString pyquestion, QString question, QString answer)
+    //根据问题修改答案：changeAnswerDB1(QString question, QString answer)
+    //TEST
+    //changeAnswerDB1("金生____,玉出____。", "丽水、昆冈");
+
+    //2016-04-29
+    //changeAnswerDB1("目前游戏中的阅读等级最高为多少级？", "95级");
+    //changeAnswerDB1("春秋时期吴国的忠臣伍子胥本为哪国人？", "楚国");
+    //changeAnswerDB1("《佛藏拾珠·卷七》这套书中有多少本是蓝色品质的？", "三本");
+    //changeAnswerDB1("《嫦娥奔月》的故事中，后羿交给嫦娥珍藏的“不死药”是他向谁求得的？", "王母娘娘");
+    //changeAnswerDB1("下面哪个不是“万花七圣“之一？", "乌有先生");
+    //changeQuestionDB1("伟伟，房子，和粽子为试验对毒物的抵抗力，决定各选一种毒物服食，他们三人分别吃了鹤顶红，断肠草和一钩吻，他们即将中毒死去了，这是粽子从怀里掏出了六种解毒药物，炭灰，碱水，催吐汤，绿豆，金银花，甘草，他们之中谁不会死？",
+    //                  "伟伟，房子，和粽子为试验对毒物的抵抗力，决定各选一种毒物服食，他们三人分别吃了鹤顶红，断肠草和一钩吻，他们即将中毒死去了，这是粽子从怀里掏出了六种解毒药物，炭灰，碱水，催吐汤，绿豆，金银花，甘草，他们之中谁不会死？");
+    //insertToDB1(ToChineseSpell("天策府的宣威将军曹雪阳是______的后人？"), "天策府的宣威将军曹雪阳是______的后人？", "曹孟德");
+    //insertToDB1(ToChineseSpell("狼牙军“山狼”曹将军和天策府宣威将军曹雪阳的关系是______。"), "狼牙军“山狼”曹将军和天策府宣威将军曹雪阳的关系是______。", "兄妹");
+
+    QMessageBox::information(this, "Update dbQA_JX3", "数据库更新完成！");
+}
+
+void Widget::updateSql_TY(int idStart, int idEnd, int newid)
 {
     QSqlQuery query;
     QString sqlstr;
