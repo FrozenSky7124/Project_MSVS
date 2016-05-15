@@ -331,6 +331,8 @@ void Widget::updateDB1()
     //insertToDB1(ToChineseSpell("天策府的宣威将军曹雪阳是______的后人？"), "天策府的宣威将军曹雪阳是______的后人？", "曹孟德");
     //insertToDB1(ToChineseSpell("狼牙军“山狼”曹将军和天策府宣威将军曹雪阳的关系是______。"), "狼牙军“山狼”曹将军和天策府宣威将军曹雪阳的关系是______。", "兄妹");
 
+    //2016-05-15
+    //insertToDB1(ToChineseSpell("题目：以下哪组技能全部都是减伤技能？"), "题目：以下哪组技能全部都是减伤技能？", "守如山，天地低昂，袖纳乾坤，春泥护花");
     QMessageBox::information(this, "Update dbQA_JX3", "数据库更新完成！");
 }
 
