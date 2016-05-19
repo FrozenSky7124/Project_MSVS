@@ -1,4 +1,5 @@
 #include "mainWin.h"
+#include "chinesetopinyin.h"
 #include <QFont>
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -88,8 +89,13 @@ void Widget::onSearchChange()
             }
             else
             {
-                filter.push_back(value2);
+                filter.push_back(value1);
                 QString tempStr;
+                //Update 2016-05-19
+                //匹配字符串染色
+                int searchLength = searchStr.length();
+                int questionLength = value1.length();
+                qDebug() << searchLength << " " << questionLength << endl;
                 tempStr.sprintf("%s   【 %s 】", value1.toStdString().data(), value2.toStdString().data());
                 ResultTextEdit->append(tempStr);
                 ResultTextEdit->append("");

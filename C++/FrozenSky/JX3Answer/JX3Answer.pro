@@ -16,7 +16,8 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainWin.cpp
 
-HEADERS  += mainWin.h
+HEADERS  += mainWin.h \
+    chinesetopinyin.h
 
 DISTFILES +=
 
