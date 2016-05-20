@@ -13,7 +13,7 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    this->setWindowTitle("剑网三科举答题器(离线版)");
+    this->setWindowTitle("剑网三科举答题器");
     //this->setWindowFlags(Qt::WindowStaysOnTopHint);
     SearchLine = new QLineEdit(this);
     SearchLine->setFont(QFont("微软雅黑", 15));
@@ -95,8 +95,43 @@ void Widget::onSearchChange()
                 //匹配字符串染色
                 int searchLength = searchStr.length();
                 int questionLength = value1.length();
-                qDebug() << searchLength << " " << questionLength << endl;
-                tempStr.sprintf("%s   【 %s 】", value1.toStdString().data(), value2.toStdString().data());
+                int posKeyWords = value0.indexOf(searchStr.toUpper());
+
+                int pCur = posKeyWords;
+                int pLen = searchLength;
+                while(pCur <= questionLength - searchLength)
+                {
+                    if(ToChineseSpell(value1.mid(pCur, pLen)) == searchStr.toUpper())
+                    {
+                        pLen++;
+                        if(ToChineseSpell(value1.mid(pCur, pLen)) == searchStr.toUpper())
+                            break;
+                        else
+                        {
+                            pLen--;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        pLen++;
+                        if(pCur+pLen >= questionLength)
+                        {
+                            pLen = searchLength;
+                            pCur++;
+                        }
+                    }
+                }
+                //qDebug() << "KeyLength=" << searchLength << " KeyPos=" << posKeyWords << " KeyLen=" << pLen ;
+                tempStr.sprintf("%s<font color=red>%s</font>%s   <font color=blue>  %s </font>",
+                                value1.mid(0, pCur).toStdString().data(),
+                                value1.mid(pCur, pLen).toStdString().data(),
+                                value1.mid(pCur+pLen).toStdString().data(),
+                                value2.toStdString().data());
+
+                //tempStr.sprintf("%s   <font color=blue>  %s  </font>", value1.mid(0).toStdString().data(), value2.toStdString().data());
+                //tempStr.sprintf("%s   <font color=blue>  %s  </font>", value1.toStdString().data(), value2.toStdString().data());
+                //Update 2016-05-20 End.
                 ResultTextEdit->append(tempStr);
                 ResultTextEdit->append("");
             }
