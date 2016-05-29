@@ -9,7 +9,7 @@ QT       += sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = JX3Answer
+TARGET = JX3NCEE
 TEMPLATE = app
 
 

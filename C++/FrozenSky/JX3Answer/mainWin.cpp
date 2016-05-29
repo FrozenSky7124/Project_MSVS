@@ -10,10 +10,12 @@
 #include <QTextStream>
 #include <qt_windows.h>
 
+#define Author "FrozenSky"
+
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    this->setWindowTitle("剑网三科举答题器");
+    this->setWindowTitle("剑网三科举小助手");
     //this->setWindowFlags(Qt::WindowStaysOnTopHint);
     SearchLine = new QLineEdit(this);
     SearchLine->setFont(QFont("微软雅黑", 15));
@@ -81,15 +83,15 @@ void Widget::onSearchChange()
             QString value0 = query.value(0).toString();
             QString value1 = query.value(1).toString();
             QString value2 = query.value(2).toString();
-
+            QString qanda = value1 + value2;
             //过滤重复的问题
-            if(isRepeatQA(filter, value1) == true)
+            if(isRepeatQA(filter, qanda) == true)
             {
                 continue;
             }
             else
             {
-                filter.push_back(value1);
+                filter.push_back(qanda);
                 QString tempStr;
                 //Update 2016-05-19
                 //匹配字符串染色
@@ -154,7 +156,13 @@ bool Widget::isRepeatQA(QStringList &list, QString &value)
 
 void Widget::onHelpBtn()
 {
-    QMessageBox::information(this, "小TIPS", "这是一只萌萌的帮助。\n别看它只是一只帮助，但是它很努力，你知道吗。");
+    QMessageBox::information(this, "小TIPS", "这是一只萌萌的帮助 O(∩_∩)O~\n别看它只是一只帮助，但是它很努力，你知道吗！\n"
+                                   "\n"
+                                   "简化搜索的操作，只需要在搜索框里输入题目中连续的某段文字的拼音首字母即可快速索引，题目中的标点符号(比如常见的书名号《》)不用输入，可以跳过标点输入拼音首字母。搜索的关键文字将以红色高亮显示，答案则以蓝色高亮显示。\n"
+                                   "\n"
+                                   "窗口总在最前，从其他窗口切换至小助手将会自动选中搜索框中的内容，答题后直接搜索下一题吧！\n"
+                                   "\n"
+                                   "题库已经优化过啦，不会出现相同的问题，所以如果搜索出了看似相同的题目，就要仔细审题了，因为其中定有猫腻！");
 }
 
 bool Widget::nativeEvent(const QByteArray & eventType, void * message, long * result)
