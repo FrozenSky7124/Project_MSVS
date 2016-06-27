@@ -22,3 +22,6 @@ HEADERS  += mainWin.h \
 DISTFILES +=
 
 RC_FILE = icon.rc
+
+RESOURCES += \
+    jx3answerres.qrc

@@ -6,6 +6,8 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QLayout>
+#include <QEvent>
+#include <QSystemTrayIcon>
 
 class Widget : public QWidget
 {
@@ -20,15 +22,21 @@ private:
     QLineEdit *SearchLine;
     QPushButton *HelpBtn;
     QTextEdit *ResultTextEdit;
+    //托盘区图标
+    QSystemTrayIcon *trayicon;
+    QMenu *trayiconMenu;
     bool linkToDatabase();
     bool isRepeatQA(QStringList &list, QString &value);
 
 private slots:
     void onSearchChange();
     void onHelpBtn();
+    //托盘区图标响应槽函数
+    void onSystemTrayIconClicked(QSystemTrayIcon::ActivationReason reason);
 
 protected:
     bool nativeEvent(const QByteArray & eventType, void * message, long * result);
+    void changeEvent(QEvent *event);
 };
 
 #endif // MAINWIN_H

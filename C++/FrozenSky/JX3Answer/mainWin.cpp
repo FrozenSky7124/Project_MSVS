@@ -30,6 +30,10 @@ Widget::Widget(QWidget *parent)
     layout->addWidget(HelpBtn, 0, 6, 1, 1);
     layout->addWidget(ResultTextEdit, 1, 0, 1, 7);
 
+    //托盘区图标
+    trayicon = new QSystemTrayIcon(this);
+    trayicon->setIcon(QIcon(":/icon.ico"));
+
     dbonline = false;
     if(!linkToDatabase())
     {
@@ -43,6 +47,7 @@ Widget::Widget(QWidget *parent)
 
     connect(SearchLine, SIGNAL(textChanged(QString)), this, SLOT(onSearchChange()));
     connect(HelpBtn, SIGNAL(clicked(bool)), this, SLOT(onHelpBtn()));
+    connect(trayicon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(onSystemTrayIconClicked(QSystemTrayIcon::ActivationReason)));
 }
 
 Widget::~Widget()
@@ -180,4 +185,36 @@ bool Widget::nativeEvent(const QByteArray & eventType, void * message, long * re
         }
     }
     return false;
+}
+
+//最小化到托盘区
+void Widget::changeEvent(QEvent *event)
+{
+    if((event->type()==QEvent::WindowStateChange)&&this->isMinimized())
+    {
+        trayicon->show();
+        this->hide();
+    }
+}
+
+//托盘区图标响应函数
+void Widget::onSystemTrayIconClicked(QSystemTrayIcon::ActivationReason reason)
+{
+    switch(reason)
+    {
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        if(this->isHidden())
+        {
+            this->show();
+            this->setWindowState(Qt::WindowActive);
+            this->activateWindow();
+            SearchLine->selectAll();
+            SearchLine->setFocus();
+            trayicon->hide();
+        }
+        break;
+    default:
+        break;
+    }
 }
