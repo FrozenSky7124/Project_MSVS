@@ -403,7 +403,7 @@ void MainDialog::OnEnChangeSearchEdit()
 		WCHAR* tempIDchar = Utf8ToUnicode(dbResult[i - 2]); //È¡³öID×Ö·û´®
 		tempID.Format(_T("%s"), tempIDchar);
 		delete[] tempIDchar;
-		if (_ttoi(tempID) > 16000 && _ttoi(tempID) < 18000)
+		if (_ttoi(tempID) > 12000 && _ttoi(tempID) < 18000)
 		{
 			SetDlgItemText(IDC_CurID, tempID);
 		}
