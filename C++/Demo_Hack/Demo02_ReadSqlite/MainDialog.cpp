@@ -185,64 +185,6 @@ void MainDialog::OnTimer(UINT_PTR nIDEvent)
 
 	if (confirmAddr)
 	{
-		//自动搜索数据库
-
-		/*
-		static CString preStr = _T("");
-		CString curStr;
-		WCHAR* tempChar = Utf8ToUnicode((char*)idAddr);
-		curStr.Format(_T("%s"), tempChar);
-		delete[] tempChar;
-
-		if (preStr != curStr)
-		{
-			preStr = curStr;
-			TRACE(_T("FrozenDebug: 检测到题目更改"));
-			char *dbErrMsg = 0;
-			char sqlQuery[128];
-			memset(sqlQuery, 0, sizeof(sqlQuery));
-			char* tempChar = UnicodeToUtf8((WCHAR*)(curStr.GetString()));
-			sprintf_s(sqlQuery, "SELECT * FROM qatable WHERE question = '%s';", tempChar);
-			delete[] tempChar;
-			int nRow = 0, nColumn = 0; //查询结果集的行数、列数
-			char **dbResult; //二维数组存放结果
-			sqlite3_get_table(db, sqlQuery, &dbResult, &nRow, &nColumn, &dbErrMsg);
-			if (nRow == 0)
-			{
-				//没有找到
-			}
-			else
-			{
-				//找到
-				CString resultCStr;
-				CString *filter;
-				int filterNum = 0;
-				filter = new CString[nRow + 1];
-				resultCStr = _T("");
-				for (int i = 6; i < (nRow + 1) * nColumn; i = i + 4)
-				{
-					CString temp2;
-					WCHAR* tempwchar2 = Utf8ToUnicode(dbResult[i + 1]);
-					temp2.Format(_T("【 %s 】"), tempwchar2);
-					delete[] tempwchar2;
-					if (isRepeat(filter, &filterNum, temp2))
-					{
-						continue;
-					}
-					resultCStr += temp2;
-				}
-				TRACE(_T("FrozenDebug: db Row=%d Column=%d"), nRow, nColumn);
-				SetDlgItemText(IDC_ResultEdit, resultCStr);
-				//MessageBeep(0x00000030L);
-				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetResourceHandle(), SND_ASYNC | SND_RESOURCE | SND_NODEFAULT);
-				delete[] filter;
-			}
-		}
-		else
-		{
-			//题目没变
-		}
-		*/
 		
 		int curID = *((int *)idAddr);
 

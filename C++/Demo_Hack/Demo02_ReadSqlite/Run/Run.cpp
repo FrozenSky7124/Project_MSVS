@@ -8,6 +8,7 @@
 
 #define WndClassName "GEMAINWINDOWCLASS"
 #define WndTitleName "天涯明月刀" //模糊查找 窗口标题含有指定字串即可
+//#define WndTitleName "foobar2000 v1.3.9"
 #define DLLName "Demo02_ReadSqlite.dll"
 
 char* m_char;
