@@ -19,3 +19,5 @@ HEADERS  += mainwindow.h
 
 RESOURCES += \
     resource.qrc
+
+RC_FILE = icon.rc
