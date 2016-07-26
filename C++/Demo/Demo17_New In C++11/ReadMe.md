@@ -42,3 +42,11 @@ int counts[10] { };
 int counts[10] {5, 6, 7.1, 2.4} //Error!
 ```
 
+**C++11原始字符串raw**
+
+```cpp
+cout << R"(Jim "King" Tutt uses "\n" instead of endl.)" << '\n';
+```
+
+
+
