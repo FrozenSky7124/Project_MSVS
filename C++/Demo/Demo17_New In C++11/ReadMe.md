@@ -48,5 +48,14 @@ int counts[10] {5, 6, 7.1, 2.4} //Error!
 cout << R"(Jim "King" Tutt uses "\n" instead of endl.)" << '\n';
 ```
 
+**新增模板类array**
+
+```cpp
+#include <array>
+array<typeName, n_elem> arr;
+//C++11中可用初始化列表为vector和array赋值
+array<typeName, n_elem> arr = { elem1, elem2, ..., elemN};
+```
+
 
 
