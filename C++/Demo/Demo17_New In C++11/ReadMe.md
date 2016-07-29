@@ -54,7 +54,24 @@ cout << R"(Jim "King" Tutt uses "\n" instead of endl.)" << '\n';
 #include <array>
 array<typeName, n_elem> arr;
 //C++11中可用初始化列表为vector和array赋值
-array<typeName, n_elem> arr = { elem1, elem2, ..., elemN};
+array<typeName, n_elem> arr = { elem1, elem2, ..., elemN };
+```
+
+**线程存储持续性**
+
+```cpp
+C++11新增面向多核处理器的变量存储模式，生命周期与所属线程一样长。
+让程序能够将计算放在可并行处理的不同线程中，使用关键字thread_local声明。
+```
+
+**新增关键字constexpr**
+
+**说明符和限定符**
+
+```cpp
+const
+volatile //硬件可修改被修饰的内存单元
+mutable //即使结构（或类）变量为const，其修饰的成员变量也可以被修改
 ```
 
 
