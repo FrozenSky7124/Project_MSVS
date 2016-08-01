@@ -74,5 +74,12 @@ volatile //硬件可修改被修饰的内存单元
 mutable //即使结构（或类）变量为const，其修饰的成员变量也可以被修改
 ```
 
+**C++11特殊成员函数**
+
+```cpp
+移动构造函数（Move Constructor）
+移动赋值运算符（Move Assignment Operator）
+```
+
 
 
