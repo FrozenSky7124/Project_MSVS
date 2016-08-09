@@ -14,7 +14,9 @@ struct _finddata_t
 ```
 
 ```
-文件属性是无符号整数，取值为相应的宏：_A_ARCH(存档)，_A_SUBDIR(文件夹)，_A_HIDDEN(隐藏)，_A_SYSTEM(系统)，_A_NORMAL(正常)，_A_RDONLY(只读)。
+文件属性是无符号整数，取值为相应的宏：
+_A_ARCH(存档)，_A_SUBDIR(文件夹)，_A_HIDDEN(隐藏)，
+_A_SYSTEM(系统)，_A_NORMAL(正常)，_A_RDONLY(只读)。
 ```
 ```cpp
 //按FileName命名规则匹配当前目录第一个文件
