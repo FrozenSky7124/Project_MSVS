@@ -2,6 +2,7 @@
 #include <direct.h>
 #include "FileCopy.h"
 #include "FileTrave.h"
+#include "FileTraveDel.h"
 
 using namespace std;
 
@@ -28,19 +29,29 @@ int main(int argc, char* argv[])
 		_getcwd(srcDir, 256);
 		cout << "srcDir:  " << srcDir << endl;
 		cout << "destDir: " << argv[1] << endl;
-		fileTrave(srcDir, "", argv[1]);
-	}
-	else if (argc == 3)
-	{
-		cout << "Copying..." << endl;
-		if (copyFile(argv[1], argv[2]))
+		int fTFunc = fileTrave(srcDir, "", argv[1]);
+		int fTDFunc = fileTraveDel(argv[1], "", srcDir);
+		if (fTFunc == 0 && fTDFunc == 0)
 		{
-			cout << "Copy Success!" << endl;
+			cout << "同步完成！" << endl;
 		}
 		else
 		{
-			cout << "Copy Fail!" << endl;
+			cout << "同步失败！" << endl;
 		}
+	}
+	else if (argc >= 3)
+	{
+		cout << "隐藏功能已禁用" << endl;
+		//cout << "Copying..." << endl;
+		//if (copyFile(argv[1], argv[2]))
+		//{
+		//	cout << "Copy Success!" << endl;
+		//}
+		//else
+		//{
+		//	cout << "Copy Fail!" << endl;
+		//}
 	}
 	return 0;
 }

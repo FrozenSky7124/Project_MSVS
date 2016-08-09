@@ -122,11 +122,13 @@
   <ItemGroup>
     <ClCompile Include="FileCopy.cpp" />
     <ClCompile Include="FileTrave.cpp" />
+    <ClCompile Include="FileTraveDel.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileCopy.h" />
     <ClInclude Include="FileTrave.h" />
+    <ClInclude Include="FileTraveDel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

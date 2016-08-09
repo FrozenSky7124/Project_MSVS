@@ -10,7 +10,8 @@ using namespace std;
 
 /*
 [Function]
-	int fileTrave(const char *srcDir, const char *curPath, const char *destDir);
+	遍历srcDir路径下的所有文件和文件夹，与destDir路径下的文件进行比对，更新destDir路径下对应的文件。
+	curPath用以记录相对路径。
 [Return Value]
 	0 : Success!
 	-1: Error in _findfirst()

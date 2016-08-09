@@ -1,6 +1,7 @@
 **_finddata_t 文件信息结构体**
 
 ```cpp
+#include <io.h>
 struct _finddata_t
 {
     unsigned attrib;     //文件属性
@@ -27,6 +28,7 @@ _findclose(_In_ intptr_t _FindHandle);
 **判断文件是否存在**
 
 ```cpp
+#include <io.h>
 _access(char *,int) //判断文件是否存在
 //存在 返回0; 不存在 返回-1.
 _access(const char *path,int mode)
@@ -42,5 +44,23 @@ _access(const char *path,int mode)
 ```cpp
 #include <direct.h>
 int _mkdir(const char *dirname);
+```
+
+**删除文件夹**
+
+```cpp
+#include <direct.h>
+int _rmdir(const char *dirname);
+//返回值0 :删除成功
+//返回值-1:删除失败
+```
+
+**删除文件**
+
+```cpp
+#include <stdio.h>
+int remove(const char *filename);
+//返回值0 :删除成功
+//返回值-1:删除失败
 ```
 

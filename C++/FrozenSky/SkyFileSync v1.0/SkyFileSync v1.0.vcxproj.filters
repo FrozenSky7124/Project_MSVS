@@ -24,12 +24,18 @@
     <ClCompile Include="FileTrave.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="FileTraveDel.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileCopy.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="FileTrave.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FileTraveDel.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
