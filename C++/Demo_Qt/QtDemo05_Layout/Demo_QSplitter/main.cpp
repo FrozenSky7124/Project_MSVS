@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
     //
     QTextEdit *textBottom = new QTextEdit(QObject::tr("Bottom Widget"), splitterRight);
     textBottom->setAlignment(Qt::AlignCenter);
-    //splitterMain->setStretchFactor(1, 1); //设置根据窗口大小改变调整内容大小
+    splitterMain->setStretchFactor(1, 1); //设置根据窗口大小改变调整内容大小
+
     splitterMain->setStretchFactor(0, 1);
     splitterMain->setWindowTitle(QObject::tr("Splitter"));
     splitterMain->show();
