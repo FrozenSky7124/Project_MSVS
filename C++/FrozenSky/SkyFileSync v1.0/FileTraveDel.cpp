@@ -38,20 +38,20 @@ int fileTraveDel(const char *srcDir, const char *curPath, const char *destDir)
 				if (_access(destDirPath.c_str(), 0) == -1) //目标目录不存在
 				{
 					string delDirPath = string(srcDir) + tmpCurPath;
-					cout << "是否删除目录" << delDirPath.c_str() << " ？ [Y/N]" << endl;
+					cout << "★是否删除目录 " << delDirPath.c_str() << " ？ [Y/N]" << endl;
 					char yorn;
 					cin >> yorn;
 					if (yorn == 'y' || yorn == 'Y')
 					{
 						if (_rmdir(delDirPath.c_str()) == -1)
 						{
-							cout << "删除目录 " << delDirPath.c_str() << "失败" << endl;
+							cout << "◆删除目录 " << delDirPath.c_str() << "失败" << endl;
 							_findclose(Handle);
 							return -2;
 						}
 						else
 						{
-							cout << "删除目录 " << delDirPath.c_str() << endl;
+							cout << "★删除目录 " << delDirPath.c_str() << endl;
 						}
 					}
 				}
@@ -64,20 +64,20 @@ int fileTraveDel(const char *srcDir, const char *curPath, const char *destDir)
 			if (_access(destFilePath.c_str(), 0) == -1)
 			{
 				string delFilePath = string(srcDir) + tmpCurPath;
-				cout << "是否删除文件" << delFilePath.c_str() << " ？ [Y/N]" << endl;
+				cout << "☆是否删除文件 " << delFilePath.c_str() << " ？ [Y/N]" << endl;
 				char yorn;
 				cin >> yorn;
 				if (yorn == 'y' || yorn == 'Y')
 				{
 					if (remove(delFilePath.c_str()) == -1)
 					{
-						cout << "删除文件 " << delFilePath.c_str() << "失败" << endl;
+						cout << "◆删除文件 " << delFilePath.c_str() << "失败" << endl;
 						_findclose(Handle);
 						return -3;
 					}
 					else
 					{
-						cout << "删除文件 " << delFilePath.c_str() << endl;
+						cout << "☆删除文件 " << delFilePath.c_str() << endl;
 					}
 				}
 			}

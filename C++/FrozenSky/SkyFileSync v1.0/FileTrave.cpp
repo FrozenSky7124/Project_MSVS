@@ -50,7 +50,7 @@ int fileTrave(const char *srcDir, const char *curPath, const char *destDir)
 					}
 					else
 					{
-						cout << "创建目录 " << tmpCurPath.c_str() << endl;
+						cout << "★创建目录 " << tmpCurPath.c_str() << endl;
 					}
 				}
 				//cout << "目录 " << tmpCurPath.c_str() << endl;
@@ -68,10 +68,10 @@ int fileTrave(const char *srcDir, const char *curPath, const char *destDir)
 			{
 				string srcFile = string(srcDir) + tmpCurPath;
 				if (copyFile(srcFile.c_str(), destFile.c_str()))
-					cout << "复制文件 " << tmpCurPath.c_str() << endl;
+					cout << "☆复制文件 " << tmpCurPath.c_str() << endl;
 				else
 				{
-					cout << "复制文件 " << tmpCurPath.c_str() << "失败" << endl;
+					cout << "◆复制文件 " << tmpCurPath.c_str() << "失败" << endl;
 					_findclose(Handle_DestFile);
 					_findclose(Handle);
 					return -2;
@@ -83,10 +83,10 @@ int fileTrave(const char *srcDir, const char *curPath, const char *destDir)
 				{
 					string srcFile = string(srcDir) + tmpCurPath;
 					if (copyFile(srcFile.c_str(), destFile.c_str()))
-						cout << "复制文件 " << tmpCurPath.c_str() << endl;
+						cout << "☆复制文件 " << tmpCurPath.c_str() << endl;
 					else
 					{
-						cout << "复制文件 " << tmpCurPath.c_str() << "失败" << endl;
+						cout << "◆复制文件 " << tmpCurPath.c_str() << "失败" << endl;
 						_findclose(Handle_DestFile);
 						_findclose(Handle);
 						return -2;
