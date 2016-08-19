@@ -103,6 +103,7 @@ void MapLayer::initMapNode(int templevel)
 		tempArray->addObject(tempNode2);
 	}
 
+	//构建关卡地图：周围块id = -1
 	for (int i = 0; i < MapRow + 2; i++)
 	{
 		for (int j = 0; j < MapColumn + 2; j++)
@@ -221,6 +222,7 @@ MapNode * MapLayer::PointToMapNode(int x, int y)
 	return (MapNode *)totalArray->getObjectAtIndex(num);
 }
 
+//判断是否可连通
 bool MapLayer::match(MapNode *pre, MapNode *cur)
 {
 	if (matchDirect(pre, cur) == true)
@@ -238,6 +240,7 @@ bool MapLayer::match(MapNode *pre, MapNode *cur)
 	return false;
 }
 
+//直线连通判断函数
 bool MapLayer::matchDirect(MapNode *pre, MapNode *cur)
 {
 	if (!((pre->getX() == cur->getX()) || (pre->getY() == cur->getY())))
@@ -314,6 +317,7 @@ bool MapLayer::matchDirect(MapNode *pre, MapNode *cur)
 	return match_x || match_y;
 }
 
+//有1个折点的连通判断函数
 bool MapLayer::matchOnecorner(MapNode *pre, MapNode *cur)
 {
 	//获得折点
@@ -338,6 +342,7 @@ bool MapLayer::matchOnecorner(MapNode *pre, MapNode *cur)
 	return false;
 }
 
+//有2个折点的连通判断函数
 bool MapLayer::matchTwocorner(MapNode *pre, MapNode *cur)
 {
 	int x = pre->getX();
@@ -394,6 +399,7 @@ bool MapLayer::matchTwocorner(MapNode *pre, MapNode *cur)
 	return false;
 }
 
+//清除图块：图块Index = -1
 void MapLayer::clearNode(MapNode *pre, MapNode *cur)
 {
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/biubiubiu.wav");

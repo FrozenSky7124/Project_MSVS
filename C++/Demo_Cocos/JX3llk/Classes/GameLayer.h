@@ -11,13 +11,14 @@ class GameLayer : public Layer
 public:
 	static Scene* createScene();
 
+	//游戏界面主要初始化函数：将初始化MapLayer对象_map构建连连看图块布局
 	virtual bool init();
 
 	CREATE_FUNC(GameLayer);
 
-	int _level;
-	int _score;
-	int _remainNum;
+	int _level; //存储从_map对象获取的关卡信息
+	int _score; //存储从_map对象获取的分数信息
+	int _remainNum; //存储从_map对象获取的当前关卡剩余图块数量
 
 private:
 	ProgressTimer * _progressBar;

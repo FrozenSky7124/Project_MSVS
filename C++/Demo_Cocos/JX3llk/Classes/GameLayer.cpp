@@ -93,7 +93,7 @@ void GameLayer::initUI()
 	this->addChild(_progressBar, 1);
 
 	//进度条定时器
-	schedule(SEL_SCHEDULE(&GameLayer::updateProgress), 1);
+	schedule(SEL_SCHEDULE(&GameLayer::updateProgress), 1); //开启计时进度条定时器，设置1s触发时间
 
 	//全局帧定时器
 	scheduleUpdate();
@@ -110,6 +110,7 @@ void GameLayer::initUI()
 	this->addChild(_timeTTF, 1);
 }
 
+//获取关卡地图_map数据信息
 void GameLayer::initData()
 {
 	_level = _map->getLevel();
@@ -117,8 +118,10 @@ void GameLayer::initData()
 	_remainNum = _map->_remainNum;
 }
 
+//初始化关卡1地图
 void GameLayer::initMap()
 {
+	//MapLayer * MapLayer::create(int level, int score) 初始化_map对象，传入Level,Score数据
 	_map = MapLayer::create(1, 0);
 	addChild(_map, 1, 10003);
 }
@@ -137,6 +140,7 @@ void GameLayer::initSound()
 	this->playSound1(0.0f);
 }
 
+//计时条定时器更新
 void GameLayer::updateProgress(float delta)
 {
 	float currTime = _progressBar->getPercentage();
@@ -149,6 +153,7 @@ void GameLayer::updateProgress(float delta)
 	_timeTTF->setPosition(_progressBar->getPosition().x + _progressBar->getContentSize().width / 2 - (100 - currTime) / 100 * _progressBar->getContentSize().width, _timeTTF->getPosition().y);
 }
 
+//帧定时器触发
 void GameLayer::update(float delta)
 {
 	_score = _map->getScore();
@@ -183,7 +188,7 @@ void GameLayer::update(float delta)
 		int templevel = ++_level;
 		SAE->playEffect("Sound/success.wav");
 		_map->removeFromParentAndCleanup(true);
-		_map = MapLayer::create(templevel, _score);
+		_map = MapLayer::create(templevel, _score); //构建下一关卡地图
 		this->addChild(_map);
 		//重置计时器
 		_progressBar->setPercentage(100);

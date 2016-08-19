@@ -29,7 +29,7 @@ public:
 private:
 	int _x;
 	int _y;
-	int _index;
+	int _index; //MapNode标志位：-1表示虚空 >0表示图块
 };
 
 #endif // __MapNode_H__
