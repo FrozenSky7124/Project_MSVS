@@ -63,6 +63,15 @@ void GameLayer::initUI()
 	scorettf->setScale(0.7f);
 	addChild(scorettf, 1);
 
+	//±³¾°ÒôÀÖ
+	bgmSwitchBtn = MenuItemImage::create("bgmon.png", "bgmoff.png", this, SEL_MenuHandler(&GameLayer::pauseBGM));
+	bgmSwitchBtn->setScale(0.7f);
+	Menu *bottomMenu = Menu::create();
+	bottomMenu->setPosition(winSize.width / 16 * 14.5, winSize.height / 12 * 0.7);
+	bottomMenu->addChild(bgmSwitchBtn);
+	addChild(bottomMenu, 1);
+
+	//¿ØÖÆ²Ëµ¥
 	Menu *controlMenu = Menu::create();
 	controlMenu->setPosition(winSize.width / 16 * 14, winSize.height / 12 * 11);
 	controlMenu->addChild(pauseMenuItem);
@@ -116,6 +125,7 @@ void GameLayer::initData()
 	_level = _map->getLevel();
 	_score = _map->getScore();
 	_remainNum = _map->_remainNum;
+	bgmSwitch = true;
 }
 
 //³õÊ¼»¯¹Ø¿¨1µØÍ¼
@@ -170,6 +180,7 @@ void GameLayer::update(float delta)
 	{
 		CCLOG("Fail!");
 		SAE->stopBackgroundMusic();
+		bgmSwitch = false;
 
 		//Í£Ö¹Ö¡¶¨Ê±Æ÷
 		unscheduleUpdate();
@@ -197,8 +208,11 @@ void GameLayer::update(float delta)
 
 void GameLayer::playSound1(float dt)
 {
-	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/qixiubg1.mp3", false);
+	if (bgmSwitch == true)
+	{
+		SAE->stopBackgroundMusic();
+		SAE->playBackgroundMusic("Sound/qixiubg1.mp3", false);
+	}
 	this->scheduleOnce(schedule_selector(GameLayer::playSound2), 140.0f);
 
 	//GameBackground Change
@@ -213,8 +227,11 @@ void GameLayer::playSound1(float dt)
 void GameLayer::playSound2(float dt)
 {
 	CCLOG("into playSound2");
-	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/qixiubg2.mp3", false);
+	if (bgmSwitch == true)
+	{
+		SAE->stopBackgroundMusic();
+		SAE->playBackgroundMusic("Sound/qixiubg2.mp3", false);
+	}
 	this->scheduleOnce(schedule_selector(GameLayer::playSound3), 100.0f);
 
 	//GameBackground Change
@@ -228,8 +245,11 @@ void GameLayer::playSound2(float dt)
 
 void GameLayer::playSound3(float dt)
 {
-	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/wanhuabg1.mp3", false);
+	if (bgmSwitch == true)
+	{
+		SAE->stopBackgroundMusic();
+		SAE->playBackgroundMusic("Sound/wanhuabg1.mp3", false);
+	}
 	this->scheduleOnce(schedule_selector(GameLayer::playSound4), 135.0f);
 
 	//GameBackground Change
@@ -243,8 +263,11 @@ void GameLayer::playSound3(float dt)
 
 void GameLayer::playSound4(float dt)
 {
-	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/wanhuabg2.mp3", false);
+	if (bgmSwitch == true)
+	{
+		SAE->stopBackgroundMusic();
+		SAE->playBackgroundMusic("Sound/wanhuabg2.mp3", false);
+	}
 	this->scheduleOnce(schedule_selector(GameLayer::playSound5), 105.0f);
 
 	//GameBackground Change
@@ -258,8 +281,11 @@ void GameLayer::playSound4(float dt)
 
 void GameLayer::playSound5(float dt)
 {
-	SAE->stopBackgroundMusic();
-	SAE->playBackgroundMusic("Sound/yangzhoubg.mp3", false);
+	if (bgmSwitch == true)
+	{
+		SAE->stopBackgroundMusic();
+		SAE->playBackgroundMusic("Sound/yangzhoubg.mp3", false);
+	}
 	this->scheduleOnce(schedule_selector(GameLayer::playSound1), 95.0f);
 
 	//GameBackground Change
@@ -280,6 +306,7 @@ void GameLayer::goBackCallBack(Ref *ref)
 	Scene *scene = StartMenu::createScene();
 	auto transition = TransitionFadeBL::create(0.8f, scene);
 	SAE->stopBackgroundMusic();
+	bgmSwitch = false;
 	Director::getInstance()->replaceScene(transition);
 }
 
@@ -294,6 +321,7 @@ void GameLayer::pauseCallBack(Ref *ref)
 		//Òþ²Ø·µ»Ø¼ü
 		goBackMenuItem->setVisible(false);
 		SAE->pauseBackgroundMusic();
+		bgmSwitch = false;
 		Director::getInstance()->pause();
 		isPause = !isPause;
 	}
@@ -306,6 +334,26 @@ void GameLayer::pauseCallBack(Ref *ref)
 		goBackMenuItem->setVisible(true);
 		Director::getInstance()->resume();
 		SAE->resumeBackgroundMusic();
+		bgmSwitch = true;
 		isPause = !isPause;
+	}
+}
+
+//2016-08-20
+void GameLayer::pauseBGM(Ref *ref)
+{
+	if (bgmSwitch == true)
+	{
+		CCLOG("pauseBGM.");
+		bgmSwitchBtn->selected();
+		bgmSwitch = false;
+		SAE->pauseBackgroundMusic();
+	}
+	else
+	{
+		CCLOG("resumeBGM.");
+		bgmSwitchBtn->unselected();
+		bgmSwitch = true;
+		SAE->resumeBackgroundMusic();
 	}
 }

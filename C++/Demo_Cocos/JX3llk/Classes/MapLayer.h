@@ -40,7 +40,16 @@ private:
 	bool matchOnecorner(MapNode *pre, MapNode *cur);
 	bool matchTwocorner(MapNode *pre, MapNode *cur);
 	void clearNode(MapNode *pre, MapNode *cur);
+	void linkNode(MapNode *pre, MapNode *cur);
+	void clearLinkNode(MapNode *pre, MapNode *cur);
+	void clearAllLink(float dt);
 	MapNode * PointToMapNode(int x, int y);
+
+	//折点信息（用于连线）
+	MapNode *linkedp;
+	MapNode *linkedc;
+	MapNode *z1;
+	MapNode *z2;
 
 	MapNode *_preNode;
 	MapNode *_curNode;

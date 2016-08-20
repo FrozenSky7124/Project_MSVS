@@ -25,6 +25,7 @@ public:
 	void offSelect();
 
 	Sprite *bg;
+	Sprite *onLink;
 
 private:
 	int _x;

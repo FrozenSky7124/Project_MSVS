@@ -18,6 +18,11 @@ bool MapNode::init(int index)
 	bg->setVisible(false);
 	addChild(bg, 5);
 
+	onLink = Sprite::create("NodeLink.png");
+	onLink->setAnchorPoint(Vec2(0, 0));
+	onLink->setVisible(false);
+	addChild(onLink, 10);
+
 	return true;
 }
 

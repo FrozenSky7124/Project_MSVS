@@ -51,7 +51,8 @@ void MapLayer::initUI()
 	//this->setOpacity(50);
 	 
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/biubiubiu.wav");
-
+	this->z1 = NULL;
+	this->z2 = NULL;
 	this->_preNode = NULL;
 	this->_curNode = NULL;
 }
@@ -159,34 +160,51 @@ void MapLayer::onTouchEnded(Touch *touch, Event *event)
 	if (_preNode == NULL)
 	{
 		onMapNode(&_preNode, touch);
-		_preNode->onSelect();
+		if (_preNode->getIndex() != -1)
+		{
+			_preNode->onSelect();
+			return;
+		}
+		_preNode = NULL;
 		return;
 	}
 	else if (_preNode == onMapNode(&_curNode, touch))
 	{
 		//_preNode与_curNode相同，选择了同一个点
-		_preNode->offSelect();
-		CCLOG("_preNode == _curNode");
-		_preNode = NULL;
+		if (_curNode->getIndex() != -1)
+		{
+			_preNode->offSelect();
+			CCLOG("_preNode == _curNode");
+			_preNode = NULL;
+			_curNode = NULL;
+			return;
+		}
 		_curNode = NULL;
 		return;
 	}
 	else
 	{
 		//_preNode与_curNode不同，选择了两个点
-		_curNode->onSelect();
-		if (isSameIndex(_preNode, _curNode) && match(_preNode, _curNode) == true)
+		if (_curNode->getIndex() != -1)
 		{
-			//可以消除
-			clearNode(_preNode, _curNode);
+			_curNode->onSelect();
+			if (isSameIndex(_preNode, _curNode) && match(_preNode, _curNode) == true)
+			{
+				//可以消除
+				clearNode(_preNode, _curNode);
+				return;
+			}
+			else
+			{
+				//不可以消除
+				_preNode->offSelect();
+				_preNode = _curNode;
+				_curNode = NULL;
+				return;
+			}
 		}
-		else
-		{
-			//不可以消除
-			_preNode->offSelect();
-			_preNode = _curNode;
-			_curNode = NULL;
-		}
+		_curNode = NULL;
+		return;
 	}
 }
 
@@ -198,7 +216,7 @@ MapNode * MapLayer::onMapNode(MapNode** temp, Touch *touch)
 
 		if (tempNode->getBoundingBox().containsPoint(this->convertToNodeSpace(touch->getLocation())))
 		{
-			//击中MapNode
+			//击中存活状态的MapNode
 			*temp = tempNode;
 			//(*temp)->runBlink();
 			CCLOG("_preNode x=%d y=%d", (*temp)->getX(), (*temp)->getY());
@@ -313,7 +331,11 @@ bool MapLayer::matchDirect(MapNode *pre, MapNode *cur)
 			}
 		}
 	}
-
+	if (match_x || match_y)
+	{
+		z1 = NULL;
+		z2 = NULL;
+	}
 	return match_x || match_y;
 }
 
@@ -331,14 +353,19 @@ bool MapLayer::matchOnecorner(MapNode *pre, MapNode *cur)
 
 	if ((temp1->getIndex() == -1) && (matchDirect(pre, temp1)) && (matchDirect(cur, temp1)))
 	{
+		/*记录折点z1*/
+		z1 = temp1;
 		return true;
 	}
 
 	if ((temp2->getIndex() == -1) && (matchDirect(pre, temp2)) && (matchDirect(cur, temp2)))
 	{
+		/*记录折点z1*/
+		z1 = temp2;
 		return true;
 	}
-
+	//无法找到1个折点的路径，则z2 = NULL
+	z1 = NULL;
 	return false;
 }
 
@@ -357,6 +384,8 @@ bool MapLayer::matchTwocorner(MapNode *pre, MapNode *cur)
 		}
 		if (matchOnecorner(PointToMapNode(i, y), cur))
 		{
+			//记录折点
+			z2 = PointToMapNode(i, y);
 			return true;
 		}
 	}
@@ -369,6 +398,8 @@ bool MapLayer::matchTwocorner(MapNode *pre, MapNode *cur)
 		}
 		if (matchOnecorner(PointToMapNode(i, y), cur))
 		{
+			//记录折点
+			z2 = PointToMapNode(i, y);
 			return true;
 		}
 	}
@@ -381,6 +412,8 @@ bool MapLayer::matchTwocorner(MapNode *pre, MapNode *cur)
 		}
 		if (matchOnecorner(PointToMapNode(x, i), cur))
 		{
+			//记录折点
+			z2 = PointToMapNode(x, i);
 			return true;
 		}
 	}
@@ -393,9 +426,12 @@ bool MapLayer::matchTwocorner(MapNode *pre, MapNode *cur)
 		}
 		if (matchOnecorner(PointToMapNode(x, i), cur))
 		{
+			//记录折点
+			z2 = PointToMapNode(x, i);
 			return true;
 		}
 	}
+	z2 = NULL;
 	return false;
 }
 
@@ -407,12 +443,132 @@ void MapLayer::clearNode(MapNode *pre, MapNode *cur)
 	this->_remainNum = this->_remainNum - 2;
 	pre->setIndex(-1);
 	cur->setIndex(-1);
-	pre->setVisible(false);
-	cur->setVisible(false);
+	//pre->setVisible(false);
+	//cur->setVisible(false);
+	pre->setTexture("NodeImg-1.png");
+	cur->setTexture("NodeImg-1.png");
+	this->linkedp = pre;
+	this->linkedc = cur;
+	if (z1 == NULL && z2 == NULL)
+	{
+		linkNode(pre, cur);
+		this->scheduleOnce(schedule_selector(MapLayer::clearAllLink), 0.1f);
+	}
+	else if (z1 != NULL && z2 == NULL)
+	{
+		linkNode(pre, z1);
+		linkNode(z1, cur);
+		this->scheduleOnce(schedule_selector(MapLayer::clearAllLink), 0.1f);
+	}
+	else if (z1 != NULL && z2 != NULL)
+	{
+		CCLOG("z1 = %d %d z2 = %d %d\n", z1->getX(), z1->getY(), z2->getX(), z2->getY());
+		linkNode(pre, z2);
+		linkNode(z2, z1);
+		linkNode(z1, cur);
+		this->scheduleOnce(schedule_selector(MapLayer::clearAllLink), 0.1f);
+	}
+	//z1 = z2 = NULL;
 	pre->offSelect();
 	cur->offSelect();
 	pre = NULL;
 	cur = NULL;
+}
+
+void MapLayer::linkNode(MapNode *pre, MapNode *cur)
+{
+	/*连线算法*/
+	//MapNode *pre, MapNode *cur
+	int px = pre->getX();
+	int py = pre->getY();
+	int cx = cur->getX();
+	int cy = cur->getY();
+	if (px == cx && py > cy)
+	{
+		for (int i = cy; i <= py; i++)
+		{
+			((Sprite *)(PointToMapNode(px, i)->onLink))->setVisible(true);
+		}
+	}
+	else if (px == cx && py < cy)
+	{
+		for (int i = py; i <= cy; i++)
+		{
+			((Sprite *)(PointToMapNode(px, i)->onLink))->setVisible(true);
+		}
+	}
+	if (py == cy && px > cx)
+	{
+		for (int i = cx; i <= px; i++)
+		{
+			((Sprite *)(PointToMapNode(i, py)->onLink))->setVisible(true);
+		}
+	}
+	else if (py == cy && px < cx)
+	{
+		for (int i = px; i <= cx; i++)
+		{
+			((Sprite *)(PointToMapNode(i, py)->onLink))->setVisible(true);
+		}
+	}
+}
+
+void MapLayer::clearLinkNode(MapNode *pre, MapNode *cur)
+{
+	/*连线算法*/
+	//MapNode *pre, MapNode *cur
+	int px = pre->getX();
+	int py = pre->getY();
+	int cx = cur->getX();
+	int cy = cur->getY();
+	if (px == cx && py > cy)
+	{
+		for (int i = cy; i <= py; i++)
+		{
+			((Sprite *)(PointToMapNode(px, i)->onLink))->setVisible(false);
+		}
+	}
+	else if (px == cx && py < cy)
+	{
+		for (int i = py; i <= cy; i++)
+		{
+			((Sprite *)(PointToMapNode(px, i)->onLink))->setVisible(false);
+		}
+	}
+	if (py == cy && px > cx)
+	{
+		for (int i = cx; i <= px; i++)
+		{
+			((Sprite *)(PointToMapNode(i, py)->onLink))->setVisible(false);
+		}
+	}
+	else if (py == cy && px < cx)
+	{
+		for (int i = px; i <= cx; i++)
+		{
+			((Sprite *)(PointToMapNode(i, py)->onLink))->setVisible(false);
+		}
+	}
+}
+
+void MapLayer::clearAllLink(float dt)
+{
+	CCLOG("ClearAllLink");
+	if (z1 == NULL && z2 == NULL)
+	{
+		clearLinkNode(linkedp, linkedc);
+	}
+	else if (z1 != NULL && z2 == NULL)
+	{
+		clearLinkNode(linkedp, z1);
+		clearLinkNode(z1, linkedc);
+	}
+	else if (z1 != NULL && z2 != NULL)
+	{
+		clearLinkNode(linkedp, z2);
+		clearLinkNode(z2, z1);
+		clearLinkNode(z1, linkedc);
+	}
 }
 
 int MapLayer::getLevel()

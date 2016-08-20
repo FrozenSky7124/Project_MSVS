@@ -43,6 +43,11 @@ private:
 
 	void goBackCallBack(Ref *ref);
 	void pauseCallBack(Ref *ref);
+
+	//2016-08-20
+	MenuItem *bgmSwitchBtn;
+	bool bgmSwitch;
+	void pauseBGM(Ref *ref);
 };
 
 #endif // __GameLayer_H__
