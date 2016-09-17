@@ -1,9 +1,0 @@
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\bin\Debug\Demo_13.6.3.exe.config
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\bin\Debug\Demo_13.6.3.exe
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\bin\Debug\Demo_13.6.3.pdb
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\obj\Debug\Demo_13.6.3.csprojResolveAssemblyReference.cache
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\obj\Debug\Demo_13._6._3.Form1.resources
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\obj\Debug\Demo_13._6._3.Properties.Resources.resources
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\obj\Debug\Demo_13.6.3.csproj.GenerateResource.Cache
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\obj\Debug\Demo_13.6.3.exe
-E:\Project_MSVS\C#\Demo_13.6.3\Demo_13.6.3\obj\Debug\Demo_13.6.3.pdb
