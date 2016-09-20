@@ -4,7 +4,6 @@
 MMUI-TinyTools.lua
 SpellID.lua
 Focuser.lua
-CombatNotification.lua
 PriestBar.lua
-MapCurLocation.lua
 CurrencyTips.lua
+bXP.lua

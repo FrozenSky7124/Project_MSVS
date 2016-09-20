@@ -8,7 +8,9 @@
 --要塞物资 824
 --原油 1101
 --神器碎片 944
-local F, Currency = CreateFrame("Frame"), {392,944,823,824,1101,1191}
+--远古魔力 1155
+--职业大厅资源 1220
+local F, Currency = CreateFrame("Frame"), {1220, 1155, 824, 1101, 1191}
 F.icon = {} 
 for i = 1, #Currency do 
 local icon = CreateFrame("Frame", nil, UIParent) 
