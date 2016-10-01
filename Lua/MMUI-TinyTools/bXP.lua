@@ -1,6 +1,6 @@
 ﻿media = {
 	flat = "Interface\\Buttons\\WHITE8x8",
-	font = "Interface\\Addons\\MMUI-TinyTools\\Media\\font.ttf"
+	font = "Fonts\\ARIALN.TTF"
 }
 config = {
 	enable = 1,

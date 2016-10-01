@@ -15,7 +15,8 @@ F.icon = {}
 for i = 1, #Currency do 
 local icon = CreateFrame("Frame", nil, UIParent) 
 --icon:SetPoint("BOTTOMRIGHT", _G["Minimap"], "BOTTOMLEFT", 3, 20*i+2*(i-1)-10) 
-icon:SetPoint("TOPRIGHT", _G["Minimap"], "BOTTOMRIGHT", -2, -25*i+2*(i-1)-20) 
+icon:SetPoint("TOPRIGHT", _G["Minimap"], "BOTTOMRIGHT", -2, -25*i+2*(i-1)-20)
+--icon:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -90*i+2*(i-1)-200, 60) 
 icon:SetSize(20, 20) 
 icon.texture = icon:CreateTexture(nil, "ARTWORK") 
 icon.texture:SetAllPoints(icon) 

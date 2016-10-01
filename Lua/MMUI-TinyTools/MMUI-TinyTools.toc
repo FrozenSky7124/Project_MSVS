@@ -7,3 +7,4 @@ Focuser.lua
 PriestBar.lua
 CurrencyTips.lua
 bXP.lua
+MyInterrupts.lua
