@@ -103,4 +103,5 @@ end)
 OrderHallCommandBar:SetAlpha(0)
 
 --[任务说明界面字体调整]
-QuestFont:SetFont("Fonts\\ARKai_T.ttf", 16)
+--QuestFont:SetFont("Fonts\\ARKai_T.ttf", 16)
+QuestFont:SetFont(STANDARD_TEXT_FONT, 16)

@@ -6,7 +6,7 @@
 
 ### 下载地址
 
-* Release: http://pan.baidu.com/s/1gfz9Jzl
+* Release: http://pan.baidu.com/s/1mi6RgMk
 * Debug: https://github.com/FrozenSky7124/Project_MSVS/tree/master/Lua/MMUI-TinyTools
 
 
@@ -18,11 +18,11 @@ v2016-10-10
 
    鼠标滑过显示神器等级、当前能量、解锁能量等信息。
 
-   ![image_ReadMe_bAXP.jpg](ReadMe\image_ReadMe_bAXP.jpg)
+   ![image_ReadMe_bAXP.jpg](ReadMe/image_ReadMe_bAXP.jpg)
 
    鼠标滑出渐隐
 
-   ![image_ReadMe_bAXP1.jpg](ReadMe\image_ReadMe_bAXP1.jpg)
+   ![image_ReadMe_bAXP1.jpg](ReadMe/image_ReadMe_bAXP1.jpg)
 
 v2016-10-02
 

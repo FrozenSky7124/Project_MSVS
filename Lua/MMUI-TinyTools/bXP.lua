@@ -1,6 +1,7 @@
 ﻿media = {
 	flat = "Interface\\Buttons\\WHITE8x8",
-	font = "Fonts\\ARIALN.TTF"
+	--font = "Fonts\\ARIALN.TTF"
+	font = STANDARD_TEXT_FONT
 }
 config = {
 	enable = 1,
