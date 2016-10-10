@@ -6,12 +6,30 @@
 
 ### 下载地址
 
-* Release: http://pan.baidu.com/s/1boHckBP
+* Release: http://pan.baidu.com/s/1gfz9Jzl
 * Debug: https://github.com/FrozenSky7124/Project_MSVS/tree/master/Lua/MMUI-TinyTools
 
 
+### 更新说明
 
-### 功能说明
+v2016-10-10
+
+1. +神器能量条美化 (bAXP.lua)
+
+   鼠标滑过显示神器等级、当前能量、解锁能量等信息。
+
+   ![image_ReadMe_bAXP.jpg](ReadMe\image_ReadMe_bAXP.jpg)
+
+   鼠标滑出渐隐
+
+   ![image_ReadMe_bAXP1.jpg](ReadMe\image_ReadMe_bAXP1.jpg)
+
+v2016-10-02
+
+1. +职业大厅资源条默认隐藏，鼠标滑过显示。
+2. ^使用游戏全局字体，减少插件体积。
+
+v2016-09-26
 
 1. 经验/声望条美化 (bXP.lua)
 
@@ -47,5 +65,3 @@
 6. 综合功能 (MMUI-TinyTools.lua)
 
    * /align 命令 打开调试网格
-   * /fstack 命令 打开界面框体提示
-   * 鼠标滑过显示职业大厅资源条
