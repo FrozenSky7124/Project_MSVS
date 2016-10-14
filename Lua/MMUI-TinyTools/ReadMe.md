@@ -6,7 +6,7 @@
 
 ### 下载地址
 
-* Release: http://pan.baidu.com/s/1mi6RgMk
+* Release: http://pan.baidu.com/s/1o77mUYe
 * Debug: https://github.com/FrozenSky7124/Project_MSVS/tree/master/Lua/MMUI-TinyTools
 
 
@@ -17,6 +17,8 @@ v2016-10-10
 1. +神器能量条美化 (bAXP.lua)
 
    鼠标滑过显示神器等级、当前能量、解锁能量等信息。
+
+   Shift + 鼠标左键拖动可以移动能量条位置。
 
    ![image_ReadMe_bAXP.jpg](ReadMe/image_ReadMe_bAXP.jpg)
 

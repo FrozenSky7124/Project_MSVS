@@ -36,11 +36,11 @@ end
 local abar = CreateFrame("frame", "bAXP", UIParent)
 abar:SetPoint(unpack(config_A.spawn))
 abar:SetFrameStrata("LOW")
---abar:SetClampedToScreen(true)
---abar:SetMovable(true)
---abar:SetUserPlaced(true)
---abar:EnableMouse(true)
---abar:RegisterForDrag("LeftButton")
+abar:SetClampedToScreen(true)
+abar:SetMovable(true)
+abar:SetUserPlaced(true)
+abar:EnableMouse(true)
+abar:RegisterForDrag("LeftButton")
 abar:SetWidth(config_A.width)
 abar:SetHeight(config_A.height)
 abar:SetBackdrop({bgFile = media_A.flat, insets = {top = -2, left = -2, bottom = -2, right = -2}})
@@ -93,6 +93,7 @@ abar:SetScript("OnEvent", function()
 end)
 
 --[测试]
+--[[
 SLASH_TOGGLEGRID2 = "/mbaxp"
 SlashCmdList["TOGGLEGRID"] = function()
 	print("MMUI-TestMode")
@@ -114,7 +115,7 @@ SlashCmdList["TOGGLEGRID"] = function()
 	SendChatMessage("MMUI-ArtifactInfo Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp.."/"..pointCost, "SAY")
 	--SendChatMessage("MMUI-ArtifactInfo Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp, "OFFICER")
 end
-
+]]
 
 --[[
 SendChatMessage("msg", ["chatType"], ["language"], ["channel"])
