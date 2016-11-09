@@ -93,7 +93,7 @@ abar:SetScript("OnEvent", function()
 end)
 
 --[测试]
---[[
+
 SLASH_TOGGLEGRID2 = "/mbaxp"
 SlashCmdList["TOGGLEGRID"] = function()
 	print("MMUI-TestMode")
@@ -115,7 +115,6 @@ SlashCmdList["TOGGLEGRID"] = function()
 	SendChatMessage("MMUI-ArtifactInfo Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp.."/"..pointCost, "SAY")
 	--SendChatMessage("MMUI-ArtifactInfo Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp, "OFFICER")
 end
-]]
 
 --[[
 SendChatMessage("msg", ["chatType"], ["language"], ["channel"])
