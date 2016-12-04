@@ -79,17 +79,24 @@ abar:RegisterEvent("UNIT_INVENTORY_CHANGED")
 
 --[响应函数]
 abar:SetScript("OnEvent", function()
-	local itemID, _, name, _, xp, curLevel, _, _, _, _, _, _, artifactMaxed = C_ArtifactUI.GetEquippedArtifactInfo()
-	local pointCost = C_ArtifactUI.GetCostForPointAtRank(curLevel)
-	abar:Show()
-	axpbar:SetMinMaxValues(0, pointCost)
-	--当前神器能量大于解锁天赋需求的神器能量
-	if (xp > pointCost) then 
-		xp = pointCost
+	local itemID, _, name, _, xp, curLevel, _, _, _, _, _, _, artifactMaxed = C_ArtifactUI.GetEquippedArtifactInfo()	
+	local showArtifact = itemID and not artifactMaxed;
+	if showArtifact then
+		--print("showArtifact = ", showArtifact)
+		abar:Show()
+		local pointCost = C_ArtifactUI.GetCostForPointAtRank(curLevel)
+		axpbar:SetMinMaxValues(0, pointCost)
+		--当前神器能量大于解锁天赋需求的神器能量
+		if (xp > pointCost) then 
+			xp = pointCost
+		end
+		axpbar:SetStatusBarColor(unpack(config_A.color))
+		axpbar:SetValue(xp)
+		axpbar.text:SetText("Lv "..curLevel.."  |  "..numberize(xp).." / "..numberize(pointCost).."  |  "..floor((xp/pointCost)*1000)/10 .."%".."  |  "..name)
+	else
+		--print("showArtifact = ", showArtifact)
+		abar:Hide()
 	end
-	axpbar:SetStatusBarColor(unpack(config_A.color))
-	axpbar:SetValue(xp)
-	axpbar.text:SetText("Lv "..curLevel.."  |  "..numberize(xp).." / "..numberize(pointCost).."  |  "..floor((xp/pointCost)*1000)/10 .."%".."  |  "..name)
 end)
 
 --[测试]
@@ -102,8 +109,8 @@ SlashCmdList["TOGGLEGRID"] = function()
 	local itemID, altItemID, name, icon, xp, pointsSpent, quality, _, _, _, _, altOnTop, artifactMaxed = C_ArtifactUI.GetEquippedArtifactInfo()
 	local pointCost = C_ArtifactUI.GetCostForPointAtRank(pointsSpent)
 	--local knowledgeLevel = C_ArtifactUI.GetArtifactKnowledgeLevel()
-	--print("itemID = ", itemID)
-	--print("altItemID = ", altItemID)
+	print("itemID = ", itemID)
+	print("altItemID = ", altItemID)
 	print("name = ", name)
 	print("xp = ", xp)
 	print("pointsSpent = ", pointsSpent)
@@ -112,7 +119,7 @@ SlashCmdList["TOGGLEGRID"] = function()
 	print("artifactMaxed = ", artifactMaxed)
 	print("Cost = ", pointCost)
 	--print("KnowledgeLevel = ", knowledgeLevel)
-	SendChatMessage("MMUI-ArtifactInfo Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp.."/"..pointCost, "SAY")
+	SendChatMessage("MMUI-ArtifactInfo ItemID:"..itemID.." Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp.."/"..pointCost, "SAY")
 	--SendChatMessage("MMUI-ArtifactInfo Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp, "OFFICER")
 end
 

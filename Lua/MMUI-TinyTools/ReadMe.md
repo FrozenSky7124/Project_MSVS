@@ -6,11 +6,15 @@
 
 ### 下载地址
 
-* Release: http://pan.baidu.com/s/1o77mUYe
+* Release: http://pan.baidu.com/s/1qYKZb1i
 * Debug: https://github.com/FrozenSky7124/Project_MSVS/tree/master/Lua/MMUI-TinyTools
 
 
 ### 更新说明
+
+v2016-12-04
+
+1. ^修复了神器能量条在玩家木有装备神器时显示异常的问题。
 
 v2016-10-10
 
