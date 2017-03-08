@@ -2,16 +2,16 @@
 media_A = {
 	flat = "Interface\\Buttons\\WHITE8x8",
 	--font = "Fonts\\ARIALN.TTF"
-	font = STANDARD_TEXT_FONT
+	font = STANDARD_TEXT_FONT				--字体设置（可按照上一行修改为指定字体）
 }
 
 --[参数设置]
 config_A = {
-	enable = 1,
-	spawn = {"BOTTOM", UIParent, "BOTTOM", 0, 2},
-	width = 553,
-	height = 17,
-	color = {1.0, 0.9, 0, 1}
+	enable = 1,										--插件开关
+	spawn = {"BOTTOM", UIParent, "BOTTOM", 0, 2},	--位置
+	width = 553,									--宽度
+	height = 17,									--高度
+	color = {1.0, 0.9, 0, 1}						--填充颜色
 }
 
 if config_A.enable ~= 1 then
@@ -80,6 +80,7 @@ abar:RegisterEvent("UNIT_INVENTORY_CHANGED")
 --[响应函数]
 abar:SetScript("OnEvent", function()
 	local itemID, _, name, _, xp, curLevel, _, _, _, _, _, _, artifactMaxed = C_ArtifactUI.GetEquippedArtifactInfo()	
+	--当不存在神器或者神器能量已满的情况下隐藏能量条
 	local showArtifact = itemID and not artifactMaxed;
 	if showArtifact then
 		--print("showArtifact = ", showArtifact)
