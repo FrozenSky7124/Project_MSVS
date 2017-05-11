@@ -59,6 +59,7 @@ bool Widget::linkToDatabase()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("dbQA_JX3.db");
+    //db.setDatabaseName("qrc:/dbQA_JX3.db");
     if( !db.open() )
     {
         return false;
