@@ -40,7 +40,7 @@ void Widget::onConvertBtn()
 {
     //染色函数
     NewTextEdit->clear();
-
+    /*
     int arrayColor[18] =
     {
         0x000000, 0x330000, 0x660000, 0x990000, 0xCC0000, 0xFF0000,
@@ -53,6 +53,20 @@ void Widget::onConvertBtn()
         0xFF3300, 0xCC3300, 0xFF6600, 0xFF9900, 0x009900, 0x339900,
         0x00CC00, 0x33CC00, 0x66CC00, 0x00FF00, 0x66FF00, 0xCCFF00,
     };
+    */
+    int arrayColor[18] =
+    {
+        0x000066, 0x330066, 0x660066, 0x990066, 0xCC0066, 0xFF0066,
+        0xFF3300, 0xCC3300, 0xFF6600, 0xFF9900, 0x009900, 0x339900,
+        0x00CC00, 0x33CC00, 0x66CC00, 0x00FF00, 0x66FF00, 0xCCFF00,
+    };
+    int arrayColor_Backup[18] =
+    {
+        0x000066, 0x330066, 0x660066, 0x990066, 0xCC0066, 0xFF0066,
+        0xFF3300, 0xCC3300, 0xFF6600, 0xFF9900, 0x009900, 0x339900,
+        0x00CC00, 0x33CC00, 0x66CC00, 0x00FF00, 0x66FF00, 0xCCFF00,
+    };
+
     QString oldStr;
     QString newStr;
     int n = 0;
@@ -67,7 +81,7 @@ void Widget::onConvertBtn()
         if (QString(tmpChar) == "\n") //换行时颜色标识n+1
         {
             n++;
-            if(n >= 17) //超出色彩循环范围则重置颜色标识n和基础色数组
+            if(n >= 18) //超出色彩循环范围则重置颜色标识n和基础色数组
             {
                 n = 0;
                 memcpy_s(&arrayColor, 18 * sizeof(int), &arrayColor_Backup, 18 * sizeof(int));
@@ -76,7 +90,7 @@ void Widget::onConvertBtn()
         }
         else
         {
-            tmpStr.sprintf("[color=%x]%s[/color]", arrayColor[n] += 0x000007, QString(tmpChar).toStdString().data());
+            tmpStr.sprintf("[color=%06x]%s[/color]", arrayColor[n] += 0x000003, QString(tmpChar).toStdString().data());
         }
         newStr += tmpStr;
     }
