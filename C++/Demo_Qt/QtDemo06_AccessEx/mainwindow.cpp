@@ -508,7 +508,14 @@ void Widget::importFile_JX3Ex2()
 
 void Widget::updateDB_JX3Ex()
 {
-    QMessageBox::information(this, "Test", "Test！");
+    int index = 0;
+    QString tmpStr;
+    QString testChar = "佛";
+    mainTextEdit->append(ToChineseSpell(testChar));
+    ushort vChar = testChar[0].unicode();
+    index = (int)vChar - 19968;
+    tmpStr.sprintf("%d",index);
+    mainTextEdit->append(tmpStr);
 }
 
 void Widget::selectTable_JX3Ex()
