@@ -6,15 +6,15 @@
 
 ### 下载地址
 
-* Release: http://pan.baidu.com/s/1qYKZb1i
+* Release: https://pan.baidu.com/s/1caZyxg
 * Debug: https://github.com/FrozenSky7124/Project_MSVS/tree/master/Lua/MMUI-TinyTools
 
 
 ### 更新说明
 
-v2017-03-07
+v2017-09-01
 
-1. ^新增部分注释，便于玩家自定义修改。
+1. ^修复插件，支持7.3.0版本。
 
 v2016-12-04
 

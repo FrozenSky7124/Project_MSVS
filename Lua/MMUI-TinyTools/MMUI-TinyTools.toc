@@ -1,4 +1,4 @@
-﻿## Interface: 70000 
+﻿## Interface: 70300 
 ## Title: 萌萌UI小工具 
 ## Notes: 萌萌的 MMUI 小工具合集
 MMUI-TinyTools.lua

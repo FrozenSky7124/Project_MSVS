@@ -2,16 +2,16 @@
 media_A = {
 	flat = "Interface\\Buttons\\WHITE8x8",
 	--font = "Fonts\\ARIALN.TTF"
-	font = STANDARD_TEXT_FONT				--字体设置（可按照上一行修改为指定字体）
+	font = STANDARD_TEXT_FONT
 }
 
 --[参数设置]
 config_A = {
-	enable = 1,										--插件开关
-	spawn = {"BOTTOM", UIParent, "BOTTOM", 0, 2},	--位置
-	width = 553,									--宽度
-	height = 17,									--高度
-	color = {1.0, 0.9, 0, 1}						--填充颜色
+	enable = 1, --开启/关闭
+	spawn = {"BOTTOM", UIParent, "BOTTOM", 0, 2}, --调整神器条位置（修改后两个数字）
+	width = 553, --宽度
+	height = 17, --高度
+	color = {1.0, 0.9, 0, 1} --颜色
 }
 
 if config_A.enable ~= 1 then
@@ -79,29 +79,46 @@ abar:RegisterEvent("UNIT_INVENTORY_CHANGED")
 
 --[响应函数]
 abar:SetScript("OnEvent", function()
-	local itemID, _, name, _, xp, curLevel, _, _, _, _, _, _, artifactMaxed = C_ArtifactUI.GetEquippedArtifactInfo()	
-	--当不存在神器或者神器能量已满的情况下隐藏能量条
-	local showArtifact = itemID and not artifactMaxed;
+	local itemID, altItemID, name, _, xp, pointsSpent, _, _, _, _, _, _, artifactTier = C_ArtifactUI.GetEquippedArtifactInfo();
+	local showArtifact = itemID;
 	if showArtifact then
 		--print("showArtifact = ", showArtifact)
 		abar:Show()
-		local pointCost = C_ArtifactUI.GetCostForPointAtRank(curLevel)
-		axpbar:SetMinMaxValues(0, pointCost)
+		local xpForNextPoint = C_ArtifactUI.GetCostForPointAtRank(pointsSpent, artifactTier);
+		axpbar:SetMinMaxValues(0, xpForNextPoint)
 		--当前神器能量大于解锁天赋需求的神器能量
-		if (xp > pointCost) then 
-			xp = pointCost
+		if (xp > xpForNextPoint) then 
+			xp = xpForNextPoint
 		end
 		axpbar:SetStatusBarColor(unpack(config_A.color))
 		axpbar:SetValue(xp)
-		axpbar.text:SetText("Lv "..curLevel.."  |  "..numberize(xp).." / "..numberize(pointCost).."  |  "..floor((xp/pointCost)*1000)/10 .."%".."  |  "..name)
+		axpbar.text:SetText("Lv "..pointsSpent.."   |   "..numberize(xp).." / "..numberize(xpForNextPoint).."   |   "..floor((xp/xpForNextPoint)*1000)/10 .."%".."   |   "..name)
 	else
 		--print("showArtifact = ", showArtifact)
 		abar:Hide()
 	end
 end)
 
---[测试]
+--[测试] 20170901
 
+SLASH_TOGGLEGRID2 = "/mbaxp"
+SlashCmdList["TOGGLEGRID"] = function()
+	print("MMUI-TestMode")
+
+	--Artifact Test
+	local itemID, altItemID, name, icon, xp, pointsSpent, quality, artifactAppearanceID, appearanceModID, itemAppearanceID, altItemAppearanceID, altOnTop, artifactTier = C_ArtifactUI.GetEquippedArtifactInfo(); --7.3.0 更新了此函数的返回值列表
+	local xpForNextPoint = C_ArtifactUI.GetCostForPointAtRank(pointsSpent, artifactTier);  --7.3.0 更新了此函数的参数，新增第二参数：artifactTier，即神器层级。
+
+	print("name = ", name)
+	print("xp = ", xp)
+	print("pointsSpent = ", pointsSpent)
+	print("artifactTier = ", artifactTier)
+	print("xpForNextPoint = ", xpForNextPoint)
+
+end
+
+
+--[[
 SLASH_TOGGLEGRID2 = "/mbaxp"
 SlashCmdList["TOGGLEGRID"] = function()
 	print("MMUI-TestMode")
@@ -123,6 +140,7 @@ SlashCmdList["TOGGLEGRID"] = function()
 	SendChatMessage("MMUI-ArtifactInfo ItemID:"..itemID.." Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp.."/"..pointCost, "SAY")
 	--SendChatMessage("MMUI-ArtifactInfo Name:"..name.." CurLevel:"..pointsSpent.." CurXP:"..xp, "OFFICER")
 end
+--]]
 
 --[[
 SendChatMessage("msg", ["chatType"], ["language"], ["channel"])
@@ -139,14 +157,14 @@ SendChatMessage("msg", ["chatType"], ["language"], ["channel"])
 "WHISPER" 相当于/w
 ]]
 
---[[
-获取当前装备的神器信息
-local itemID, altItemID, name, icon, xp, pointsSpent, quality, 
-artifactAppearanceID, appearanceModID, itemAppearanceID, altItemAppearanceID, 
-altOnTop, artifactMaxed 
-= C_ArtifactUI.GetEquippedArtifactInfo();
+--[[  
+
+--因7.3.0更新，以下函数已失效。
+
+local itemID, altItemID, name, icon, xp, pointsSpent, quality, artifactAppearanceID, appearanceModID, itemAppearanceID, altItemAppearanceID, altOnTop, artifactMaxed = C_ArtifactUI.GetEquippedArtifactInfo();
 
 C_ArtifactUI.GetCostForPointAtRank(pointsSpent)
 
 C_ArtifactUI.GetArtifactKnowledgeLevel() - return number of knowledge level
+
 ]]

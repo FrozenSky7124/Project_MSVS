@@ -72,7 +72,7 @@ bar.bg:SetVertexColor(0.16,0.16,0.16,1)
 xpbar.text = xpbar:CreateFontString("XP Text")
 xpbar.text:SetPoint("TOPLEFT", bar, "BOTTOMLEFT", 50, 18)
 xpbar.text:SetFont(media.font, 15, "OUTLINE")
-xpbar.text:SetAlpha(0)
+xpbar.text:SetAlpha(1)
 
 bar:RegisterEvent("PLAYER_XP_UPDATE")
 bar:RegisterEvent("PLAYER_LEVEL_UP")
