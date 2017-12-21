@@ -7,6 +7,11 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 {
 	switch (uMsg)
 	{
+		case WM_INITDIALOG:
+		{
+			MessageBox(hwndDlg, _T("Dialog Init !"), _T(""), 0);
+			break;
+		}
 		case WM_COMMAND:
 		{
 			//响应菜单-退出
@@ -56,8 +61,18 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				SetDlgItemText(hwndDlg, IDC_EDIT_R3, cStr3);
 				break;
 			}
+		}
+		//响应鼠标移动事件
+		case WM_MOUSEMOVE:
+		{
+			short xPos = LOWORD(lParam);
+			short yPos = HIWORD(lParam);
+			CString tempStr;
+			tempStr.Format(_T("WM_MOUSEMOVE xPos:%d  yPos:%d"), xPos, yPos);
+			SetDlgItemText(hwndDlg, IDC_INFO, tempStr);
 			break;
 		}
+
 		default:
 			break;
 	}
