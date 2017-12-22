@@ -33,5 +33,17 @@
     <Image Include="onmyoji.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="F:\玉雪·幻境云图\素材图片\GameResources\剑网三 Res\剑网3技能图标\纯阳\exp_5-68599.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="bitmap1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\froze\Pictures\Test.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="c:\users\froze\pictures\bitmap2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>
