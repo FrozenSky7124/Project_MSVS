@@ -37,8 +37,9 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnClose();
 	afx_msg void OnBnClickedCancel();
+	afx_msg void OnClose();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	DECLARE_MESSAGE_MAP()
 
 public:
@@ -48,6 +49,10 @@ public:
 	HANDLE          m_hDispThread;	//图像抓取线程的句柄
 	BOOL            m_bExit;		//用来通知图像抓取线程结束
 
+	tSdkFrameHead   m_sFrInfo;		//用于保存当前图像帧的帧头信息
+	int	            m_iDispFrameNum;//用于记录当前已经显示的图像帧的数量
+
 	BYTE*           m_pFrameBuffer;	//用于将原始图像数据转换为RGB的缓冲区
-	
+	BOOL	        m_bPause;		//是否暂停图像
+	BOOL InitCamera();
 };
