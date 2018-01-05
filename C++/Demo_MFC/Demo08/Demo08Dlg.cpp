@@ -153,8 +153,19 @@ void CDemo08Dlg::OnBnClickedButtonSave()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CFile saveFile;
+	CListCtrl *obsList = (CListCtrl *)GetDlgItem(IDC_LIST);
 	saveFile.Open(_T("./ObsData.TxT"), CFile::modeCreate | CFile::modeWrite);
-	const TCHAR sz[] = _T("I love CFile!");
-	saveFile.Write(sz, sizeof(sz));
+	int i = 0;
+	int obsCount = obsList->GetItemCount();
+	OBSInfo obsInfo;
+	while (i < obsCount)
+	{
+		obsInfo.obsID = _tstoi(obsList->GetItemText(i, 0));
+		_tcscpy(obsInfo.obsPlan, obsList->GetItemText(i, 1));
+		obsInfo.tarCount = _tstoi(obsList->GetItemText(i, 2));
+		obsInfo.obsDate.ParseDateTime(obsList->GetItemText(i, 3), VAR_DATEVALUEONLY);
+		saveFile.Write(&obsInfo, sizeof(obsInfo));
+		i++;
+	}
 	saveFile.Close();
 }

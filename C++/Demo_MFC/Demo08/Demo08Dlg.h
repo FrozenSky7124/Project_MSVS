@@ -8,6 +8,13 @@
 // CDemo08Dlg 对话框
 class CDemo08Dlg : public CDialogEx
 {
+	struct OBSInfo
+	{
+		int obsID;
+		TCHAR obsPlan[20];
+		int tarCount;
+		COleDateTime obsDate;
+	};
 // 构造
 public:
 	CDemo08Dlg(CWnd* pParent = NULL);	// 标准构造函数
