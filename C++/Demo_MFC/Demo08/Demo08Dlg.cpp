@@ -32,6 +32,9 @@ BEGIN_MESSAGE_MAP(CDemo08Dlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &CDemo08Dlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CDemo08Dlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_BUTTON_ADD, &CDemo08Dlg::OnBnClickedButtonAdd)
+	ON_BN_CLICKED(IDC_BUTTON_DEL, &CDemo08Dlg::OnBnClickedButtonDel)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CDemo08Dlg::OnBnClickedButtonSave)
 END_MESSAGE_MAP()
 
 
@@ -47,7 +50,14 @@ BOOL CDemo08Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-
+	CListCtrl *obsList = (CListCtrl *)GetDlgItem(IDC_LIST);
+	obsList->InsertColumn(0, _T("观测员序号"), LVCFMT_LEFT, 75);
+	obsList->InsertColumn(1, _T("观测计划"), LVCFMT_LEFT, 160);
+	obsList->InsertColumn(2, _T("捕获目标数"), LVCFMT_LEFT, 100);
+	obsList->InsertColumn(3, _T("日期"), LVCFMT_LEFT, 196);
+	obsList->SetBkColor(RGB(205, 226, 252));
+	obsList->SetTextBkColor(RGB(205, 226, 252));
+	obsList->SetExtendedStyle(obsList->GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -100,4 +110,51 @@ void CDemo08Dlg::OnBnClickedCancel()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CDialogEx::OnCancel();
+}
+
+void CDemo08Dlg::OnBnClickedButtonAdd()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CListCtrl *pList = (CListCtrl *)GetDlgItem(IDC_LIST);
+	CString tempStr;
+	UINT nCount = pList->GetItemCount();
+	GetDlgItemText(IDC_EDIT_OBSID, tempStr);
+	pList->InsertItem(nCount, tempStr);
+	GetDlgItemText(IDC_EDIT_OBSPLAN, tempStr);
+	pList->SetItemText(nCount, 1, tempStr);
+	GetDlgItemText(IDC_EDIT_TARGET, tempStr);
+	pList->SetItemText(nCount, 2, tempStr);
+	GetDlgItemText(IDC_DATETIMEPICKER_OBSDATE, tempStr);
+	pList->SetItemText(nCount, 3, tempStr);
+}
+
+
+void CDemo08Dlg::OnBnClickedButtonDel()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CListCtrl *obsList = (CListCtrl *)GetDlgItem(IDC_LIST);
+	//int index = obsList->GetSelectedColumn();
+	int selectNum = obsList->GetSelectedCount();
+	if (selectNum != 0)
+	{
+		int index = -1;
+		for (int i = 0; i < selectNum; i++)
+		{
+			index = obsList->GetNextItem(-1, LVNI_SELECTED);
+			ASSERT(index != -1);
+			TRACE(_T("Select: %d.\n"), index);
+			obsList->DeleteItem(index);
+		}
+	}
+}
+
+
+void CDemo08Dlg::OnBnClickedButtonSave()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CFile saveFile;
+	saveFile.Open(_T("./ObsData.TxT"), CFile::modeCreate | CFile::modeWrite);
+	const TCHAR sz[] = _T("I love CFile!");
+	saveFile.Write(sz, sizeof(sz));
+	saveFile.Close();
 }
