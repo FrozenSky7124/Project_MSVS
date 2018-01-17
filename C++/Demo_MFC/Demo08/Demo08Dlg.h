@@ -1,7 +1,3 @@
-
-// Demo08Dlg.h : 头文件
-//
-
 #pragma once
 
 
@@ -15,6 +11,9 @@ class CDemo08Dlg : public CDialogEx
 		int tarCount;
 		COleDateTime obsDate;
 	};
+
+protected:
+	BOOL m_bChanged;
 // 构造
 public:
 	CDemo08Dlg(CWnd* pParent = NULL);	// 标准构造函数
@@ -43,4 +42,6 @@ public:
 	afx_msg void OnBnClickedButtonAdd();
 	afx_msg void OnBnClickedButtonDel();
 	afx_msg void OnBnClickedButtonSave();
+	afx_msg void OnBnClickedButtonLoad();
+	afx_msg void OnBnClickedButtonChange();
 };

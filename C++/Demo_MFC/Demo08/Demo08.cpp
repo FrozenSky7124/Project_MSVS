@@ -1,7 +1,3 @@
-
-// Demo08.cpp : 定义应用程序的类行为。
-//
-
 #include "stdafx.h"
 #include "Demo08.h"
 #include "Demo08Dlg.h"

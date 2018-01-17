@@ -1,7 +1,3 @@
-
-// Demo08Dlg.cpp : 实现文件
-//
-
 #include "stdafx.h"
 #include "Demo08.h"
 #include "Demo08Dlg.h"
@@ -35,6 +31,8 @@ BEGIN_MESSAGE_MAP(CDemo08Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, &CDemo08Dlg::OnBnClickedButtonAdd)
 	ON_BN_CLICKED(IDC_BUTTON_DEL, &CDemo08Dlg::OnBnClickedButtonDel)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CDemo08Dlg::OnBnClickedButtonSave)
+	ON_BN_CLICKED(IDC_BUTTON_LOAD, &CDemo08Dlg::OnBnClickedButtonLoad)
+	ON_BN_CLICKED(IDC_BUTTON_CHANGE, &CDemo08Dlg::OnBnClickedButtonChange)
 END_MESSAGE_MAP()
 
 
@@ -58,6 +56,7 @@ BOOL CDemo08Dlg::OnInitDialog()
 	obsList->SetBkColor(RGB(205, 226, 252));
 	obsList->SetTextBkColor(RGB(205, 226, 252));
 	obsList->SetExtendedStyle(obsList->GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_bChanged = FALSE;
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -109,6 +108,13 @@ void CDemo08Dlg::OnBnClickedOk()
 void CDemo08Dlg::OnBnClickedCancel()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	if (m_bChanged)
+	{
+		if (IDYES == AfxMessageBox(_T("是否保存更改？"), MB_YESNO | MB_ICONQUESTION))
+		{
+			OnBnClickedButtonSave();
+		}
+	}
 	CDialogEx::OnCancel();
 }
 
@@ -126,6 +132,7 @@ void CDemo08Dlg::OnBnClickedButtonAdd()
 	pList->SetItemText(nCount, 2, tempStr);
 	GetDlgItemText(IDC_DATETIMEPICKER_OBSDATE, tempStr);
 	pList->SetItemText(nCount, 3, tempStr);
+	m_bChanged = TRUE;
 }
 
 
@@ -144,6 +151,7 @@ void CDemo08Dlg::OnBnClickedButtonDel()
 			ASSERT(index != -1);
 			TRACE(_T("Select: %d.\n"), index);
 			obsList->DeleteItem(index);
+			m_bChanged = TRUE;
 		}
 	}
 }
@@ -154,18 +162,80 @@ void CDemo08Dlg::OnBnClickedButtonSave()
 	// TODO: 在此添加控件通知处理程序代码
 	CFile saveFile;
 	CListCtrl *obsList = (CListCtrl *)GetDlgItem(IDC_LIST);
-	saveFile.Open(_T("./ObsData.TxT"), CFile::modeCreate | CFile::modeWrite);
+	if (!saveFile.Open(_T("./ObsData.TxT"), CFile::modeCreate | CFile::modeWrite))
+	{
+		AfxMessageBox(_T("无法打开ObsData.TxT文件！"));
+		return;
+	}
 	int i = 0;
 	int obsCount = obsList->GetItemCount();
 	OBSInfo obsInfo;
 	while (i < obsCount)
 	{
 		obsInfo.obsID = _tstoi(obsList->GetItemText(i, 0));
-		_tcscpy(obsInfo.obsPlan, obsList->GetItemText(i, 1));
+		_tcscpy_s(obsInfo.obsPlan, obsList->GetItemText(i, 1));
 		obsInfo.tarCount = _tstoi(obsList->GetItemText(i, 2));
 		obsInfo.obsDate.ParseDateTime(obsList->GetItemText(i, 3), VAR_DATEVALUEONLY);
 		saveFile.Write(&obsInfo, sizeof(obsInfo));
 		i++;
 	}
 	saveFile.Close();
+}
+
+
+void CDemo08Dlg::OnBnClickedButtonLoad()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CFile loadFile;
+	CListCtrl *obsList = (CListCtrl *)GetDlgItem(IDC_LIST);
+	if (!loadFile.Open(_T("./ObsData.TxT"), CFile::modeRead))
+	{
+		AfxMessageBox(_T("无法打开ObsData.TxT文件！"));
+		return;
+	}
+	OBSInfo obsInfo;
+	int i = 0;
+	CString tempStr;
+	while (loadFile.Read(&obsInfo, sizeof(obsInfo)) == sizeof(obsInfo))
+	{
+		tempStr.Format(_T("%d"), obsInfo.obsID);
+		obsList->InsertItem(i, tempStr);
+		obsList->SetItemText(i, 1, obsInfo.obsPlan);
+		tempStr = _T("");
+		tempStr.Format(_T("%d"), obsInfo.tarCount);
+		obsList->SetItemText(i, 2, tempStr);
+		//obsList->SetItemText(i, 3, obsInfo.obsDate.Format(VAR_DATEVALUEONLY));
+		tempStr = obsInfo.obsDate.Format(_T("%Y年%m月%d日")); // 调用COleDataTime类Format函数对时间格式化
+		obsList->SetItemText(i, 3, tempStr);
+		i++;
+	}
+	loadFile.Close();
+}
+
+void CDemo08Dlg::OnBnClickedButtonChange()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CListCtrl *obsList = (CListCtrl *)GetDlgItem(IDC_LIST);
+	UINT nSelected = obsList->GetSelectedCount();
+	if (nSelected == 0)
+	{
+		AfxMessageBox(_T("请选择要修改的项目！"));
+		return;
+	}
+	
+	CString tempStr;
+	POSITION pos = obsList->GetFirstSelectedItemPosition();
+
+	while (nSelected != 0)
+	{
+		int index = obsList->GetNextSelectedItem(pos);
+		GetDlgItemText(IDC_EDIT_OBSPLAN, tempStr);
+		obsList->SetItemText(index, 1, tempStr);
+		GetDlgItemText(IDC_EDIT_TARGET, tempStr);
+		obsList->SetItemText(index, 2, tempStr);
+		GetDlgItemText(IDC_DATETIMEPICKER_OBSDATE, tempStr);
+		obsList->SetItemText(index, 3, tempStr);
+		nSelected--;
+	}
+	m_bChanged = TRUE;
 }
