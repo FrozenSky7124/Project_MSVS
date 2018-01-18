@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Demo09.h"
 #include "QNotepadDlg.h"
+#include "AboutDlg.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -34,6 +35,11 @@ BEGIN_MESSAGE_MAP(QNotepadDlg, CDialogEx)
 	ON_BN_CLICKED(IDCANCEL, &QNotepadDlg::OnBnClickedCancel)
 	ON_COMMAND(ID_APP_EXIT, &QNotepadDlg::OnAppExit)
 	ON_WM_DROPFILES()
+	ON_COMMAND(ID_HELPMENU_ABOUT, &QNotepadDlg::OnHelpmenuAbout)
+	ON_WM_SIZE()
+	ON_WM_CLOSE()
+	ON_COMMAND(ID_EDITMENU_SELECTALL, &QNotepadDlg::OnEditmenuSelectall)
+	ON_COMMAND(ID_EDITMENU_DATETIME, &QNotepadDlg::OnEditmenuDatetime)
 END_MESSAGE_MAP()
 
 
@@ -49,6 +55,11 @@ BOOL QNotepadDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	CRect rect = NULL;
+	CWnd *mainEdit = GetDlgItem(IDC_EDIT_MAIN);
+	GetClientRect(rect);
+	mainEdit->MoveWindow(rect);
+
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -102,7 +113,6 @@ void QNotepadDlg::OnBnClickedCancel()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	//CDialogEx::OnCancel();
-	EndDialog(ID_APP_EXIT);
 }
 
 
@@ -129,4 +139,53 @@ void QNotepadDlg::OnDropFiles(HDROP hDropInfo)
 	}
 	*/
 	CDialogEx::OnDropFiles(hDropInfo);
+}
+
+// 帮助-关于 菜单响应函数
+void QNotepadDlg::OnHelpmenuAbout()
+{
+	AboutDlg aboutDlg;
+	aboutDlg.DoModal();
+}
+
+// 改变窗口大小时的消息处理函数
+void QNotepadDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO: 在此处添加消息处理程序代码
+	CRect rect = NULL;
+	CWnd *mainEdit = GetDlgItem(IDC_EDIT_MAIN);
+	if (mainEdit)
+	{
+		GetClientRect(rect);
+		mainEdit->MoveWindow(rect);
+	}
+}
+
+
+void QNotepadDlg::OnClose()
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	EndDialog(IDCANCEL);
+	CDialogEx::OnClose();
+}
+
+
+void QNotepadDlg::OnEditmenuSelectall()
+{
+	// TODO: 
+	CEdit *mainEdit = (CEdit *)GetDlgItem(IDC_EDIT_MAIN);
+	mainEdit->SetSel(0, -1);
+}
+
+
+void QNotepadDlg::OnEditmenuDatetime()
+{
+	// TODO: 
+	CEdit *mainEdit = (CEdit *)GetDlgItem(IDC_EDIT_MAIN);
+	COleDateTime dateTime = COleDateTime::GetCurrentTime();
+	CString tempStr;
+	tempStr = dateTime.Format(_T("%Y年%m月%d日 %A %H:%M:%S"));
+	mainEdit->ReplaceSel(tempStr);
 }

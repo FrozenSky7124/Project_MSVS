@@ -35,4 +35,9 @@ public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnAppExit();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg void OnHelpmenuAbout();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnClose();
+	afx_msg void OnEditmenuSelectall();
+	afx_msg void OnEditmenuDatetime();
 };
