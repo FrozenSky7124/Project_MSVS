@@ -122,6 +122,19 @@ void QNotepadDlg::OnAppExit()
 	EndDialog(ID_APP_EXIT);
 }
 
+// ANSI格式读取函数
+void QNotepadDlg::FileRead_ANSI(CFile& file)
+{
+	UINT fileLen = file.GetLength();
+	CHAR *fileBuff = new CHAR[fileLen + 1];
+	memset(fileBuff, 0, sizeof(CHAR)*(fileLen + 1));
+	file.Read(fileBuff, fileLen);
+	fileBuff[fileLen] = '\0';
+	CString tempStr(fileBuff);
+	SetDlgItemText(IDC_EDIT_MAIN, tempStr);
+	delete []fileBuff;
+}
+
 // 拖放文件消息处理函数
 void QNotepadDlg::OnDropFiles(HDROP hDropInfo)
 {
@@ -138,6 +151,23 @@ void QNotepadDlg::OnDropFiles(HDROP hDropInfo)
 		i++;
 	}
 	*/
+
+	// 获取拖入的文件路径
+	TCHAR filePath[256];
+	DragQueryFile(hDropInfo, 0, filePath, _countof(filePath));
+	TRACE(_T("File %d: %s\n"), 0, filePath);
+	// 打开文件
+	CFile file;
+	if (!file.Open(filePath, CFile::modeRead))
+	{
+		CString tip;
+		tip.Format(_T("无法打开文件%s !"), filePath);
+		AfxMessageBox(tip);
+		return;
+	}
+	// 调用文件读取函数，将文件显示在文本框中
+	FileRead_ANSI(file);
+	file.Close();
 	CDialogEx::OnDropFiles(hDropInfo);
 }
 

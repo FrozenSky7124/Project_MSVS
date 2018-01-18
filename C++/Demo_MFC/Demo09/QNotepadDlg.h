@@ -40,4 +40,7 @@ public:
 	afx_msg void OnClose();
 	afx_msg void OnEditmenuSelectall();
 	afx_msg void OnEditmenuDatetime();
+
+protected:
+	void FileRead_ANSI(CFile& file);
 };
