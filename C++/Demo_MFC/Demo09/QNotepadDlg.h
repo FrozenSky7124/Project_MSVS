@@ -43,4 +43,6 @@ public:
 
 protected:
 	void FileRead_ANSI(CFile& file);
+	void FileRead_UTF8(CFile& file);
+	void FileRead_UTF16(CFile& file);
 };

@@ -122,17 +122,46 @@ void QNotepadDlg::OnAppExit()
 	EndDialog(ID_APP_EXIT);
 }
 
-// ANSI格式读取函数
+// ANSI编码读取函数
 void QNotepadDlg::FileRead_ANSI(CFile& file)
 {
-	UINT fileLen = file.GetLength();
+	file.Seek(0, CFile::begin);
+	UINT fileLen = (UINT)file.GetLength();
 	CHAR *fileBuff = new CHAR[fileLen + 1];
 	memset(fileBuff, 0, sizeof(CHAR)*(fileLen + 1));
 	file.Read(fileBuff, fileLen);
 	fileBuff[fileLen] = '\0';
 	CString tempStr(fileBuff);
 	SetDlgItemText(IDC_EDIT_MAIN, tempStr);
-	delete []fileBuff;
+	delete[]fileBuff;
+}
+
+// UTF-8编码读取函数
+void QNotepadDlg::FileRead_UTF8(CFile& file)
+{
+	file.Seek(3, CFile::begin);
+	UINT fileLen = (UINT)file.GetLength();
+	CHAR *fileBuff = new CHAR[fileLen + 1];
+	memset(fileBuff, 0, sizeof(CHAR)*(fileLen + 1));
+	file.Read(fileBuff, fileLen);
+	fileBuff[fileLen] = '\0';
+	TCHAR *tFileBuff = new TCHAR[fileLen / 2 + 2];
+	MultiByteToWideChar(CP_UTF8, NULL, fileBuff, -1, tFileBuff, fileLen / 2 + 2);
+	SetDlgItemText(IDC_EDIT_MAIN, tFileBuff);
+	delete[]tFileBuff;
+	delete[]fileBuff;
+}
+
+// UTF-16编码读取函数
+void QNotepadDlg::FileRead_UTF16(CFile& file)
+{
+	file.Seek(2, CFile::begin);
+	UINT fileLen = (UINT)file.GetLength();
+	TCHAR *tFileBuff = new TCHAR[fileLen / 2 + 1];
+	fileLen = file.Read(tFileBuff, fileLen);
+	tFileBuff[fileLen / 2] = _T('\0');
+	SetDlgItemText(IDC_EDIT_MAIN, tFileBuff);
+	delete[]tFileBuff;
 }
 
 // 拖放文件消息处理函数
@@ -165,8 +194,27 @@ void QNotepadDlg::OnDropFiles(HDROP hDropInfo)
 		AfxMessageBox(tip);
 		return;
 	}
-	// 调用文件读取函数，将文件显示在文本框中
-	FileRead_ANSI(file);
+	// 判断文件编码，调用对应的文件读取函数，将文件显示在文本框中。
+	CHAR fileMod[3];
+	file.Read(&fileMod, 3);
+	if ((fileMod[0] == (CHAR)0xEF) && (fileMod[1] == (CHAR)0xBB) && (fileMod[2] == (CHAR)0xBF))
+	{
+		// UTF-8
+		TRACE(_T("UTF-8 Procedure.\n"));
+		FileRead_UTF8(file);
+	}
+	else if ((fileMod[0] == (CHAR)0xFE) && (fileMod[1] == (CHAR)0xFF))
+	{
+		// UTF-16
+		TRACE(_T("UTF-16 Procedure.\n"));
+		FileRead_UTF16(file);
+	}
+	else
+	{
+		// ANSI
+		TRACE(_T("ANSI Procedure.\n"));
+		FileRead_ANSI(file);
+	}
 	file.Close();
 	CDialogEx::OnDropFiles(hDropInfo);
 }
