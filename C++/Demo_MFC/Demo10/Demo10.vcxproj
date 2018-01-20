@@ -211,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Demo10.ico" />
+    <Image Include="res\JX3.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

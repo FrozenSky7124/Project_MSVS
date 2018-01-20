@@ -19,7 +19,8 @@
 CDemo10Dlg::CDemo10Dlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DEMO10_DIALOG, pParent)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON_JX3);
+	m_hCursor = LoadCursorFromFile(_T(".\\res\\working.ani"));
 	// 全局函数AfxGetApp取出全局变量theApp的地址
 	CWinApp *winApp = AfxGetApp();
 	// 全局函数AfxGetInstanceHandle取出资源句柄
@@ -43,6 +44,7 @@ BEGIN_MESSAGE_MAP(CDemo10Dlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON1, &CDemo10Dlg::OnBnClickedButton1)
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
@@ -56,7 +58,6 @@ BOOL CDemo10Dlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
-
 	// TODO: 在此添加额外的初始化代码
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -133,4 +134,16 @@ void CDemo10Dlg::OnBnClickedButton1()
 		m_modelDlg.ShowWindow(SW_SHOW);
 	}
 	m_modelDlg.ShowWindow(SW_SHOW);
+}
+
+
+BOOL CDemo10Dlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (pWnd == (CWnd*)GetDlgItem(IDC_BUTTON1))
+	{
+		AfxMessageBox(_T("!!!!!"));
+	}
+	SetCursor(m_hCursor);
+	return TRUE;
 }

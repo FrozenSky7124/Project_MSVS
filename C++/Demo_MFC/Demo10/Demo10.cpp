@@ -73,7 +73,7 @@ BOOL CDemo10App::InitInstance()
 	// 初始化RichEdit控件
 	AfxInitRichEdit2();
 	// 初始化Socket控件
-	AfxSocketInit();
+	//AfxSocketInit();
 
 	CDemo10Dlg dlg;
 	m_pMainWnd = &dlg;

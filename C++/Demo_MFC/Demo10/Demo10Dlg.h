@@ -25,6 +25,7 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
+	HCURSOR m_hCursor;
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
@@ -40,4 +41,6 @@ public:
 // FrozenSky
 protected:
 	ModelDlg m_modelDlg;
+public:
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 };
