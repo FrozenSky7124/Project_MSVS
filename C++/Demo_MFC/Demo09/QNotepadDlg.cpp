@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(QNotepadDlg, CDialogEx)
 	ON_WM_CLOSE()
 	ON_COMMAND(ID_EDITMENU_SELECTALL, &QNotepadDlg::OnEditmenuSelectall)
 	ON_COMMAND(ID_EDITMENU_DATETIME, &QNotepadDlg::OnEditmenuDatetime)
+	ON_COMMAND(ID_FORMATMENU_FONT, &QNotepadDlg::OnFormatmenuFont)
 END_MESSAGE_MAP()
 
 
@@ -266,4 +267,24 @@ void QNotepadDlg::OnEditmenuDatetime()
 	CString tempStr;
 	tempStr = dateTime.Format(_T("%YÄê%mÔÂ%dÈÕ %A %H:%M:%S"));
 	mainEdit->ReplaceSel(tempStr);
+}
+
+
+void QNotepadDlg::OnFormatmenuFont()
+{
+	// TODO:
+	LOGFONT lf;
+	CFont *pTempFont = NULL;
+	if (m_cFont.GetSafeHandle())
+		pTempFont = &m_cFont;
+	else
+		pTempFont = CWnd::GetFont();
+	pTempFont->GetLogFont(&lf);
+	CFontDialog fontDlg(&lf);
+	if (fontDlg.DoModal() == IDCANCEL)
+		return;
+	fontDlg.GetCurrentFont(&lf);
+	this->m_cFont.DeleteObject();
+	this->m_cFont.CreateFontIndirect(&lf);
+	GetDlgItem(IDC_EDIT_MAIN)->SetFont(&this->m_cFont);
 }

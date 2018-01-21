@@ -24,6 +24,7 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
+	CFont m_cFont;
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
@@ -45,4 +46,6 @@ protected:
 	void FileRead_ANSI(CFile& file);
 	void FileRead_UTF8(CFile& file);
 	void FileRead_UTF16(CFile& file);
+public:
+	afx_msg void OnFormatmenuFont();
 };
