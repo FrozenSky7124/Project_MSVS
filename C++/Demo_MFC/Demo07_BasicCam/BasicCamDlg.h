@@ -37,7 +37,8 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedOk();
+	virtual void OnCancel();
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	DECLARE_MESSAGE_MAP()
@@ -55,4 +56,5 @@ public:
 	BYTE*           m_pFrameBuffer;	//用于将原始图像数据转换为RGB的缓冲区
 	BOOL	        m_bPause;		//是否暂停图像
 	BOOL InitCamera();
+
 };

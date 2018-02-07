@@ -75,7 +75,7 @@ BEGIN_MESSAGE_MAP(BasicCamDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CLOSE()
-	ON_BN_CLICKED(IDCANCEL, &BasicCamDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDOK, &BasicCamDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -110,10 +110,6 @@ BOOL BasicCamDlg::OnInitDialog()
 
 	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
-
-//  如果向对话框添加最小化按钮，则需要下面的代码
-//  来绘制该图标。  对于使用文档/视图模型的 MFC 应用程序，
-//  这将由框架自动完成。
 
 BOOL BasicCamDlg::InitCamera()
 {
@@ -161,7 +157,7 @@ BOOL BasicCamDlg::InitCamera()
 	SetThreadPriority(m_hDispThread, THREAD_PRIORITY_HIGHEST);
 
 	//使相机进入工作模式，并且SDK开始接收相机图像
-	if (CameraPlay(m_hCamera) != 0) TRACE("进入工作模式失败！\n");
+	//if (CameraPlay(m_hCamera) != 0) TRACE("进入工作模式失败！\n");
 	m_bPause = FALSE;
 	//GetDlgItem(IDC_BUTTON_PREVIEW)->SetWindowText(gLanguage ? "暂停" : "Pause");
 	return TRUE;
@@ -229,31 +225,15 @@ void BasicCamDlg::OnClose()
 	CDialogEx::OnClose();
 }
 
-
-void BasicCamDlg::OnBnClickedCancel()
+void BasicCamDlg::OnBnClickedOk()
 {
-	// TODO: 在此添加控件通知处理程序代码
-	TRACE(_T("反初始化相机\n"));
-	if (m_hCamera > 0)
-	{
-		if (NULL != m_hDispThread)
-		{
-			//等待采集线程结束
-			m_bExit = TRUE;
-			::WaitForSingleObject(m_hDispThread, INFINITE);
-			CloseHandle(m_hDispThread);
-			m_hDispThread = NULL;
-		}
+	//使相机进入工作模式，并且SDK开始接收相机图像
+	if (CameraPlay(m_hCamera) != 0) TRACE("进入工作模式失败！\n");
+}
 
-		//反初始化相机。
-		CameraUnInit(m_hCamera);
-		m_hCamera = 0;
-	}
 
-	if (m_pFrameBuffer)
-	{
-		CameraAlignFree(m_pFrameBuffer);
-		m_pFrameBuffer = NULL;
-	}
+void BasicCamDlg::OnCancel()
+{
+	OnClose();
 	CDialogEx::OnCancel();
 }
