@@ -37,7 +37,9 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedCaptStart();	//BUTTON:开始采集
+	afx_msg void OnBnClickedBtnCaptStop();	//BUTTON:停止采集
+	afx_msg void OnBnClickedBtnQuit();		//BUTTON:退出程序
 	virtual void OnCancel();
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -55,6 +57,9 @@ public:
 
 	BYTE*           m_pFrameBuffer;	//用于将原始图像数据转换为RGB的缓冲区
 	BOOL	        m_bPause;		//是否暂停图像
-	BOOL InitCamera();
+	BOOL            InitCamera();
 
+	int				m_iMode;		//模式参数 0：采集模式 1：回放模式
+	afx_msg void OnBnClickedRadioModeCapt();
+	afx_msg void OnBnClickedRadioModeReview();
 };

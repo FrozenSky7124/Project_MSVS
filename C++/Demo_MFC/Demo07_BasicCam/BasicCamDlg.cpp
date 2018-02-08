@@ -19,6 +19,8 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 	tSdkFrameHead 	sFrameInfo;
 	BasicCamDlg*	pThis = (BasicCamDlg*)lpParam;
 	BYTE*			pRgbBuffer;
+	CString         fileName;
+	UINT			fileCount = 0;
 
 	//先清0
 	memset(&sFrameInfo, 0, sizeof(tSdkFrameHead));
@@ -45,6 +47,13 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 			CameraImageOverlay(pThis->m_hCamera, pRgbBuffer, &sFrameInfo);
 			CameraDisplayRGB24(pThis->m_hCamera, pRgbBuffer, &sFrameInfo);
 			pThis->m_iDispFrameNum++;
+			/*
+			CameraReleaseImageBuffer(pThis->m_hCamera, pRgbBuffer);
+			memcpy(&pThis->m_sFrInfo, &sFrameInfo, sizeof(tSdkFrameHead));
+
+			fileName.Format("X:\\Images\\ImageSnap-%3d.BMP", fileCount++);
+			CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP, 100);
+			fileName.ReleaseBuffer();*/
 		}
 	}
 	_endthreadex(0);
@@ -63,6 +72,7 @@ BasicCamDlg::BasicCamDlg(CWnd* pParent /*=NULL*/)
 	m_bExit = FALSE;
 	m_hDispThread = NULL;
 	m_pFrameBuffer = NULL;
+	m_iMode = 0;
 }
 
 void BasicCamDlg::DoDataExchange(CDataExchange* pDX)
@@ -75,7 +85,11 @@ BEGIN_MESSAGE_MAP(BasicCamDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CLOSE()
-	ON_BN_CLICKED(IDOK, &BasicCamDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BTN_CAPTSTART, &BasicCamDlg::OnBnClickedCaptStart)
+	ON_BN_CLICKED(IDC_BTN_CAPTSTOP, &BasicCamDlg::OnBnClickedBtnCaptStop)
+	ON_BN_CLICKED(IDC_BTN_QUIT, &BasicCamDlg::OnBnClickedBtnQuit)
+	ON_BN_CLICKED(IDC_RADIO_MODECAPT, &BasicCamDlg::OnBnClickedRadioModeCapt)
+	ON_BN_CLICKED(IDC_RADIO_MODEREVIEW, &BasicCamDlg::OnBnClickedRadioModeReview)
 END_MESSAGE_MAP()
 
 
@@ -91,6 +105,14 @@ BOOL BasicCamDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	// 调整图像预览控件的大小和位置
+	CRect viewRect;
+	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&viewRect);
+	viewRect.SetRect(10, 10, 10 + 1024, 10 + 768);
+	GetDlgItem(IDC_STATIC_VIEW)->MoveWindow(viewRect);
+	// 控件状态初始化
+	((CButton *)GetDlgItem(IDC_RADIO_MODECAPT))->SetCheck(1);
+	
 	do
 	{
 		if (CameraSdkInit(1) != 0)
@@ -102,9 +124,9 @@ BOOL BasicCamDlg::OnInitDialog()
 			break;
 		}
 		return TRUE;
-		
+
 	} while (0);
-	
+
 	// 没有找到相机或初始化失败，退出程序
 	EndDialog(0);
 
@@ -158,8 +180,6 @@ BOOL BasicCamDlg::InitCamera()
 
 	//使相机进入工作模式，并且SDK开始接收相机图像
 	//if (CameraPlay(m_hCamera) != 0) TRACE("进入工作模式失败！\n");
-	m_bPause = FALSE;
-	//GetDlgItem(IDC_BUTTON_PREVIEW)->SetWindowText(gLanguage ? "暂停" : "Pause");
 	return TRUE;
 }
 
@@ -188,19 +208,54 @@ void BasicCamDlg::OnPaint()
 	}
 }
 
-//当用户拖动最小化窗口时系统调用此函数取得光标
-//显示。
+//当用户拖动最小化窗口时系统调用此函数取得光标显示。
 HCURSOR BasicCamDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void BasicCamDlg::OnBnClickedCaptStart()
+{
+	int errorCode;
+	if ((errorCode = CameraPlay(m_hCamera)) != CAMERA_STATUS_SUCCESS) //使相机进入工作模式，并且SDK开始接收相机图像
+	{
+		AfxMessageBox(_T("开始采集失败！ 错误代码：%d ！"), errorCode);
+		return;
+	}
+	m_bPause = FALSE;
+	GetDlgItem(IDC_BTN_CAPTSTART)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_CAPTSTOP)->EnableWindow(TRUE);
+}
 
+void BasicCamDlg::OnBnClickedBtnCaptStop()
+{
+	int errorCode;
+	if ((errorCode = CameraPause(m_hCamera)) != CAMERA_STATUS_SUCCESS) //使相机进入暂停模式
+	{
+		AfxMessageBox(_T("停止采集失败！ 错误代码：%d ！"), errorCode);
+		return;
+	}
+	m_bPause = TRUE;
+	GetDlgItem(IDC_BTN_CAPTSTART)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BTN_CAPTSTOP)->EnableWindow(FALSE);
+}
+
+void BasicCamDlg::OnCancel()
+{
+	AfxMessageBox(_T("请点击[退出程序]按钮关闭！"));
+	//OnClose();
+	//CDialogEx::OnCancel();
+}
 
 void BasicCamDlg::OnClose()
 {
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	TRACE(_T("反初始化相机\n"));
+	AfxMessageBox(_T("请点击[退出程序]按钮关闭！"));
+	//OnClose();
+	//CDialogEx::OnCancel();
+}
+
+void BasicCamDlg::OnBnClickedBtnQuit()
+{
 	if (m_hCamera > 0)
 	{
 		if (NULL != m_hDispThread)
@@ -208,32 +263,63 @@ void BasicCamDlg::OnClose()
 			//等待采集线程结束
 			m_bExit = TRUE;
 			::WaitForSingleObject(m_hDispThread, INFINITE);
+			TRACE(_T("采集线程已终止\n"));
 			CloseHandle(m_hDispThread);
 			m_hDispThread = NULL;
 		}
 
 		//反初始化相机。
+		TRACE(_T("相机卸载\n"));
 		CameraUnInit(m_hCamera);
 		m_hCamera = 0;
 	}
 
 	if (m_pFrameBuffer)
 	{
+		TRACE(_T("采集缓存清空\n"));
 		CameraAlignFree(m_pFrameBuffer);
 		m_pFrameBuffer = NULL;
 	}
-	CDialogEx::OnClose();
-}
-
-void BasicCamDlg::OnBnClickedOk()
-{
-	//使相机进入工作模式，并且SDK开始接收相机图像
-	if (CameraPlay(m_hCamera) != 0) TRACE("进入工作模式失败！\n");
-}
-
-
-void BasicCamDlg::OnCancel()
-{
-	OnClose();
 	CDialogEx::OnCancel();
+}
+
+void BasicCamDlg::OnBnClickedRadioModeCapt()
+{
+	if (m_iMode == 0)
+	{
+		AfxMessageBox(_T("已经处于“采集模式”！"));
+		return;
+	}
+	m_iMode = 0;
+	((CButton *)GetDlgItem(IDC_RADIO_MODECAPT))->SetCheck(1);
+	((CButton *)GetDlgItem(IDC_RADIO_MODEREVIEW))->SetCheck(0);
+	GetDlgItem(IDC_BTN_REVIEWSTART)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_REVIEWSTOP)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_OPENFILE)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_CAPTSTART)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BTN_CAPTSTOP)->EnableWindow(FALSE);
+}
+
+void BasicCamDlg::OnBnClickedRadioModeReview()
+{
+	if (m_iMode == 1)
+	{
+		AfxMessageBox(_T("已经处于“回放模式”！"));
+		return;
+	}
+	if (m_bPause == FALSE)
+	{
+		((CButton *)GetDlgItem(IDC_RADIO_MODECAPT))->SetCheck(1);
+		((CButton *)GetDlgItem(IDC_RADIO_MODEREVIEW))->SetCheck(0);
+		AfxMessageBox(_T("正在采集中，请先[停止采集]！"));
+		return;
+	}
+	m_iMode = 1;
+	((CButton *)GetDlgItem(IDC_RADIO_MODECAPT))->SetCheck(0);
+	((CButton *)GetDlgItem(IDC_RADIO_MODEREVIEW))->SetCheck(1);
+	GetDlgItem(IDC_BTN_CAPTSTART)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_CAPTSTOP)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_REVIEWSTART)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BTN_REVIEWSTOP)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_OPENFILE)->EnableWindow(TRUE);
 }
