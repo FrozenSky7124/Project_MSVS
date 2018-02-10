@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo07_BasicCam", "Demo07_BasicCam.vcxproj", "{50234F4E-D23D-4FA3-81B4-AF1992C52643}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo11_CameraAlpha", "Demo11_CameraAlpha.vcxproj", "{50234F4E-D23D-4FA3-81B4-AF1992C52643}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

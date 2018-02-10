@@ -1,10 +1,10 @@
 
-// Demo07_BasicCam.cpp : 定义应用程序的类行为。
+// Demo11_CameraAlpha.cpp : 定义应用程序的类行为。
 //
 
 #include "stdafx.h"
-#include "Demo07_BasicCam.h"
-#include "BasicCamDlg.h"
+#include "Demo11_CameraAlpha.h"
+#include "CameraAlphaDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -76,7 +76,7 @@ BOOL BasicCamApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-	BasicCamDlg dlg;
+	CameraAlphaDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)

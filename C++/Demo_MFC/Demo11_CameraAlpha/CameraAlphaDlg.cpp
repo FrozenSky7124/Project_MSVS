@@ -1,10 +1,10 @@
 
-// BasicCamDlg.cpp : 实现文件
+// CameraAlphaDlg.cpp : 实现文件
 //
 
 #include "stdafx.h"
-#include "Demo07_BasicCam.h"
-#include "BasicCamDlg.h"
+#include "Demo11_CameraAlpha.h"
+#include "CameraAlphaDlg.h"
 #include "afxdialogex.h"
 #include "malloc.h"
 
@@ -17,7 +17,7 @@
 UINT WINAPI uiDisplayThread(LPVOID lpParam)
 {
 	tSdkFrameHead 	sFrameInfo;
-	BasicCamDlg*	pThis = (BasicCamDlg*)lpParam;
+	CameraAlphaDlg*	pThis = (CameraAlphaDlg*)lpParam;
 //	BYTE*			pRgbBuffer;
 	BYTE*			pbyBuffer;
 	CString         fileName;
@@ -88,7 +88,7 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 // 回放线程
 UINT WINAPI uiReviewThread(LPVOID lpParam)
 {
-	BasicCamDlg*	pThis = (BasicCamDlg*)lpParam;
+	CameraAlphaDlg*	pThis = (CameraAlphaDlg*)lpParam;
 	CFileFind		imageFind;
 	BOOL			bFound;
 	CString			imagePath;
@@ -127,7 +127,7 @@ UINT WINAPI uiReviewThread(LPVOID lpParam)
 }
 
 // Config Save
-void BasicCamDlg::ConfigSave()
+void CameraAlphaDlg::ConfigSave()
 {
 	CFile fout;
 	SConfig tempConfig;
@@ -145,7 +145,7 @@ void BasicCamDlg::ConfigSave()
 }
 
 // Config Read
-void BasicCamDlg::ConfigRead()
+void CameraAlphaDlg::ConfigRead()
 {
 	CFile fin;
 	SConfig tempConfig;
@@ -164,9 +164,9 @@ void BasicCamDlg::ConfigRead()
 	SetDlgItemTextA(IDC_STATIC_SAVEPATH, m_csSaveFolder);
 }
 
-// BasicCamDlg 对话框
+// CameraAlphaDlg 对话框
 
-BasicCamDlg::BasicCamDlg(CWnd* pParent /*=NULL*/)
+CameraAlphaDlg::CameraAlphaDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_MAIN_DIALOG, pParent)
 {
 	m_hIcon				=	AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -185,35 +185,35 @@ BasicCamDlg::BasicCamDlg(CWnd* pParent /*=NULL*/)
 	m_bReviewEnd		=	TRUE;
 }
 
-void BasicCamDlg::DoDataExchange(CDataExchange* pDX)
+void CameraAlphaDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATIC_VIEW, m_cPreview);
 	DDX_Control(pDX, IDC_BTN_CONFIG, m_BtnConfig);
 }
 
-BEGIN_MESSAGE_MAP(BasicCamDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CameraAlphaDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CLOSE()
-	ON_BN_CLICKED(IDC_BTN_CAPTSTART, &BasicCamDlg::OnBnClickedCaptStart)
-	ON_BN_CLICKED(IDC_BTN_CAPTSTOP, &BasicCamDlg::OnBnClickedBtnCaptStop)
-	ON_BN_CLICKED(IDC_BTN_QUIT, &BasicCamDlg::OnBnClickedBtnQuit)
-	ON_BN_CLICKED(IDC_RADIO_MODECAPT, &BasicCamDlg::OnBnClickedRadioModeCapt)
-	ON_BN_CLICKED(IDC_RADIO_MODEREVIEW, &BasicCamDlg::OnBnClickedRadioModeReview)
-	ON_BN_CLICKED(IDC_BTN_BROWSE, &BasicCamDlg::OnBnClickedBtnBrowse)
-	ON_CBN_SELCHANGE(IDC_COMBO_SAVEFILE, &BasicCamDlg::OnSelchangeComboSavefile)
-	ON_BN_CLICKED(IDC_BTN_CONFIG, &BasicCamDlg::OnBnClickedBtnConfig)
-	ON_STN_CLICKED(IDC_STATIC_SAVEPATH, &BasicCamDlg::OnStnClickedStaticSavepath)
-	ON_BN_CLICKED(IDC_BTN_OPENFILE, &BasicCamDlg::OnBnClickedBtnOpenfile)
-	ON_BN_CLICKED(IDC_BTN_REVIEWSTART, &BasicCamDlg::OnBnClickedBtnReviewStart)
-	ON_BN_CLICKED(IDC_BTN_REVIEWSTOP, &BasicCamDlg::OnBnClickedBtnReviewstop)
+	ON_BN_CLICKED(IDC_BTN_CAPTSTART, &CameraAlphaDlg::OnBnClickedCaptStart)
+	ON_BN_CLICKED(IDC_BTN_CAPTSTOP, &CameraAlphaDlg::OnBnClickedBtnCaptStop)
+	ON_BN_CLICKED(IDC_BTN_QUIT, &CameraAlphaDlg::OnBnClickedBtnQuit)
+	ON_BN_CLICKED(IDC_RADIO_MODECAPT, &CameraAlphaDlg::OnBnClickedRadioModeCapt)
+	ON_BN_CLICKED(IDC_RADIO_MODEREVIEW, &CameraAlphaDlg::OnBnClickedRadioModeReview)
+	ON_BN_CLICKED(IDC_BTN_BROWSE, &CameraAlphaDlg::OnBnClickedBtnBrowse)
+	ON_CBN_SELCHANGE(IDC_COMBO_SAVEFILE, &CameraAlphaDlg::OnSelchangeComboSavefile)
+	ON_BN_CLICKED(IDC_BTN_CONFIG, &CameraAlphaDlg::OnBnClickedBtnConfig)
+	ON_STN_CLICKED(IDC_STATIC_SAVEPATH, &CameraAlphaDlg::OnStnClickedStaticSavepath)
+	ON_BN_CLICKED(IDC_BTN_OPENFILE, &CameraAlphaDlg::OnBnClickedBtnOpenfile)
+	ON_BN_CLICKED(IDC_BTN_REVIEWSTART, &CameraAlphaDlg::OnBnClickedBtnReviewStart)
+	ON_BN_CLICKED(IDC_BTN_REVIEWSTOP, &CameraAlphaDlg::OnBnClickedBtnReviewstop)
 END_MESSAGE_MAP()
 
 
-// BasicCamDlg 消息处理程序
+// CameraAlphaDlg 消息处理程序
 
-BOOL BasicCamDlg::OnInitDialog()
+BOOL CameraAlphaDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
@@ -265,7 +265,7 @@ BOOL BasicCamDlg::OnInitDialog()
 	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
-BOOL BasicCamDlg::InitCamera()
+BOOL CameraAlphaDlg::InitCamera()
 {
 	tSdkCameraDevInfo sCameraList[10];
 	INT iCameraNums;
@@ -322,7 +322,7 @@ BOOL BasicCamDlg::InitCamera()
 	return TRUE;
 }
 
-void BasicCamDlg::OnPaint()
+void CameraAlphaDlg::OnPaint()
 {
 	if (IsIconic())
 	{
@@ -348,12 +348,12 @@ void BasicCamDlg::OnPaint()
 }
 
 //当用户拖动最小化窗口时系统调用此函数取得光标显示。
-HCURSOR BasicCamDlg::OnQueryDragIcon()
+HCURSOR CameraAlphaDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void BasicCamDlg::OnBnClickedCaptStart()
+void CameraAlphaDlg::OnBnClickedCaptStart()
 {
 	int errorCode;
 	if ((errorCode = CameraPlay(m_hCamera)) != CAMERA_STATUS_SUCCESS) //使相机进入工作模式，并且SDK开始接收相机图像
@@ -366,7 +366,7 @@ void BasicCamDlg::OnBnClickedCaptStart()
 	GetDlgItem(IDC_BTN_CAPTSTOP)->EnableWindow(TRUE);
 }
 
-void BasicCamDlg::OnBnClickedBtnCaptStop()
+void CameraAlphaDlg::OnBnClickedBtnCaptStop()
 {
 	int errorCode;
 	if ((errorCode = CameraPause(m_hCamera)) != CAMERA_STATUS_SUCCESS) //使相机进入暂停模式
@@ -379,7 +379,7 @@ void BasicCamDlg::OnBnClickedBtnCaptStop()
 	GetDlgItem(IDC_BTN_CAPTSTOP)->EnableWindow(FALSE);
 }
 
-void BasicCamDlg::OnBnClickedRadioModeCapt()
+void CameraAlphaDlg::OnBnClickedRadioModeCapt()
 {
 	if (m_iMode == 0)
 	{
@@ -396,7 +396,7 @@ void BasicCamDlg::OnBnClickedRadioModeCapt()
 	GetDlgItem(IDC_BTN_CAPTSTOP)->EnableWindow(FALSE);
 }
 
-void BasicCamDlg::OnBnClickedRadioModeReview()
+void CameraAlphaDlg::OnBnClickedRadioModeReview()
 {
 	if (m_iMode == 1)
 	{
@@ -421,7 +421,7 @@ void BasicCamDlg::OnBnClickedRadioModeReview()
 }
 
 
-void BasicCamDlg::OnBnClickedBtnBrowse()
+void CameraAlphaDlg::OnBnClickedBtnBrowse()
 {
 	//typedef struct _browseinfo {
 	//	HWND hwndOwner;            // 父窗口句柄  
@@ -457,7 +457,7 @@ void BasicCamDlg::OnBnClickedBtnBrowse()
 	SetDlgItemTextA(IDC_STATIC_SAVEPATH, m_csSaveFolder);
 }
 
-void BasicCamDlg::OnStnClickedStaticSavepath()
+void CameraAlphaDlg::OnStnClickedStaticSavepath()
 {
 	if (m_csSaveFolder == CString(_T("CameraImages\\")))
 	{
@@ -472,7 +472,7 @@ void BasicCamDlg::OnStnClickedStaticSavepath()
 	}
 }
 
-void BasicCamDlg::OnSelchangeComboSavefile()
+void CameraAlphaDlg::OnSelchangeComboSavefile()
 {
 	int i = ((CComboBox *)GetDlgItem(IDC_COMBO_SAVEFILE))->GetCurSel();
 	if (0 == i)
@@ -481,26 +481,26 @@ void BasicCamDlg::OnSelchangeComboSavefile()
 		this->m_bSaveFile = FALSE;
 }
 
-void BasicCamDlg::OnBnClickedBtnConfig()
+void CameraAlphaDlg::OnBnClickedBtnConfig()
 {
 	CameraShowSettingPage(m_hCamera, TRUE);
 }
 
-void BasicCamDlg::OnCancel()
+void CameraAlphaDlg::OnCancel()
 {
 	AfxMessageBox(_T("请点击[退出程序]按钮关闭！"));
 	//OnClose();
 	//CDialogEx::OnCancel();
 }
 
-void BasicCamDlg::OnClose()
+void CameraAlphaDlg::OnClose()
 {
 	AfxMessageBox(_T("请点击[退出程序]按钮关闭！"));
 	//OnClose();
 	//CDialogEx::OnCancel();
 }
 
-void BasicCamDlg::OnBnClickedBtnQuit()
+void CameraAlphaDlg::OnBnClickedBtnQuit()
 {
 	ConfigSave(); //保存配置
 	if (m_hCamera > 0)
@@ -530,7 +530,7 @@ void BasicCamDlg::OnBnClickedBtnQuit()
 	CDialogEx::OnCancel();
 }
 
-void BasicCamDlg::OnBnClickedBtnOpenfile()
+void CameraAlphaDlg::OnBnClickedBtnOpenfile()
 {
 	TCHAR acDir[MAX_PATH] = { 0 };
 	BROWSEINFO browInfo;
@@ -555,7 +555,7 @@ void BasicCamDlg::OnBnClickedBtnOpenfile()
 }
 
 
-void BasicCamDlg::OnBnClickedBtnReviewStart()
+void CameraAlphaDlg::OnBnClickedBtnReviewStart()
 {
 	if (m_csReviewFolder == CString(_T("")))
 	{
@@ -571,7 +571,7 @@ void BasicCamDlg::OnBnClickedBtnReviewStart()
 }
 
 
-void BasicCamDlg::OnBnClickedBtnReviewstop()
+void CameraAlphaDlg::OnBnClickedBtnReviewstop()
 {
 	m_bReviewEnd = TRUE;
 }

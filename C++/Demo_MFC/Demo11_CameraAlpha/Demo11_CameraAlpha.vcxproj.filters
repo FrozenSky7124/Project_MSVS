@@ -18,12 +18,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Demo07_BasicCam.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicCamDlg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -33,33 +27,40 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Demo11_CameraAlpha.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraAlphaDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Demo07_BasicCam.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicCamDlg.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Demo11_CameraAlpha.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraAlphaDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Demo07_BasicCam.rc">
+    <ResourceCompile Include="Demo11_CameraAlpha.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Demo07_BasicCam.rc2">
+    <None Include="res\Demo11_CameraAlpha.rc2">
       <Filter>资源文件</Filter>
     </None>
     <None Include="res\config.ico">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Demo07_BasicCam.ico">
+    <Image Include="res\Demo11_CameraAlpha.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

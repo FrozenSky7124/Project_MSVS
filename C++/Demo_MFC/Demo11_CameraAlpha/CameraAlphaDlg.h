@@ -1,5 +1,5 @@
 
-// BasicCamDlg.h : 头文件
+// CameraAlphaDlg.h : 头文件
 //
 
 #pragma once
@@ -14,12 +14,12 @@
 #pragma comment(lib, "MVCAMSDK.lib")
 #endif
 
-// BasicCamDlg 对话框
-class BasicCamDlg : public CDialogEx
+// CameraAlphaDlg 对话框
+class CameraAlphaDlg : public CDialogEx
 {
 // 构造
 public:
-	BasicCamDlg(CWnd* pParent = NULL);	// 标准构造函数
+	CameraAlphaDlg(CWnd* pParent = NULL);	// 标准构造函数
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
