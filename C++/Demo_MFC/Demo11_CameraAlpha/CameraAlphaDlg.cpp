@@ -7,6 +7,7 @@
 #include "CameraAlphaDlg.h"
 #include "afxdialogex.h"
 #include "malloc.h"
+#include "Dib_Ex.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,6 +26,9 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 	int				statusCode;
 	CString			strTime;
 	CTime			curTime;
+	CRect			tRect;
+	
+	pThis->GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&tRect);
 
 	//先清0
 	memset(&sFrameInfo, 0, sizeof(tSdkFrameHead));
@@ -54,9 +58,27 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 			if (statusCode == CAMERA_STATUS_SUCCESS)
 			{
 				//调用SDK封装好的显示接口来显示图像,您也可以将m_pFrameBuffer中的RGB数据通过其他方式显示，比如directX,OpengGL,等方式。
-				CameraImageOverlay(pThis->m_hCamera, pThis->m_pFrameBuffer, &sFrameInfo);
-				CameraDisplayRGB24(pThis->m_hCamera, pThis->m_pFrameBuffer, &sFrameInfo);
+				//CameraImageOverlay(pThis->m_hCamera, pThis->m_pFrameBuffer, &sFrameInfo);
+				//CameraDisplayRGB24(pThis->m_hCamera, pThis->m_pFrameBuffer, &sFrameInfo);
 
+				//调用CDib类载入缓存数据并显示图像
+				CDib cDibImage;
+				cDibImage.LoadFromBuffer(pThis->m_pFrameBuffer, sFrameInfo.iWidth, sFrameInfo.iHeight, 8);
+				cDibImage.Draw(pThis->m_pCDC, CPoint(0, 0), CSize(tRect.Width(), tRect.Height()));
+
+				if (pThis->m_bSaveFile == TRUE)
+				{
+					curTime = CTime::GetCurrentTime();
+					strTime.Format(_T("_%d%02d%02d%02d%02d%02d_"), curTime.GetYear(), curTime.GetMonth(), curTime.GetDay(), curTime.GetHour(), curTime.GetMinute(), curTime.GetSecond());
+					fileName.Format(_T("%05d.BMP"), iSaveCounts++);
+					fileName = pThis->m_csSaveFolder + _T("Image") + strTime + fileName;
+					//保存为24位BMP文件
+					//CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP, 100);
+					//保存为8位BMP文件
+					//CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP_8BIT, 100);
+					cDibImage.SaveToFile(fileName.GetBuffer(1));
+					fileName.ReleaseBuffer();
+				}
 			}
 			pThis->m_iDispFrameNum++;
 
@@ -65,19 +87,6 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 			CameraReleaseImageBuffer(pThis->m_hCamera, pbyBuffer);
 
 			memcpy(&pThis->m_sFrInfo, &sFrameInfo, sizeof(tSdkFrameHead));
-
-			if (pThis->m_bSaveFile == TRUE)
-			{
-				curTime = CTime::GetCurrentTime();
-				strTime.Format(_T("_%d%02d%02d%02d%02d%02d_"), curTime.GetYear(), curTime.GetMonth(), curTime.GetDay(), curTime.GetHour(), curTime.GetMinute(), curTime.GetSecond());
-				fileName.Format(_T("%05d.BMP"), iSaveCounts++);
-				fileName = pThis->m_csSaveFolder + _T("Image") + strTime + fileName;
-				//保存为24位BMP文件
-				//CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP, 100);
-				//保存为8位BMP文件
-				CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP_8BIT, 100);
-				fileName.ReleaseBuffer();
-			}
 		}
 	}
 	_endthreadex(0);
@@ -228,6 +237,8 @@ BOOL CameraAlphaDlg::OnInitDialog()
 	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&viewRect);
 	viewRect.SetRect(10, 10, 10 + 1024, 10 + 768);
 	GetDlgItem(IDC_STATIC_VIEW)->MoveWindow(viewRect);
+
+	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
 	
 	// 控件状态初始化
 	HICON m_IconBtn = AfxGetApp()->LoadIcon(IDI_ICON_CONFIG);
