@@ -1,12 +1,15 @@
 //======================================================================
-// 文件： Dib.cpp
+// 文件： Dib_Ex.cpp
 // 内容： 设备无关位图类-源文件
-// 功能： （1）位图的加载与保存；
+// 功能： 
+//        （1）位图的加载与保存；
 //        （2）位图信息的获取；
 //        （3）位图数据的获取；
 //        （3）位图的显示；
 //        （4）位图的转换；
 //        （5）位图相关判断；
+// 新增功能： 
+//        （1）从BYTE*类型的相机原始数据指针加载图像
 //======================================================================
 
 #include "StdAfx.h"
@@ -30,6 +33,7 @@ CDib::CDib(void)
     m_hPalette = NULL;
     m_bHasRgbQuad = FALSE;
     m_bValid = FALSE;
+	m_lpRgbQuad_Mem = NULL;
 }
 
 //=======================================================
@@ -151,6 +155,9 @@ BOOL CDib::LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT 
 	if (pBmpDataBuffer == NULL)
 		return FALSE;
 	
+	if (iBitCount != 8)
+		return FALSE;
+
 	// 计算8位BMP每行的字节数
 	UINT uBmpLineByte = (lWidth * (iBitCount / 8) + 3) / 4 * 4;
 	DWORD dwBmpDataSize = uBmpLineByte * lHeight;
@@ -159,22 +166,29 @@ BOOL CDib::LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT 
 	DWORD dwBmpSize = sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256 + dwBmpDataSize;
 
 	// 设置BMP文件头
-	m_lpBmpFileHeader = (LPBITMAPFILEHEADER) new BYTE[sizeof(BITMAPFILEHEADER)];
-	memset(m_lpBmpFileHeader, 0, sizeof(BITMAPFILEHEADER));
+	if (m_lpBmpFileHeader == NULL)
+	{
+		m_lpBmpFileHeader = (LPBITMAPFILEHEADER) new BYTE[sizeof(BITMAPFILEHEADER)];
+		memset(m_lpBmpFileHeader, 0, sizeof(BITMAPFILEHEADER));
+	}
 	m_lpBmpFileHeader->bfType = 0x4d42;
 	m_lpBmpFileHeader->bfSize = sizeof(BITMAPFILEHEADER) + dwBmpSize;
 	m_lpBmpFileHeader->bfReserved1 = 0;
 	m_lpBmpFileHeader->bfReserved2 = 0;
 	m_lpBmpFileHeader->bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256;
+	
 
-	//
-	m_lpDib = (LPBYTE) new BYTE[dwBmpSize];
-	memset(m_lpDib, 0, dwBmpSize);
+	// 为BMP数据区分配空间
+	if (m_lpDib == NULL)
+	{
+		m_lpDib = (LPBYTE) new BYTE[dwBmpSize];
+		memset(m_lpDib, 0, dwBmpSize);
+	}
 
-	//
+	// 设置BMP信息
 	m_lpBmpInfo = (LPBITMAPINFO)m_lpDib;
 
-	//
+	// 设置BMP信息头
 	m_lpBmpInfoHeader = (LPBITMAPINFOHEADER)m_lpDib;
 	m_lpBmpInfoHeader->biBitCount = 8;
 	m_lpBmpInfoHeader->biClrImportant = 0;
@@ -188,19 +202,11 @@ BOOL CDib::LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT 
 	m_lpBmpInfoHeader->biXPelsPerMeter = 2834;
 	m_lpBmpInfoHeader->biYPelsPerMeter = 2834;
 
-	//
+	// 设置BMP颜色表
 	m_lpRgbQuad = (LPRGBQUAD)(m_lpDib + sizeof(BITMAPINFOHEADER));
-	for (int i = 0; i < 256; i++)
-	{
-		m_lpRgbQuad = (LPRGBQUAD)(m_lpRgbQuad + 1);
-		m_lpRgbQuad->rgbBlue = i;
-		m_lpRgbQuad->rgbGreen = i;
-		m_lpRgbQuad->rgbRed = i;
-		m_lpRgbQuad->rgbReserved = 0;
-	}
-	m_lpRgbQuad = (LPRGBQUAD)(m_lpDib + sizeof(BITMAPINFOHEADER));
+	memcpy(m_lpRgbQuad, m_lpRgbQuad_Mem, m_iClrUse * sizeof(RGBQUAD));
 
-	//
+	// 设置BMP图像数据
 	m_lpData = (LPBYTE)(m_lpDib + sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256);
 	memcpy(m_lpData, pBmpDataBuffer, dwBmpDataSize);
 
@@ -770,6 +776,16 @@ void CDib::Empty(BOOL bFlag)
         strcpy(m_fileName, "");
     }      
 
+	// 释放预构建颜色表内存
+	if (m_lpRgbQuad_Mem != NULL)
+	{
+		for (UINT i = 0; i < m_iClrUse; i++)
+		{
+			delete[] (m_lpRgbQuad_Mem + i);
+		}
+		m_lpRgbQuad_Mem = NULL;
+	}
+
     // 释放位图文件头指针空间
     if(m_lpBmpFileHeader != NULL)
     {
@@ -802,3 +818,33 @@ void CDib::Empty(BOOL bFlag)
     m_bValid = FALSE;
 
 }  
+
+//=======================================================
+// 函数功能： Ex:预构建指定的颜色表内存空间
+// 输入参数： 无
+// 返回值：   TRUE:成功 FALSE:失败
+//=======================================================
+BOOL CDib::MakeRgbQuadMem(WORD wBitCount)
+{
+	if (wBitCount == 8)
+	{
+		// 为预构建的颜色表分配空间
+		m_lpRgbQuad_Mem = (LPRGBQUAD)new BYTE[sizeof(RGBQUAD) * 256];
+		if (!m_lpRgbQuad_Mem) return FALSE;
+
+		// 设置预构建颜色表的颜色数
+		m_iClrUse = 256;
+
+		for (int i = 0; i < 256; i++)
+		{
+			LPRGBQUAD lpTempRgbQuad = m_lpRgbQuad_Mem + i;
+			lpTempRgbQuad->rgbBlue = i;
+			lpTempRgbQuad->rgbGreen = i;
+			lpTempRgbQuad->rgbRed = i;
+			lpTempRgbQuad->rgbReserved = 0;
+		}
+		
+		return TRUE;
+	}
+	return FALSE;
+}

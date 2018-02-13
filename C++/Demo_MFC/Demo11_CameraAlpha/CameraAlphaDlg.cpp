@@ -17,18 +17,19 @@
 /*图像抓取线程，主动调用SDK接口函数获取图像*/
 UINT WINAPI uiDisplayThread(LPVOID lpParam)
 {
-	tSdkFrameHead 	sFrameInfo;
+	tSdkFrameHead		sFrameInfo;
 	CameraAlphaDlg*	pThis = (CameraAlphaDlg*)lpParam;
-//	BYTE*			pRgbBuffer;
 	BYTE*			pbyBuffer;
-	CString         fileName;
+	CString			fileName;
 	int				iSaveCounts = 0;
 	int				statusCode;
 	CString			strTime;
 	CTime			curTime;
 	CRect			tRect;
+	CDib			cDibImage;
 	
 	pThis->GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&tRect);
+	cDibImage.MakeRgbQuadMem(8);
 
 	//先清0
 	memset(&sFrameInfo, 0, sizeof(tSdkFrameHead));
@@ -62,7 +63,7 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 				//CameraDisplayRGB24(pThis->m_hCamera, pThis->m_pFrameBuffer, &sFrameInfo);
 
 				//调用CDib类载入缓存数据并显示图像
-				CDib cDibImage;
+				
 				cDibImage.LoadFromBuffer(pThis->m_pFrameBuffer, sFrameInfo.iWidth, sFrameInfo.iHeight, 8);
 				cDibImage.Draw(pThis->m_pCDC, CPoint(0, 0), CSize(tRect.Width(), tRect.Height()));
 
@@ -72,11 +73,12 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 					strTime.Format(_T("_%d%02d%02d%02d%02d%02d_"), curTime.GetYear(), curTime.GetMonth(), curTime.GetDay(), curTime.GetHour(), curTime.GetMinute(), curTime.GetSecond());
 					fileName.Format(_T("%05d.BMP"), iSaveCounts++);
 					fileName = pThis->m_csSaveFolder + _T("Image") + strTime + fileName;
-					//保存为24位BMP文件
+					// 保存为24位BMP文件
 					//CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP, 100);
-					//保存为8位BMP文件
-					//CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP_8BIT, 100);
-					cDibImage.SaveToFile(fileName.GetBuffer(1));
+					// 保存为8位BMP文件
+					CameraSaveImage(pThis->m_hCamera, fileName.GetBuffer(1), pThis->m_pFrameBuffer, &sFrameInfo, FILE_BMP_8BIT, 100);
+					// CDib类 保存图像
+					//cDibImage.SaveToFile(fileName.GetBuffer(1));
 					fileName.ReleaseBuffer();
 				}
 			}

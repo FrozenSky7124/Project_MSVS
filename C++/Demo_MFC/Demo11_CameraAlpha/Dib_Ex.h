@@ -1,12 +1,15 @@
 //======================================================================
-// 文件： Dib.h
+// 文件： Dib_Ex.h
 // 内容： 设备无关位图类-头文件
-// 功能： （1）位图的加载与保存；
+// 功能： 
+//        （1）位图的加载与保存；
 //        （2）位图信息的获取；
 //        （3）位图数据的获取；
 //        （3）位图的显示；
 //        （4）位图的转换；
 //        （5）位图相关判断；
+// 新增功能： 
+//        （1）从BYTE*类型的相机原始数据指针加载图像
 //======================================================================
 
 #pragma once
@@ -25,7 +28,7 @@ public:
     // 从文件加载位图
     BOOL LoadFromFile(LPCTSTR lpszPath);
 
-	// 从外部数据加载位图
+	// Ex:从外部数据加载位图
 	BOOL LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT iBitCount = 8);
 
     // 将位图保存到文件
@@ -79,6 +82,9 @@ public:
     // 判断位图是否有效
     BOOL IsValid();  
 
+	// Ex:预构建指定的颜色表内存空间
+	BOOL MakeRgbQuadMem(WORD wBitCount);
+
 protected:
     // 计算位图颜色表长度
     DWORD CalcRgbQuadLength();
@@ -119,4 +125,10 @@ private:
 
     // 位图是否有效
     BOOL m_bValid;
+
+	// Ex:预构建的位图颜色表颜色数
+	UINT m_iClrUse;
+
+	// Ex:预构建的位图颜色表内存区域的指针
+	LPRGBQUAD m_lpRgbQuad_Mem;
 };
