@@ -79,9 +79,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\CamTest\VC++\Include\;$(IncludePath)</IncludePath>
+    <IncludePath>D:\CamDemo\VC++\Include\;$(IncludePath)</IncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>D:\CamTest\VC++\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\CamDemo\SDK;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
