@@ -565,6 +565,22 @@ void CameraAlphaDlg::OnBnClickedBtnOpenfile()
 	if (!::SHGetPathFromIDList(lpidlBrowse, acDir)) return;
 
 	m_csReviewFolder = acDir;
+
+	// 遍历回放目录，存储回放文件的文件名信息
+	CFileFind tFileFind;
+	BOOL bFound;
+	UINT iFileCount = 0;
+
+	bFound = tFileFind.FindFile(m_csReviewFolder + _T("\\*.BMP"));
+	while (bFound)
+	{
+		bFound = tFileFind.FindNextFile(); //首次执行选择搜索到的第一个文件，以后执行将选择下一个文件
+		if (tFileFind.IsDots()) continue; //过滤.与..文件
+		if (tFileFind.IsDirectory()) continue; //过滤文件夹
+		iFileCount++;
+	}
+
+	TRACE(_T("Find: %d files.\n"), iFileCount);
 }
 
 
