@@ -17,7 +17,7 @@
 /*图像抓取线程，主动调用SDK接口函数获取图像*/
 UINT WINAPI uiDisplayThread(LPVOID lpParam)
 {
-	tSdkFrameHead		sFrameInfo;
+	tSdkFrameHead	sFrameInfo;
 	CameraAlphaDlg*	pThis = (CameraAlphaDlg*)lpParam;
 	BYTE*			pbyBuffer;
 	CString			fileName;
@@ -100,39 +100,26 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 UINT WINAPI uiReviewThread(LPVOID lpParam)
 {
 	CameraAlphaDlg*	pThis = (CameraAlphaDlg*)lpParam;
-	CFileFind		imageFind;
-	BOOL			bFound;
 	CString			imagePath;
 	CWnd*			pWnd = pThis->GetDlgItem(IDC_STATIC_VIEW);
 	CDC*			pDC = pWnd->GetDC();
-	HDC				hDC = pDC->m_hDC;
 	CRect			rectPicCtrl;
-	CImage			tempImage;
+	LONG			lCount;
+	CDib			cDibImage;
 
+	lCount = 0;
 	pWnd->GetClientRect(&rectPicCtrl);
-	bFound = imageFind.FindFile(pThis->m_csReviewFolder + _T("\\*.BMP"));
-	while (bFound && !pThis->m_bReviewEnd)
+	for (; lCount < pThis->m_lReviewFileCount; lCount++)
 	{
-		bFound = imageFind.FindNextFile(); //首次执行选择搜索到的第一个文件，以后执行将选择下一个文件
-		if (imageFind.IsDots()) continue; //过滤.与..文件
-		if (imageFind.IsDirectory()) continue; //过滤文件夹
-		
-		imagePath = imageFind.GetFilePath();
-		//显示图像
-		TRACE(imagePath + _T("\n"));
-		tempImage.Load(imagePath);
-		::SetStretchBltMode(hDC, HALFTONE);
-		::SetBrushOrgEx(hDC, 0, 0, NULL);
-		tempImage.Draw(hDC, rectPicCtrl);
-		tempImage.Destroy();
+		imagePath = pThis->m_csReviewFolder + _T("\\") + *(*(pThis->m_pReviewFileName + lCount));
+		cDibImage.LoadFromFile(imagePath);
+		cDibImage.Draw(pDC, CPoint(10, 10), CSize(1024, 768));
 		Sleep(40);
 	}
-	ReleaseDC(*pWnd, hDC);
-	imageFind.Close();
 	pThis->m_bReviewEnd = TRUE;
 	pThis->GetDlgItem(IDC_BTN_REVIEWSTART)->EnableWindow(TRUE);
 	pThis->GetDlgItem(IDC_BTN_REVIEWSTOP)->EnableWindow(FALSE);
-	TRACE(_T("图像回放线程退出!"));
+	TRACE(_T("图像回放线程退出!\n"));
 	_endthreadex(0);	
 	return 0;
 }
@@ -194,6 +181,8 @@ CameraAlphaDlg::CameraAlphaDlg(CWnd* pParent /*=NULL*/)
 	m_tIDReviewThread	=	NULL;
 	m_hReviewThread		=	NULL;
 	m_bReviewEnd		=	TRUE;
+	m_pReviewFileName	=	NULL;
+	m_lReviewFileCount	=	0;
 }
 
 void CameraAlphaDlg::DoDataExchange(CDataExchange* pDX)
@@ -516,6 +505,18 @@ void CameraAlphaDlg::OnClose()
 void CameraAlphaDlg::OnBnClickedBtnQuit()
 {
 	ConfigSave(); //保存配置
+
+	// 清理回放模块数据
+	if (m_pReviewFileName != NULL)
+	{
+		for (LONG l = 0; l < m_lReviewFileCount; l++)
+		{
+			delete *(m_pReviewFileName + l);
+		}
+		delete[] m_pReviewFileName;
+		m_pReviewFileName = NULL;
+	}
+	
 	if (m_hCamera > 0)
 	{
 		if (NULL != m_hDispThread)
@@ -571,6 +572,7 @@ void CameraAlphaDlg::OnBnClickedBtnOpenfile()
 	BOOL bFound;
 	UINT iFileCount = 0;
 
+	// 首次搜索，确定文件数量
 	bFound = tFileFind.FindFile(m_csReviewFolder + _T("\\*.BMP"));
 	while (bFound)
 	{
@@ -579,8 +581,31 @@ void CameraAlphaDlg::OnBnClickedBtnOpenfile()
 		if (tFileFind.IsDirectory()) continue; //过滤文件夹
 		iFileCount++;
 	}
+	m_lReviewFileCount = iFileCount;
+	tFileFind.Close();
 
-	TRACE(_T("Find: %d files.\n"), iFileCount);
+	// 创建文件名指针存储空间
+	m_pReviewFileName = new CString*[iFileCount];
+
+	// 再次搜索，存入文件名
+	iFileCount = 0;
+	bFound = tFileFind.FindFile(m_csReviewFolder + _T("\\*.BMP"));
+	while (bFound)
+	{
+		bFound = tFileFind.FindNextFile(); //首次执行选择搜索到的第一个文件，以后执行将选择下一个文件
+		if (tFileFind.IsDots()) continue; //过滤.与..文件
+		if (tFileFind.IsDirectory()) continue; //过滤文件夹
+		CString* tempFileName = new CString;
+		*tempFileName = tFileFind.GetFileName();
+		*(m_pReviewFileName + iFileCount) = tempFileName;
+		iFileCount++;
+	}
+	
+	for (int iTemp = 0; iTemp < m_lReviewFileCount; iTemp++)
+	{
+		TRACE(_T("File_%d: %s.\n"), iTemp, *(*(m_pReviewFileName + iTemp)));
+	}
+	TRACE(_T("Find: %d files In %s.\n"), m_lReviewFileCount, m_csReviewFolder);
 }
 
 

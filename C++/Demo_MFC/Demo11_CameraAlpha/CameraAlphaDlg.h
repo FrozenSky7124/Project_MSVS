@@ -83,7 +83,8 @@ public:
 	BOOL			m_bSaveFile;			//是否保存图像
 	CString			m_csSaveFolder;		//用于存储图像保存文件夹位置
 	CString			m_csReviewFolder;		//用于存储回放文件夹位置
-	CString*		m_pReviewFileName;		//用于存储回放文件的文件名数组的指针
+	LONG			m_lReviewFileCount; //用于存储回放文件数量
+	CString**		m_pReviewFileName;		//用于存储回放文件的文件名数组的指针
 	BOOL			InitCamera();			//相机初始化函数
 
 	int				m_iMode;				//模式参数 0：采集模式 1：回放模式
