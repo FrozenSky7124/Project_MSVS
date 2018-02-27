@@ -107,16 +107,25 @@ UINT WINAPI uiReviewThread(LPVOID lpParam)
 	LONG			lCount;
 	CDib			cDibImage;
 
-	lCount = 0;
+	lCount = pThis->m_lCurReview;
 	pWnd->GetClientRect(&rectPicCtrl);
 	for (; lCount < pThis->m_lReviewFileCount; lCount++)
 	{
+		(pThis->m_lCurReview)++;
+		((CScrollBar*)(pThis->GetDlgItem(IDC_SCROLLBAR_REVCTRL)))->SetScrollPos(lCount + 1);
 		imagePath = pThis->m_csReviewFolder + _T("\\") + *(*(pThis->m_pReviewFileName + lCount));
 		cDibImage.LoadFromFile(imagePath);
-		cDibImage.Draw(pDC, CPoint(10, 10), CSize(1024, 768));
+		cDibImage.Draw(pDC, CPoint(0, 0), CSize(1024, 768));
 		Sleep(40);
+		if (pThis->m_bReviewEnd)
+			break;
 	}
 	pThis->m_bReviewEnd = TRUE;
+	if (pThis->m_lCurReview >= pThis->m_lReviewFileCount - 1)
+	{
+		pThis->m_lCurReview = 0;
+		((CScrollBar*)(pThis->GetDlgItem(IDC_SCROLLBAR_REVCTRL)))->SetScrollPos(1);
+	}
 	pThis->GetDlgItem(IDC_BTN_REVIEWSTART)->EnableWindow(TRUE);
 	pThis->GetDlgItem(IDC_BTN_REVIEWSTOP)->EnableWindow(FALSE);
 	TRACE(_T("图像回放线程退出!\n"));
@@ -183,6 +192,7 @@ CameraAlphaDlg::CameraAlphaDlg(CWnd* pParent /*=NULL*/)
 	m_bReviewEnd		=	TRUE;
 	m_pReviewFileName	=	NULL;
 	m_lReviewFileCount	=	0;
+	m_lCurReview		=	0;
 }
 
 void CameraAlphaDlg::DoDataExchange(CDataExchange* pDX)
@@ -208,6 +218,7 @@ BEGIN_MESSAGE_MAP(CameraAlphaDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_OPENFILE, &CameraAlphaDlg::OnBnClickedBtnOpenfile)
 	ON_BN_CLICKED(IDC_BTN_REVIEWSTART, &CameraAlphaDlg::OnBnClickedBtnReviewStart)
 	ON_BN_CLICKED(IDC_BTN_REVIEWSTOP, &CameraAlphaDlg::OnBnClickedBtnReviewstop)
+	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
 
@@ -570,7 +581,7 @@ void CameraAlphaDlg::OnBnClickedBtnOpenfile()
 	// 遍历回放目录，存储回放文件的文件名信息
 	CFileFind tFileFind;
 	BOOL bFound;
-	UINT iFileCount = 0;
+	LONG iFileCount = 0;
 
 	// 首次搜索，确定文件数量
 	bFound = tFileFind.FindFile(m_csReviewFolder + _T("\\*.BMP"));
@@ -586,6 +597,10 @@ void CameraAlphaDlg::OnBnClickedBtnOpenfile()
 
 	// 创建文件名指针存储空间
 	m_pReviewFileName = new CString*[iFileCount];
+
+	// 滚动条初始化
+	CScrollBar* pCScrollBar = (CScrollBar*)GetDlgItem(IDC_SCROLLBAR_REVCTRL);
+	pCScrollBar->SetScrollRange(1, m_lReviewFileCount);
 
 	// 再次搜索，存入文件名
 	iFileCount = 0;
@@ -628,4 +643,33 @@ void CameraAlphaDlg::OnBnClickedBtnReviewStart()
 void CameraAlphaDlg::OnBnClickedBtnReviewstop()
 {
 	m_bReviewEnd = TRUE;
+}
+
+
+void CameraAlphaDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	LONG TempPos = pScrollBar->GetScrollPos();
+	CString imagePath;
+	CDib cDibImage;
+	CWnd* pWnd = GetDlgItem(IDC_STATIC_VIEW);
+	CDC* pDC = pWnd->GetDC();
+
+	switch (nSBCode)
+	{
+	case SB_THUMBPOSITION:
+		pScrollBar->SetScrollPos(nPos);
+		GetDlgItem(IDC_STATIC_CURREV)->SetWindowTextA(*(*(m_pReviewFileName + nPos - 1)));
+		m_lCurReview = nPos - 1;
+
+		//显示图像
+		imagePath = m_csReviewFolder + _T("\\") + *(*(m_pReviewFileName + m_lCurReview));
+		cDibImage.LoadFromFile(imagePath);
+		cDibImage.Draw(pDC, CPoint(0, 0), CSize(1024, 768));
+
+		break;
+	default:
+		break;
+	}
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
