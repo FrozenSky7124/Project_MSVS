@@ -114,6 +114,7 @@ UINT WINAPI uiReviewThread(LPVOID lpParam)
 		(pThis->m_lCurReview)++;
 		((CScrollBar*)(pThis->GetDlgItem(IDC_SCROLLBAR_REVCTRL)))->SetScrollPos(lCount + 1);
 		imagePath = pThis->m_csReviewFolder + _T("\\") + *(*(pThis->m_pReviewFileName + lCount));
+		(pThis->GetDlgItem(IDC_STATIC_CURREV))->SetWindowTextA(*(*(pThis->m_pReviewFileName + lCount)));
 		cDibImage.LoadFromFile(imagePath);
 		cDibImage.Draw(pDC, CPoint(0, 0), CSize(1024, 768));
 		Sleep(40);
@@ -125,6 +126,7 @@ UINT WINAPI uiReviewThread(LPVOID lpParam)
 	{
 		pThis->m_lCurReview = 0;
 		((CScrollBar*)(pThis->GetDlgItem(IDC_SCROLLBAR_REVCTRL)))->SetScrollPos(1);
+		(pThis->GetDlgItem(IDC_STATIC_CURREV))->SetWindowTextA(*(*(pThis->m_pReviewFileName + pThis->m_lCurReview)));
 	}
 	pThis->GetDlgItem(IDC_BTN_REVIEWSTART)->EnableWindow(TRUE);
 	pThis->GetDlgItem(IDC_BTN_REVIEWSTOP)->EnableWindow(FALSE);
@@ -266,6 +268,8 @@ BOOL CameraAlphaDlg::OnInitDialog()
 			TRACE(_T("初始化SDK成功！\n"));
 		if (!InitCamera())
 		{
+			// 关闭相机校验，调试模式。
+			return TRUE;
 			break;
 		}
 		return TRUE;
@@ -595,31 +599,43 @@ void CameraAlphaDlg::OnBnClickedBtnOpenfile()
 	m_lReviewFileCount = iFileCount;
 	tFileFind.Close();
 
-	// 创建文件名指针存储空间
-	m_pReviewFileName = new CString*[iFileCount];
-
-	// 滚动条初始化
-	CScrollBar* pCScrollBar = (CScrollBar*)GetDlgItem(IDC_SCROLLBAR_REVCTRL);
-	pCScrollBar->SetScrollRange(1, m_lReviewFileCount);
-
-	// 再次搜索，存入文件名
-	iFileCount = 0;
-	bFound = tFileFind.FindFile(m_csReviewFolder + _T("\\*.BMP"));
-	while (bFound)
+	
+	if (m_lReviewFileCount != 0)
 	{
-		bFound = tFileFind.FindNextFile(); //首次执行选择搜索到的第一个文件，以后执行将选择下一个文件
-		if (tFileFind.IsDots()) continue; //过滤.与..文件
-		if (tFileFind.IsDirectory()) continue; //过滤文件夹
-		CString* tempFileName = new CString;
-		*tempFileName = tFileFind.GetFileName();
-		*(m_pReviewFileName + iFileCount) = tempFileName;
-		iFileCount++;
+		// 创建文件名指针存储空间
+		m_pReviewFileName = new CString*[iFileCount];
+
+		// 滚动条初始化
+		CScrollBar* pCScrollBar = (CScrollBar*)GetDlgItem(IDC_SCROLLBAR_REVCTRL);
+		pCScrollBar->EnableWindow(TRUE);
+		pCScrollBar->SetScrollRange(1, m_lReviewFileCount);
+
+		// 再次搜索，存入文件名
+		iFileCount = 0;
+		bFound = tFileFind.FindFile(m_csReviewFolder + _T("\\*.BMP"));
+		while (bFound)
+		{
+			bFound = tFileFind.FindNextFile(); //首次执行选择搜索到的第一个文件，以后执行将选择下一个文件
+			if (tFileFind.IsDots()) continue; //过滤.与..文件
+			if (tFileFind.IsDirectory()) continue; //过滤文件夹
+			CString* tempFileName = new CString;
+			*tempFileName = tFileFind.GetFileName();
+			*(m_pReviewFileName + iFileCount) = tempFileName;
+			iFileCount++;
+		}
+
+		#ifdef _DEBUG
+		for (int iTemp = 0; iTemp < m_lReviewFileCount; iTemp++)
+		{
+			TRACE(_T("File_%d: %s.\n"), iTemp, *(*(m_pReviewFileName + iTemp)));
+		}
+		#endif
+	}
+	else
+	{
+		MessageBox(_T("未找到回放文件！"), _T("错误"), MB_ICONERROR);
 	}
 	
-	for (int iTemp = 0; iTemp < m_lReviewFileCount; iTemp++)
-	{
-		TRACE(_T("File_%d: %s.\n"), iTemp, *(*(m_pReviewFileName + iTemp)));
-	}
 	TRACE(_T("Find: %d files In %s.\n"), m_lReviewFileCount, m_csReviewFolder);
 }
 
@@ -645,7 +661,7 @@ void CameraAlphaDlg::OnBnClickedBtnReviewstop()
 	m_bReviewEnd = TRUE;
 }
 
-
+// 滚动条回调函数
 void CameraAlphaDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
@@ -667,6 +683,32 @@ void CameraAlphaDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		cDibImage.LoadFromFile(imagePath);
 		cDibImage.Draw(pDC, CPoint(0, 0), CSize(1024, 768));
 
+		break;
+	case SB_LINELEFT:
+		if (TempPos >= 2)
+		{
+			TempPos--;
+			pScrollBar->SetScrollPos(TempPos);
+			m_lCurReview = TempPos - 1;
+			GetDlgItem(IDC_STATIC_CURREV)->SetWindowTextA(*(*(m_pReviewFileName + m_lCurReview)));
+			//显示图像
+			imagePath = m_csReviewFolder + _T("\\") + *(*(m_pReviewFileName + m_lCurReview));
+			cDibImage.LoadFromFile(imagePath);
+			cDibImage.Draw(pDC, CPoint(0, 0), CSize(1024, 768));
+		}
+		break;
+	case SB_LINERIGHT:
+		if (TempPos < m_lReviewFileCount)
+		{
+			TempPos++;
+			pScrollBar->SetScrollPos(TempPos);
+			m_lCurReview = TempPos - 1;
+			GetDlgItem(IDC_STATIC_CURREV)->SetWindowTextA(*(*(m_pReviewFileName + m_lCurReview)));
+			//显示图像
+			imagePath = m_csReviewFolder + _T("\\") + *(*(m_pReviewFileName + m_lCurReview));
+			cDibImage.LoadFromFile(imagePath);
+			cDibImage.Draw(pDC, CPoint(0, 0), CSize(1024, 768));
+		}
 		break;
 	default:
 		break;

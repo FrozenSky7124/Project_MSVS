@@ -50,10 +50,9 @@ protected:
 	afx_msg void OnBnClickedBtnBrowse();			//BUTTON:路径选择
 	afx_msg void OnSelchangeComboSavefile();	//COMBO-BOX:消息处理函数
 	afx_msg void OnStnClickedStaticSavepath();	//STATIC_LABEL:单击响应函数
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar); //SCrollBar:回调函数
 	virtual void OnCancel();
 	afx_msg void OnClose();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	DECLARE_MESSAGE_MAP()
 	
 	struct SConfig
