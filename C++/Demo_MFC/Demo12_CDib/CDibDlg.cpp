@@ -94,7 +94,7 @@ void CDibDlg::OnBnClickedButtonShow()
 	CDib tDib;
 	CRect tRect;
 	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&tRect);
-	tDib.LoadFromFile(_T("X:\\CZ-5.bmp"));
+	tDib.LoadFromFile(_T("F:\\”Ò—©°§ª√æ≥‘∆Õº\\Wallpaper\\TEMP.bmp"));
 	tDib.Draw(m_pCDC, CPoint(0, 0), CSize(tRect.Width(), tRect.Height()));
 	return;
 }
