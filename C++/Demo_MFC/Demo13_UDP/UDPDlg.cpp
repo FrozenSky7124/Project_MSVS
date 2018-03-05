@@ -6,6 +6,7 @@
 #include "Demo13_UDP.h"
 #include "UDPDlg.h"
 #include "afxdialogex.h"
+#include "Dib_Ex.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,8 +15,12 @@
 // RecvThread
 UINT WINAPI uiRecvThread(LPVOID lpParam)
 {
+	UDPDlg* pThis = (UDPDlg*)lpParam;
+
 	WSADATA wsaData = { 0 };
 	UINT iResult = 0;
+
+	CDib cDibImage;
 
 	// 初始化
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -32,10 +37,10 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 		AfxMessageBox(_T("socket function failed with error = %d\n"), WSAGetLastError());
 	else
 	{
-		AfxMessageBox(_T("socket function succeeded\n"));
+		pThis->SetDlgItemTextA(IDC_STATIC_STATUS, _T("socket function succeeded!"));
 
-		TCHAR RecvBuf[256] = { 0 };
-		int BufLen = _countof(RecvBuf);
+		char RecvBuf[sizeof(UDPDlg::UDP_PACKAGE)];
+		int BufLen = sizeof(RecvBuf);
 
 		sockaddr_in addr_sender;
 		int iSenderAddrSize = sizeof(addr_sender);
@@ -49,11 +54,44 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 		if (iResult != 0)
 			AfxMessageBox(_T("bind failed with error %d\n"), WSAGetLastError());
 
-		iResult = recvfrom(serverSocket, RecvBuf, BufLen, 0, (SOCKADDR *)& addr_sender, &iSenderAddrSize);
-		if (iResult == SOCKET_ERROR)
-			AfxMessageBox(_T("recvfrom failed with error %d\n"), WSAGetLastError());
-
-		((UDPDlg*)lpParam)->SetDlgItemTextA(IDC_STATIC_STATUS, RecvBuf);
+		while ((iResult = recvfrom(serverSocket, RecvBuf, BufLen, 0, (SOCKADDR *)& addr_sender, &iSenderAddrSize)) != SOCKET_ERROR)
+		{
+			UDPDlg::UDP_PACKAGE* pTemp = (UDPDlg::UDP_PACKAGE*)RecvBuf;
+			if (pTemp->flag == 1 && pTemp->iNum == 0)
+			{
+				// 计算位图每行的字节数
+				UINT uBmpLineByte = (pTemp->width * pTemp->bitCount + 31) / 8;
+				uBmpLineByte = uBmpLineByte / 4 * 4;
+				// 计算位图数据区字节数
+				DWORD dwBmpDataSize = uBmpLineByte * pTemp->height;
+				// 为位图数据分配空间
+				pThis->m_pBmpData = new BYTE[dwBmpDataSize];
+				memcpy_s(pThis->m_pBmpData, pTemp->dataLength, pTemp->data, pTemp->dataLength);
+			}
+			else if (pTemp->flag == 1 && pTemp->iNum > 0)
+			{
+				memcpy_s(pThis->m_pBmpData + pTemp->iNum * pTemp->dataLength, pTemp->dataLength, pTemp->data, pTemp->dataLength);
+			}
+			else
+			{
+				pThis->SetDlgItemTextA(IDC_STATIC_STATUS, _T("Transmission Error!"));
+				if (pThis->m_pBmpData)
+					delete[] pThis->m_pBmpData;
+			}
+			// 传输完成
+			if (pTemp->iNum == pTemp->iTotal)
+			{
+				pThis->SetDlgItemTextA(IDC_STATIC_STATUS, _T("Transmission Complete!"));
+				// 如果是8位BMP文件，则为其预创建颜色表
+				if (pTemp->bitCount == 8)
+					cDibImage.MakeRgbQuadMem(8);
+				cDibImage.LoadFromBuffer(pThis->m_pBmpData, pTemp->width, pTemp->height, pTemp->bitCount);
+				cDibImage.Draw(pThis->m_pCDC, CPoint(0, 0), CSize(1000, 530));
+				cDibImage.~CDib();
+				delete[] pThis->m_pBmpData;
+			}
+			//pThis->SetDlgItemTextA(IDC_STATIC_STATUS, RecvBuf);
+		}
 
 		// 关闭UDP_Socket
 		iResult = closesocket(serverSocket);
@@ -100,6 +138,13 @@ BOOL UDPDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	m_hRecvThread = (HANDLE)_beginthreadex(NULL, 0, &uiRecvThread, this, 0, &m_iRecvThreadId);
+
+	// 调整图像预览控件的大小和位置
+	CRect viewRect;
+	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&viewRect);
+	viewRect.SetRect(7, 7, 7 + 1000, 7 + 530);
+	GetDlgItem(IDC_STATIC_VIEW)->MoveWindow(viewRect);
+	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
