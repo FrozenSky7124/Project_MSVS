@@ -52,6 +52,7 @@ public:
 		UINT iNum; //数据包序号
 		UINT iTotal; //数据包总数量
 		UINT dataLength; //数据包数据大小
+		DWORD dataTotal; //位图数据区大小
 		BYTE data[MAX_UDPDATA]; //数据
 	};
 };

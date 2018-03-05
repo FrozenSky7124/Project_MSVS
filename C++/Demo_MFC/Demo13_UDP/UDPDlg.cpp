@@ -40,7 +40,7 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 		pThis->SetDlgItemTextA(IDC_STATIC_STATUS, _T("socket function succeeded!"));
 
 		char RecvBuf[sizeof(UDPDlg::UDP_PACKAGE)];
-		int BufLen = sizeof(RecvBuf);
+		int BufLen = sizeof(UDPDlg::UDP_PACKAGE);
 
 		sockaddr_in addr_sender;
 		int iSenderAddrSize = sizeof(addr_sender);
@@ -56,21 +56,23 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 
 		while ((iResult = recvfrom(serverSocket, RecvBuf, BufLen, 0, (SOCKADDR *)& addr_sender, &iSenderAddrSize)) != SOCKET_ERROR)
 		{
+			//DWORD dwBmpDataSize;
 			UDPDlg::UDP_PACKAGE* pTemp = (UDPDlg::UDP_PACKAGE*)RecvBuf;
 			if (pTemp->flag == 1 && pTemp->iNum == 0)
 			{
 				// 计算位图每行的字节数
-				UINT uBmpLineByte = (pTemp->width * pTemp->bitCount + 31) / 8;
-				uBmpLineByte = uBmpLineByte / 4 * 4;
+				//UINT uBmpLineByte = (pTemp->width * pTemp->bitCount + 31) / 8;
+				//uBmpLineByte = uBmpLineByte / 4 * 4;
 				// 计算位图数据区字节数
-				DWORD dwBmpDataSize = uBmpLineByte * pTemp->height;
+				//dwBmpDataSize = uBmpLineByte * pTemp->height;
 				// 为位图数据分配空间
-				pThis->m_pBmpData = new BYTE[dwBmpDataSize];
-				memcpy_s(pThis->m_pBmpData, pTemp->dataLength, pTemp->data, pTemp->dataLength);
+				pThis->m_pBmpData = new BYTE[pTemp->dataTotal * sizeof(BYTE)];
+				memset(pThis->m_pBmpData, 0, pTemp->dataTotal * sizeof(BYTE));
+				memcpy_s(pThis->m_pBmpData, pTemp->dataLength, &pTemp->data, pTemp->dataLength);
 			}
 			else if (pTemp->flag == 1 && pTemp->iNum > 0)
 			{
-				memcpy_s(pThis->m_pBmpData + pTemp->iNum * pTemp->dataLength, pTemp->dataLength, pTemp->data, pTemp->dataLength);
+				memcpy_s(pThis->m_pBmpData + pTemp->iNum * MAX_UDPDATA, pTemp->dataLength, &pTemp->data, pTemp->dataLength);
 			}
 			else if (pTemp->flag == 0)
 			{
@@ -95,10 +97,14 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 				if (pTemp->bitCount == 8)
 					cDibImage.MakeRgbQuadMem(8);
 				cDibImage.LoadFromBuffer(pThis->m_pBmpData, pTemp->width, pTemp->height, pTemp->bitCount);
-				cDibImage.Draw(pThis->m_pCDC, CPoint(0, 0), CSize(1000, 530));
+				cDibImage.Draw(pThis->m_pCDC, CPoint(0, 0), CSize(1600, 900));
 				cDibImage.~CDib();
-				delete[] pThis->m_pBmpData;
-				pThis->m_pBmpData = NULL;
+				if (pThis->m_pBmpData)
+				{
+					memset(pThis->m_pBmpData, 0, pTemp->dataTotal * sizeof(BYTE));
+					delete [] pThis->m_pBmpData;
+					pThis->m_pBmpData = NULL;
+				}
 			}
 		}
 
@@ -157,7 +163,7 @@ BOOL UDPDlg::OnInitDialog()
 	// 调整图像预览控件的大小和位置
 	CRect viewRect;
 	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&viewRect);
-	viewRect.SetRect(7, 7, 7 + 1000, 7 + 530);
+	viewRect.SetRect(7, 7, 7 + 1600, 7 + 900);
 	GetDlgItem(IDC_STATIC_VIEW)->MoveWindow(viewRect);
 	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
 

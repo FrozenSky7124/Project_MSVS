@@ -173,7 +173,7 @@ BOOL CUDP_ClientDlg::InitSocket()
 
 void CUDP_ClientDlg::OnBnClickedButtonSend()
 {
-	UINT iResult;	
+	UINT iResult;
 	int dataLengthTotal = m_cDibImage.GetSize();
 	int iCount;
 	if (dataLengthTotal % MAX_UDPDATA == 0)
@@ -186,6 +186,7 @@ void CUDP_ClientDlg::OnBnClickedButtonSend()
 	dataPackage.width = m_cDibImage.GetWidth();
 	dataPackage.height = m_cDibImage.GetHeight();
 	dataPackage.bitCount = m_cDibImage.GetBitCount();
+	dataPackage.dataTotal = m_cDibImage.GetSize();
 	dataPackage.dataLength = MAX_UDPDATA;
 	dataPackage.iTotal = iCount;
 
@@ -194,8 +195,8 @@ void CUDP_ClientDlg::OnBnClickedButtonSend()
 		dataPackage.iNum = i;
 		if (i == iCount)
 		{
-			dataPackage.dataLength = m_cDibImage.GetSize() - i * MAX_UDPDATA;
-			memcpy_s(&dataPackage.data, MAX_UDPDATA, m_cDibImage.GetData() + i * MAX_UDPDATA, dataPackage.dataLength);
+			dataPackage.dataLength = dataPackage.dataTotal % MAX_UDPDATA;
+			memcpy_s(&dataPackage.data, dataPackage.dataLength, m_cDibImage.GetData() + i * MAX_UDPDATA, dataPackage.dataLength);
 		}
 		else
 			memcpy_s(&dataPackage.data, MAX_UDPDATA, m_cDibImage.GetData() + i * MAX_UDPDATA, MAX_UDPDATA);
@@ -203,8 +204,7 @@ void CUDP_ClientDlg::OnBnClickedButtonSend()
 		iResult = sendto(m_socket, (char *)&dataPackage, sizeof(UDP_PACKAGE), 0, (SOCKADDR *)& m_addrSendto, sizeof(m_addrSendto));
 		if (iResult == SOCKET_ERROR)
 			AfxMessageBox(_T("sendto failed with error: %d\n"), WSAGetLastError());
-		if (i % 100 == 0)
-			Sleep(1);
+		//Sleep(1);
 	}
 	TRACE(_T("Data Already Sended.\n"));
 }
