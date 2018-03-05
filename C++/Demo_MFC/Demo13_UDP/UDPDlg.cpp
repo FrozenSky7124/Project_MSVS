@@ -72,11 +72,20 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 			{
 				memcpy_s(pThis->m_pBmpData + pTemp->iNum * pTemp->dataLength, pTemp->dataLength, pTemp->data, pTemp->dataLength);
 			}
+			else if (pTemp->flag == 0)
+			{
+				if (pThis->m_pBmpData) delete[] pThis->m_pBmpData;
+				pThis->m_pBmpData = NULL;
+				break;
+			}
 			else
 			{
 				pThis->SetDlgItemTextA(IDC_STATIC_STATUS, _T("Transmission Error!"));
 				if (pThis->m_pBmpData)
+				{
 					delete[] pThis->m_pBmpData;
+					pThis->m_pBmpData = NULL;
+				}
 			}
 			// 传输完成
 			if (pTemp->iNum == pTemp->iTotal)
@@ -89,8 +98,8 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 				cDibImage.Draw(pThis->m_pCDC, CPoint(0, 0), CSize(1000, 530));
 				cDibImage.~CDib();
 				delete[] pThis->m_pBmpData;
+				pThis->m_pBmpData = NULL;
 			}
-			//pThis->SetDlgItemTextA(IDC_STATIC_STATUS, RecvBuf);
 		}
 
 		// 关闭UDP_Socket
@@ -100,6 +109,8 @@ UINT WINAPI uiRecvThread(LPVOID lpParam)
 	}
 
 	WSACleanup();
+
+	cDibImage.~CDib();
 
 	TRACE(_T("uiRecvThread Over!\n"));
 	_endthreadex(0);
@@ -112,6 +123,10 @@ UDPDlg::UDPDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DEMO13_UDP_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_pBmpData = NULL; 
+	m_pCDC = NULL;
+	m_hRecvThread = NULL;
+	m_iRecvThreadId = NULL;
 }
 
 void UDPDlg::DoDataExchange(CDataExchange* pDX)
@@ -185,6 +200,48 @@ HCURSOR UDPDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+BOOL UDPDlg::SendEndToRecvThread()
+{
+	UINT iResult = 0;
+	WSADATA wsaData;
+	SOCKET sendSocket;
+	sockaddr_in addrSendTo;
+	UDP_PACKAGE endPackage;
+
+	// 初始化SOCKET
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != 0)
+	{
+		AfxMessageBox(_T("WSAStartup failed: %d\n"), iResult);
+		return FALSE;
+	}
+	// 创建UDP_Socket
+	sendSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (sendSocket == INVALID_SOCKET)
+	{
+		AfxMessageBox(_T("socket function failed with error = %d\n"), WSAGetLastError());
+		WSACleanup();
+		return FALSE;
+	}
+	addrSendTo.sin_family = AF_INET;
+	addrSendTo.sin_port = htons(21001);
+	addrSendTo.sin_addr.S_un.S_addr = inet_addr(_T("127.0.0.1"));
+	endPackage.flag = 0;
+
+	iResult = sendto(sendSocket, (char *)&endPackage, sizeof(UDP_PACKAGE), 0, (SOCKADDR *)& addrSendTo, sizeof(addrSendTo));
+	if (iResult == SOCKET_ERROR)
+	{
+		AfxMessageBox(_T("sendto failed with error: %d\n"), WSAGetLastError());
+		closesocket(sendSocket);
+		WSACleanup();
+		return FALSE;
+	}
+	
+	closesocket(sendSocket);
+	WSACleanup();
+	return TRUE;
+}
+
 void UDPDlg::OnOK()
 {
 	// TODO: 在此添加专用代码和/或调用基类
@@ -193,11 +250,19 @@ void UDPDlg::OnOK()
 	//CDialogEx::OnOK();
 }
 
-
 void UDPDlg::OnCancel()
 {
 	// TODO: 在此添加专用代码和/或调用基类
 	TRACE(_T("OnCancel\n"));
 	
+	// 终止监听线程
+	if (m_hRecvThread)
+	{
+		SendEndToRecvThread();
+		::WaitForSingleObject(m_hRecvThread, INFINITE);
+		CloseHandle(m_hRecvThread);
+		m_hRecvThread = NULL;
+	}
+
 	CDialogEx::OnCancel();
 }

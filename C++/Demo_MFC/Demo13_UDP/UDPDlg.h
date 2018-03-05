@@ -27,6 +27,8 @@ protected:
 	HANDLE m_hRecvThread; //用于存储UDP接收线程句柄
 	UINT m_iRecvThreadId; //用于存储UDP接收线程线程ID
 
+	BOOL SendEndToRecvThread();
+
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
@@ -38,6 +40,7 @@ protected:
 public:
 	BYTE* m_pBmpData;
 	CDC* m_pCDC;
+
 	// 自定义传输协议
 	// 数据包结构体
 	struct UDP_PACKAGE
