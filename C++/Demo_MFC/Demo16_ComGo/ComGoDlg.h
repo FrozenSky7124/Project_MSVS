@@ -25,6 +25,7 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
+	BOOL m_bCommOpen;			//端口状态
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
@@ -38,9 +39,24 @@ public:
 	CListCtrl* m_pCListData;	//列表控件
 	CHAR* m_pData;				//存储文本数据
 	BYTE* m_pByteData;			//存储字节数据
+	UINT m_iRow;				//存储数据行数
+	UINT m_iCur;				//存储当前发送的行号
+	BOOL m_bPause;				//是否暂停
 	HANDLE m_hComm;				//存储已打开的串口句柄
 	DCB m_dcb;					//存储串口配置结构体
+
+	CString m_PortNo;	//端口号
+	DWORD m_BaudRate;	//波特率
+	DWORD m_fParity;	//奇偶校验位
+	BYTE m_Parity;		//奇偶校验方法
+	BYTE m_ByteSize;	//通信字节位数
+	BYTE m_StopBits;	//停止位位数
+
+	DWORD m_dwInterval;	//传输间隔
+
 	afx_msg void OnBnClickedButtonLoad();
 	afx_msg void OnBnClickedButtonOpencom();
 	afx_msg void OnBnClickedButtonSend();
+	HANDLE m_hTransThread;		//存储传输线程句柄
+	UINT m_uIDTransThread;		//存储传输线程ID
 };
