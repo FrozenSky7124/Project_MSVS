@@ -232,6 +232,8 @@ void ComGoDlg::OnBnClickedButtonLoad()
 		m_pByteData = NULL;
 	}
 
+	// 控件重置
+
 	// 获取当前工作目录
 	TCHAR curDir[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, curDir);
