@@ -792,10 +792,7 @@ void CDib::Empty(BOOL bFlag)
 	// 释放预构建颜色表内存
 	if (m_lpRgbQuad_Mem != NULL)
 	{
-		for (UINT i = 0; i < m_iClrUse; i++)
-		{
-			delete [] (m_lpRgbQuad_Mem + i);
-		}
+		delete [] m_lpRgbQuad_Mem;
 		m_lpRgbQuad_Mem = NULL;
 	}
 

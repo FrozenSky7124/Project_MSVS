@@ -20,7 +20,6 @@ CUDP_ClientDlg::CUDP_ClientDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_UDP_CLIENT_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_wsaData = { 0 };
 	m_socket = INVALID_SOCKET;
 }
 
@@ -51,6 +50,7 @@ BOOL CUDP_ClientDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 
 	srand((unsigned int)time(0));
+	//m_wsaData = { 0 };
 
 	// 调整图像预览控件的大小和位置
 	CRect viewRect;
