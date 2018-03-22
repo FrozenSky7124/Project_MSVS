@@ -233,6 +233,8 @@ void ComGoDlg::OnBnClickedButtonLoad()
 	}
 
 	// 控件重置
+	m_bPause = TRUE;
+	SetDlgItemText(IDC_BUTTON_SEND, _T("发送数据"));
 
 	// 获取当前工作目录
 	TCHAR curDir[MAX_PATH];
