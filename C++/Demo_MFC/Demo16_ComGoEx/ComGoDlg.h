@@ -62,4 +62,8 @@ public:
 	HANDLE m_hListenThread;		//存储监听线程句柄
 	UINT m_uIDListenThread;		//存储监听线程ID
 	BOOL m_bListenOver;			//是否关闭
+
+	// UI
+	CFont m_GlobalFont;
+	CFont m_ListHeaderFont;
 };

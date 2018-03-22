@@ -46,7 +46,7 @@ UINT WINAPI uiTransThread(LPVOID lpParam)
 		WriteFile(pThis->m_hComm, bSend, ROWLENGTH_BYTE, &dwBytesSent, NULL);
 		if (dwBytesSent != ROWLENGTH_BYTE) break; //检测传输异常
 		if (pThis->m_bPause == TRUE) break;
-		pListCtrl->SetItemText(pThis->m_iCur, 2, _T("SEND"));
+		pListCtrl->SetItemText(pThis->m_iCur, 2, _T("  SEND  "));
 		pThis->m_iCur++;
 		Sleep(pThis->m_dwInterval);
 	}
@@ -112,6 +112,89 @@ UINT WINAPI uiListenThread(LPVOID lpParam)
 	}
 	logFile.Close();
 
+	/// 超时读取
+	// 设置超时
+	COMMTIMEOUTS readTimeOut;
+	GetCommTimeouts(hListenCOM, &readTimeOut);
+	readTimeOut.ReadTotalTimeoutConstant = 50;
+	SetCommTimeouts(hListenCOM, &readTimeOut);
+
+	DWORD dwBytesRecv = 0;
+	DWORD dwBytesToRecv = 20;
+	BYTE bCur = 0;
+	UINT iRecvRow = 0;
+	SYSTEMTIME sysTime;
+	CString timeStr = _T("");
+	CString recvStr = _T("");
+
+	while (TRUE)
+	{
+		if (ReadFile(hListenCOM, &bCur, 1, &dwBytesRecv, NULL))
+		{
+			if (dwBytesRecv == 0) //读取超时
+			{
+				// 若还有数据未写入日志文件，则写入，并关闭日志文件
+				if (recvStr.GetLength() != 0)
+				{
+					timeStr.Format(_T("[%02d:%02d:%02d.%03d] "), sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
+					recvStr = timeStr + recvStr + _T("\n");
+					
+					logFile.Open(_T("./RecvLog.TxT"), CFile::modeWrite);
+					logFile.SeekToEnd();
+					logFile.Write(recvStr.GetBuffer(), recvStr.GetLength() * sizeof(TCHAR));
+					logFile.Close();
+
+					recvStr = _T("");
+					iRecvRow = 0;
+				}
+
+				// 判断退出
+				if (pThis->m_bListenOver)
+					break;
+				//pThis->SetDlgItemText(IDC_STATIC_LISTEN, _T("COM1: 读取超时"));
+			}
+			else
+			{
+				if (bCur == 0x7E)
+				{
+					SYSTEMTIME curTime;
+					GetLocalTime(&curTime);
+					if (iRecvRow == 0)
+					{
+						sysTime = curTime;
+						iRecvRow++;
+						recvStr.Format(_T("%02X "), bCur);
+					}
+					else
+					{
+						timeStr.Format(_T("[%02d:%02d:%02d.%03d] "), sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
+						sysTime = curTime;
+						recvStr = timeStr + recvStr + _T("\n");
+						iRecvRow++;
+
+						// 写入日志
+						logFile.Open(_T("./RecvLog.TxT"), CFile::modeWrite);
+						logFile.SeekToEnd();
+						logFile.Write(recvStr.GetBuffer(), recvStr.GetLength() * sizeof(TCHAR));
+						logFile.Close();
+
+						//TRACE(recvStr);
+
+						recvStr.Format(_T("%02X "), bCur);
+					}
+				}
+				else
+				{
+					recvStr.Format(_T("%s%02X "), recvStr, bCur);
+				}
+			}
+		}
+		else
+			pThis->SetDlgItemText(IDC_STATIC_LISTEN, _T("COM1: 读取异常"));
+	}
+
+	/// 非超时读取（因CPU占用率过高 舍弃）
+	/*
 	COMSTAT ComStat;
 	DWORD dwError = 0;
 	DWORD dwBytesRecv;
@@ -179,7 +262,12 @@ UINT WINAPI uiListenThread(LPVOID lpParam)
 		logFile.Write(recvStr.GetBuffer(), recvStr.GetLength() * sizeof(TCHAR));
 		logFile.Close();
 	}
-	
+	*/
+
+	// 关闭文件，非必须
+	if (logFile != INVALID_HANDLE_VALUE)
+		logFile.Close();
+
 	// 关闭监听端口
 	if (hListenCOM != NULL)
 	{
@@ -244,9 +332,14 @@ BOOL ComGoDlg::OnInitDialog()
 	m_StopBits = ONESTOPBIT;
 
 	// 画画
+	m_GlobalFont.CreatePointFont(100, _T("隶书"));
+	m_ListHeaderFont.CreatePointFont(140, _T("隶书"));
+	
 	m_pCListData = (CListCtrl*)GetDlgItem(IDC_LIST_DATA);
+	m_pCListData->SetFont(&m_GlobalFont, FALSE);
+	(m_pCListData->GetHeaderCtrl())->SetFont(&m_ListHeaderFont, FALSE);
 	m_pCListData->InsertColumn(0, _T(" 序号"), LVCFMT_LEFT, 75);
-	m_pCListData->InsertColumn(1, _T(" 数据"), LVCFMT_LEFT, 350);
+	m_pCListData->InsertColumn(1, _T(" 数据"), LVCFMT_LEFT, 370);
 	m_pCListData->InsertColumn(2, _T(" 状态"), LVCFMT_LEFT, 100);
 	//m_pCListData->SetBkColor(RGB(205, 226, 252));
 	//m_pCListData->SetTextBkColor(RGB(205, 226, 252));
@@ -443,7 +536,7 @@ void ComGoDlg::OnBnClickedButtonLoad()
 	memset(tempChr, 0, ROWLENGTH + 1);
 	for (UINT i = 0; i < iRow; i++)
 	{
-		tempStr.Format(_T("%4d"), i + 1);
+		tempStr.Format(_T("%6d"), i + 1);
 		m_pCListData->InsertItem(i, tempStr);
 		memcpy_s(tempChr, ROWLENGTH, m_pData + i * ROWLENGTH, ROWLENGTH);
 		tempStr.Format(_T("%s"), tempChr);
