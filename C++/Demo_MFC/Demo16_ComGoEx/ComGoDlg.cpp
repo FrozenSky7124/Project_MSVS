@@ -121,7 +121,7 @@ UINT WINAPI uiListenThread(LPVOID lpParam)
 	BYTE bCur;
 	UINT iCurRow = 0;
 	UINT iRecv = 0;
-	DWORD dwTime;
+	SYSTEMTIME sysTime;
 
 	while (!pThis->m_bListenOver)
 	{
@@ -134,17 +134,18 @@ UINT WINAPI uiListenThread(LPVOID lpParam)
 				//TRACE(_T("[Recv]%02X\n"), bCur);
 				if (bCur == 0x7E)
 				{
-					DWORD curTime = GetTickCount();
+					SYSTEMTIME curTime;
+					GetLocalTime(&curTime);
 					if (iCurRow == 0)
 					{
-						dwTime = curTime;
+						sysTime = curTime;
 						iCurRow++;
 						recvStr.Format(_T("%02X "), bCur);
 					}
 					else
 					{
-						timeStr.Format(_T("[%10d] "), dwTime);
-						dwTime = curTime;
+						timeStr.Format(_T("[%02d:%02d:%02d:%03d] "), sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
+						sysTime = curTime;
 						recvStr = timeStr + recvStr + _T("\n");
 						iCurRow++;
 
@@ -168,14 +169,17 @@ UINT WINAPI uiListenThread(LPVOID lpParam)
 	}
 
 	// 写入最后一行数据
-	timeStr.Format(_T("[%10d] "), dwTime);
-	recvStr = timeStr + recvStr + _T("\n");
-	// 写入日志
-	logFile.Open(_T("./RecvLog.TxT"), CFile::modeWrite);
-	logFile.SeekToEnd();
-	logFile.Write(recvStr.GetBuffer(), recvStr.GetLength() * sizeof(TCHAR));
-	logFile.Close();
-
+	if (recvStr.GetLength() != 0)
+	{
+		timeStr.Format(_T("[%02d:%02d:%02d:%03d] "), sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
+		recvStr = timeStr + recvStr + _T("\n");
+		// 写入日志
+		logFile.Open(_T("./RecvLog.TxT"), CFile::modeWrite);
+		logFile.SeekToEnd();
+		logFile.Write(recvStr.GetBuffer(), recvStr.GetLength() * sizeof(TCHAR));
+		logFile.Close();
+	}
+	
 	// 关闭监听端口
 	if (hListenCOM != NULL)
 	{
