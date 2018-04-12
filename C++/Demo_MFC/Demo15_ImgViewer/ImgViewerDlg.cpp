@@ -49,13 +49,28 @@ BOOL ImgViewerDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 
 	// 设置控件位置
-	this->GetClientRect(&m_mainRect);
+	int iScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int iScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	GetClientRect(&m_mainRect);
+	m_mainRect.left = (iScreenWidth - (1024 + 20)) / 2;
+	m_mainRect.top = (iScreenHeight - (768 + 20 + 30)) / 2;
+	m_mainRect.right = m_mainRect.left + 1024 + 20;
+	m_mainRect.bottom = m_mainRect.top + 768 + 20 + 30;
+	MoveWindow(m_mainRect);
+
+	GetClientRect(&m_mainRect);
 	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&m_viewRect);
 	m_viewRect.left = m_mainRect.left + 10;
 	m_viewRect.top = m_mainRect.top + 10;
 	m_viewRect.right = m_mainRect.right - 10;
-	m_viewRect.bottom = m_mainRect.bottom - 40;
+	m_viewRect.bottom = m_mainRect.bottom - 30 - 10;
 	GetDlgItem(IDC_STATIC_VIEW)->MoveWindow(m_viewRect);
+
+	CRect rectTips;
+	GetDlgItem(IDC_STATIC_TIPS)->GetClientRect(&rectTips);
+	rectTips = CRect(m_mainRect.left + 10, m_mainRect.bottom - 30, m_mainRect.right - 10, m_mainRect.bottom);
+	GetDlgItem(IDC_STATIC_TIPS)->MoveWindow(rectTips);
 
 	// 设置成员变量
 	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
@@ -133,7 +148,7 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 
 	// 载入数据
 	m_cDibImage.LoadFromFile(tcFilePath);
-	m_cDibImage.Draw(m_pCDC, CPoint(0, 0), m_viewRect.Size());
+	m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
 
 	CDialogEx::OnDropFiles(hDropInfo);
 }
