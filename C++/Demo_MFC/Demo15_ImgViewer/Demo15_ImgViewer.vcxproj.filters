@@ -33,6 +33,9 @@
     <ClInclude Include="Dib_Ex.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SubWinDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo15_ImgViewer.cpp">
@@ -45,6 +48,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Dib_Ex.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SubWinDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

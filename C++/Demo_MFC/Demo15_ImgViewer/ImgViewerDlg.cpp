@@ -150,6 +150,11 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 	m_cDibImage.LoadFromFile(tcFilePath);
 	m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
 
+	// Test: 创建子窗口
+	m_SubWin = new SubWinDlg(7124, this);
+	m_SubWin->Create(IDD_SUBWIN_DIALOG, this);
+	m_SubWin->ShowWindow(SW_SHOW);
+
 	CDialogEx::OnDropFiles(hDropInfo);
 }
 

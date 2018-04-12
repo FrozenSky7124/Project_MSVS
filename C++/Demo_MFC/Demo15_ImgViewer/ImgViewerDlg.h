@@ -4,6 +4,7 @@
 
 #pragma once
 #include "Dib_Ex.h"
+#include "SubWinDlg.h"
 
 // ImgViewerDlg ¶Ô»°¿ò
 class ImgViewerDlg : public CDialogEx
@@ -27,6 +28,8 @@ public:
 	CRect m_viewRect;
 	CDib m_cDibImage;
 	CDC* m_pCDC;
+
+	SubWinDlg* m_SubWin;
 
 protected:
 	HICON m_hIcon;
