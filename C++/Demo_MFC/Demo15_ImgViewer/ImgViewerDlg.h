@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include "Dib_Ex.h"
 #include "SubWinDlg.h"
 
@@ -30,6 +31,7 @@ public:
 	CDC* m_pCDC;
 
 	SubWinDlg* m_SubWin;
+	SubWinParam m_SubWinParam;
 
 protected:
 	HICON m_hIcon;
@@ -41,7 +43,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	virtual void OnOK();
 	virtual void OnCancel();
-public:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 };

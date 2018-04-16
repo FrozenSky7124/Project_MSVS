@@ -47,7 +47,7 @@ BOOL ImgViewerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-
+	
 	// 设置控件位置
 	int iScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int iScreenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -74,6 +74,16 @@ BOOL ImgViewerDlg::OnInitDialog()
 
 	// 设置成员变量
 	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
+	m_SubWin = NULL;
+
+	GetClientRect(&m_mainRect);
+	ClientToScreen(&m_mainRect);
+	m_SubWinParam.iSubWidth = 256;
+	m_SubWinParam.iSubHeight = 256;
+	m_SubWinParam.iMouseX = 0;
+	m_SubWinParam.iMouseY = 0;
+	m_SubWinParam.iMainWinPosX = m_mainRect.left;
+	m_SubWinParam.iMainWinPosY = m_mainRect.top;
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -146,14 +156,15 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 	// 判断文件类型
 	// ......
 
-	// 载入数据
+	// 载入位图数据
 	m_cDibImage.LoadFromFile(tcFilePath);
 	m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
+	m_SubWinParam.pOriginImage = &m_cDibImage;
 
 	// Test: 创建子窗口
-	m_SubWin = new SubWinDlg(7124, this);
+	m_SubWin = new SubWinDlg(&m_SubWinParam, this);
 	m_SubWin->Create(IDD_SUBWIN_DIALOG, this);
-	m_SubWin->ShowWindow(SW_SHOW);
+	//m_SubWin->ShowWindow(SW_SHOW);
 
 	CDialogEx::OnDropFiles(hDropInfo);
 }
@@ -162,13 +173,24 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 void ImgViewerDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-
-	if ((point.x >= m_viewRect.left + 32) && (point.x <= m_viewRect.right - 32) && 
-		(point.y >= m_viewRect.top + 32) && (point.y <= m_viewRect.bottom - 32))
+	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&m_viewRect);
+	if ((point.x >= m_viewRect.left + m_SubWinParam.iSubWidth / 2) && (point.x <= m_viewRect.right - m_SubWinParam.iSubWidth / 2) &&
+		(point.y >= m_viewRect.top + m_SubWinParam.iSubHeight / 2) && (point.y <= m_viewRect.bottom - m_SubWinParam.iSubHeight / 2))
 	{
+		m_SubWinParam.iMouseX = point.x;
+		m_SubWinParam.iMouseY = point.y;
 		CString tempStr;
 		tempStr.Format(_T("MouseX: %4d MouseY: %4d"), point.x, point.y);
 		SetDlgItemText(IDC_STATIC_TIPS, tempStr);
+		if (m_SubWin != NULL)
+		{
+			m_SubWin->ShowWindow(SW_SHOW);
+			m_SubWin->ShowViewImage();
+		}
+	}
+	else
+	{
+		;
 	}
 
 	CDialogEx::OnMouseMove(nFlags, point);

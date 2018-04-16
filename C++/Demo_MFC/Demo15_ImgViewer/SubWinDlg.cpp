@@ -17,10 +17,10 @@ SubWinDlg::SubWinDlg(CWnd* pParent /*=NULL*/)
 
 }
 
-SubWinDlg::SubWinDlg(UINT uFlag, CWnd* pParent)
+SubWinDlg::SubWinDlg(SubWinParam* pSubWinParam, CWnd* pParent)
 	: CDialogEx(IDD_SUBWIN_DIALOG, pParent)
 {
-	this->m_uFlag = uFlag;
+	m_pSubWinParam = pSubWinParam;
 }
 
 SubWinDlg::~SubWinDlg()
@@ -47,6 +47,32 @@ BOOL SubWinDlg::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 
+	// 设置预览子窗体的位置
+	GetClientRect(&m_mainRect);
+	m_mainRect.left = m_pSubWinParam->iMainWinPosX + 1024 + 20;
+	m_mainRect.top = m_pSubWinParam->iMainWinPosY;
+	m_mainRect.right = m_mainRect.left + m_pSubWinParam->iSubWidth;
+	m_mainRect.bottom = m_mainRect.top + m_pSubWinParam->iSubHeight;
+	MoveWindow(m_mainRect);
+	// 
+	GetClientRect(&m_mainRect);
+	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&m_viewRect);
+	m_viewRect.left = m_mainRect.left;
+	m_viewRect.top = m_mainRect.top;
+	m_viewRect.right = m_mainRect.right;
+	m_viewRect.bottom = m_mainRect.bottom;
+	GetDlgItem(IDC_STATIC_VIEW)->MoveWindow(m_viewRect);
+
+	// 获取绘制DC
+	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
+
+	// 初始化预览位图对象
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
+}
+
+void SubWinDlg::ShowViewImage()
+{
+	(m_pSubWinParam->pOriginImage)->Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
 }

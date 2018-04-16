@@ -1,5 +1,17 @@
 #pragma once
 
+#include "Dib_Ex.h"
+
+struct SubWinParam //预览子窗体相关参数数据结构
+{
+	int iMainWinPosX;
+	int iMainWinPosY;
+	int iSubWidth;
+	int iSubHeight;
+	int iMouseX;
+	int iMouseY;
+	CDib* pOriginImage;
+};
 
 // SubWinDlg 对话框
 
@@ -9,7 +21,8 @@ class SubWinDlg : public CDialogEx
 
 public:
 	SubWinDlg(CWnd* pParent = NULL);   // 标准构造函数
-	SubWinDlg(UINT uFlag, CWnd* pParent = NULL); // 重载构造函数
+	SubWinDlg(SubWinParam* pSubWinParam, CWnd* pParent = NULL); // 重载构造函数
+	void ShowViewImage();
 	virtual ~SubWinDlg();
 
 // 对话框数据
@@ -23,6 +36,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	UINT m_uFlag;
-
+	SubWinParam* m_pSubWinParam;
+	CDC* m_pCDC;
+	CRect m_mainRect;
+	CRect m_viewRect;
+	CDib m_viewImage;
 };
