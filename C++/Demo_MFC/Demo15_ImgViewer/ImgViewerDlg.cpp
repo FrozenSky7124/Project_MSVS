@@ -57,7 +57,8 @@ BOOL ImgViewerDlg::OnInitDialog()
 	m_mainRect.top = (iScreenHeight - (768 + 20 + 30)) / 2;
 	m_mainRect.right = m_mainRect.left + 1024 + 20;
 	m_mainRect.bottom = m_mainRect.top + 768 + 20 + 30;
-	MoveWindow(m_mainRect);
+	CalcWindowRect(&m_mainRect); //根据客户区大小，计算窗体大小
+	SetWindowPos(NULL, m_mainRect.left, m_mainRect.top, m_mainRect.Width(), m_mainRect.Height(), SWP_NOZORDER); //设置窗体位置
 
 	GetClientRect(&m_mainRect);
 	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&m_viewRect);
@@ -75,13 +76,13 @@ BOOL ImgViewerDlg::OnInitDialog()
 	// 设置成员变量
 	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
 	m_SubWin = NULL;
+	m_cDibTemp.MakeRgbQuadMem(8);
+	m_lpCDibDataBuffer = NULL;
 
 	GetClientRect(&m_mainRect);
 	ClientToScreen(&m_mainRect);
 	m_SubWinParam.iSubWidth = 256;
 	m_SubWinParam.iSubHeight = 256;
-	m_SubWinParam.iMouseX = 0;
-	m_SubWinParam.iMouseY = 0;
 	m_SubWinParam.iMainWinPosX = m_mainRect.left;
 	m_SubWinParam.iMainWinPosY = m_mainRect.top;
 
@@ -137,6 +138,9 @@ void ImgViewerDlg::OnOK()
 void ImgViewerDlg::OnCancel()
 {
 	// TODO: 在此添加专用代码和/或调用基类
+	// 释放预览图像数据缓存
+	if (m_lpCDibDataBuffer)
+		delete[] m_lpCDibDataBuffer;
 
 	CDialogEx::OnCancel();
 }
@@ -158,8 +162,9 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 
 	// 载入位图数据
 	m_cDibImage.LoadFromFile(tcFilePath);
+	m_cDibImage.RgbToGrade();
 	m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
-	m_SubWinParam.pOriginImage = &m_cDibImage;
+	m_SubWinParam.pViewImage = NULL;
 
 	// Test: 创建子窗口
 	m_SubWin = new SubWinDlg(&m_SubWinParam, this);
@@ -169,16 +174,47 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 	CDialogEx::OnDropFiles(hDropInfo);
 }
 
+// 计算并构建预览图像对象
+void ImgViewerDlg::BuildTempCDibImage(int x, int y, int width, int height)
+{
+	int iTempx = x - 10 - width / 2;
+	int iTempy = y - 10 - height / 2;
+	int iBitCount = 8;
+
+	// 计算位图每行的字节数
+	UINT uBmpLineByte = (width * iBitCount + 31) / 8;
+	uBmpLineByte = uBmpLineByte / 4 * 4;
+	// 计算位图数据区字节数
+	DWORD dwBmpDataSize = uBmpLineByte * height;
+
+	// 创建预览图像数据区缓存空间
+	if (m_lpCDibDataBuffer == NULL)
+		m_lpCDibDataBuffer = (LPBYTE) new BYTE[dwBmpDataSize];
+
+	// 写入预览图像数据
+	LPBYTE lpData = m_cDibImage.GetData();
+	int iLineByteNum = m_cDibImage.GetLineByte();
+	for (int ci = 0; ci < height; ci++)
+	{
+		memcpy_s(m_lpCDibDataBuffer + ci * uBmpLineByte, uBmpLineByte, lpData + (768 - (iTempy + height - ci)) * iLineByteNum + iTempx, uBmpLineByte);
+	}
+	
+	// 创建预览图像Dib对象
+	m_cDibTemp.LoadFromBuffer(m_lpCDibDataBuffer, width, height, 8);
+}
 
 void ImgViewerDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&m_viewRect);
-	if ((point.x >= m_viewRect.left + m_SubWinParam.iSubWidth / 2) && (point.x <= m_viewRect.right - m_SubWinParam.iSubWidth / 2) &&
-		(point.y >= m_viewRect.top + m_SubWinParam.iSubHeight / 2) && (point.y <= m_viewRect.bottom - m_SubWinParam.iSubHeight / 2))
+	if ((m_SubWin) &&
+		(point.x >= m_viewRect.left + 10 + m_SubWinParam.iSubWidth / 2) && (point.x <= m_viewRect.left + 10 + 1024 - m_SubWinParam.iSubWidth / 2) &&
+		(point.y >= m_viewRect.top + 10 + m_SubWinParam.iSubHeight / 2) && (point.y <= m_viewRect.top +10 + 768 - m_SubWinParam.iSubHeight / 2))
 	{
-		m_SubWinParam.iMouseX = point.x;
-		m_SubWinParam.iMouseY = point.y;
+		// 计算并构建预览图像对象
+		BuildTempCDibImage(point.x, point.y, m_SubWinParam.iSubWidth, m_SubWinParam.iSubHeight);
+		m_SubWinParam.pViewImage = &m_cDibTemp;
+
 		CString tempStr;
 		tempStr.Format(_T("MouseX: %4d MouseY: %4d"), point.x, point.y);
 		SetDlgItemText(IDC_STATIC_TIPS, tempStr);

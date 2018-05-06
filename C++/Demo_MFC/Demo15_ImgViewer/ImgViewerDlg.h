@@ -28,11 +28,13 @@ public:
 	CRect m_mainRect;
 	CRect m_viewRect;
 	CDib m_cDibImage;
+	CDib m_cDibTemp;
 	CDC* m_pCDC;
 
 	SubWinDlg* m_SubWin;
 	SubWinParam m_SubWinParam;
 
+	LPBYTE m_lpCDibDataBuffer;
 protected:
 	HICON m_hIcon;
 
@@ -45,4 +47,6 @@ protected:
 	virtual void OnCancel();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+
+	void BuildTempCDibImage(int x, int y, int width, int height);
 };

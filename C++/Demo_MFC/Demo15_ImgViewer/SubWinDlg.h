@@ -8,9 +8,7 @@ struct SubWinParam //预览子窗体相关参数数据结构
 	int iMainWinPosY;
 	int iSubWidth;
 	int iSubHeight;
-	int iMouseX;
-	int iMouseY;
-	CDib* pOriginImage;
+	CDib* pViewImage;
 };
 
 // SubWinDlg 对话框
@@ -40,5 +38,4 @@ public:
 	CDC* m_pCDC;
 	CRect m_mainRect;
 	CRect m_viewRect;
-	CDib m_viewImage;
 };

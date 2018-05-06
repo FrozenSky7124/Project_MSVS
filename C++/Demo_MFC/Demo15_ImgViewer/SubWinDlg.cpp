@@ -49,11 +49,12 @@ BOOL SubWinDlg::OnInitDialog()
 
 	// 设置预览子窗体的位置
 	GetClientRect(&m_mainRect);
-	m_mainRect.left = m_pSubWinParam->iMainWinPosX + 1024 + 20;
+	m_mainRect.left = m_pSubWinParam->iMainWinPosX + 1024 + 20 + 5;
 	m_mainRect.top = m_pSubWinParam->iMainWinPosY;
 	m_mainRect.right = m_mainRect.left + m_pSubWinParam->iSubWidth;
 	m_mainRect.bottom = m_mainRect.top + m_pSubWinParam->iSubHeight;
-	MoveWindow(m_mainRect);
+	CalcWindowRect(&m_mainRect);
+	SetWindowPos(NULL, m_mainRect.left, m_mainRect.top, m_mainRect.Width(), m_mainRect.Height(), SWP_NOZORDER); //设置窗体位置
 	// 
 	GetClientRect(&m_mainRect);
 	GetDlgItem(IDC_STATIC_VIEW)->GetClientRect(&m_viewRect);
@@ -74,5 +75,5 @@ BOOL SubWinDlg::OnInitDialog()
 
 void SubWinDlg::ShowViewImage()
 {
-	(m_pSubWinParam->pOriginImage)->Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
+	(m_pSubWinParam->pViewImage)->Draw(m_pCDC, CPoint(0, 0), CSize(256, 256));
 }
