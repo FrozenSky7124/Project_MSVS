@@ -205,6 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Demo17_GDI.ico" />
+    <Image Include="res\yys.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

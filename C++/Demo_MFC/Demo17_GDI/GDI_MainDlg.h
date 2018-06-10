@@ -17,7 +17,7 @@ public:
 	enum { IDD = IDD_DEMO17_GDI_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV Ö§³Ö
 
 
@@ -33,6 +33,7 @@ protected:
 	afx_msg void OnBnClickedBtnTest();
 
 	DECLARE_MESSAGE_MAP()
-public:
 
+public:
+	HBITMAP m_hBmpBackground;
 };

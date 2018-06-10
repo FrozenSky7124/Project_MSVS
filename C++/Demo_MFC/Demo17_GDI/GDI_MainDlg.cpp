@@ -46,6 +46,7 @@ BOOL GDI_MainDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	m_hBmpBackground = NULL;
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -75,6 +76,39 @@ void GDI_MainDlg::OnPaint()
 	}
 	else
 	{
+		HWND hMainWnd = GetSafeHwnd();
+		HDC hMainDC = ::GetDC(hMainWnd);
+		// 背景图片
+		HDC hMemDC = ::CreateCompatibleDC(hMainDC);
+		m_hBmpBackground = ::LoadBitmap(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BmpYYS));
+		HBITMAP hOldBmp = static_cast<HBITMAP>(::SelectObject(hMemDC, m_hBmpBackground));
+		BITMAP bmp;
+		::GetObject(m_hBmpBackground, sizeof(BITMAP), &bmp);
+		RECT rcClient;
+		::GetClientRect(hMainWnd, &rcClient);
+		int iWidth = rcClient.right - rcClient.left;
+		int iHeight = rcClient.bottom - rcClient.top;
+		//::BitBlt(hMainDC, 0, 0, bmp.bmWidth, bmp.bmHeight, hMemDC, 0, 0, SRCCOPY);
+		StretchBlt(hMainDC, 0, 0, iWidth, iHeight, hMemDC, 0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY);
+		::SelectObject(hMemDC, hOldBmp);
+		::DeleteDC(hMemDC);
+		// 文本绘制
+		LOGFONT logFont;
+		memset(&logFont, 0, sizeof(LOGFONT));
+		logFont.lfWidth = 20;
+		logFont.lfHeight = 40;
+		logFont.lfCharSet = GB2312_CHARSET;
+		_tcscpy_s(logFont.lfFaceName, _T("YaHei Consolas Hybrid"));
+		HFONT hFont = CreateFontIndirect(&logFont);
+		HFONT hOldFont = (HFONT)::SelectObject(hMainDC, hFont);
+		COLORREF clrOldText = ::SetTextColor(hMainDC, RGB(0, 0, 128));
+		::SetBkMode(hMainDC, TRANSPARENT);
+		CString csTitle = _T("FrozenSky7124.GitHub.io");
+		DrawText(hMainDC, csTitle, csTitle.GetLength(), &rcClient, DT_CENTER | DT_BOTTOM | DT_SINGLELINE);
+		::SetTextColor(hMainDC, clrOldText);
+		::SelectObject(hMainDC, hOldFont);
+		::DeleteObject(hFont);
+		::ReleaseDC(hMainWnd, hMainDC);
 		CDialogEx::OnPaint();
 	}
 }
@@ -87,12 +121,38 @@ HCURSOR GDI_MainDlg::OnQueryDragIcon()
 }
 
 
-
 void GDI_MainDlg::OnBnClickedBtnTest()
 {
 	HWND hMainWnd = GetSafeHwnd();
+	//HDC hMainDC = ::GetDC(hMainWnd);
+	//// 其他绘图操作代码
+	//// ......
+	//::ReleaseDC(hMainWnd, hMainDC);
+	
+	//PAINTSTRUCT ps;
+	//HDC hMainDC = ::BeginPaint(hMainWnd, &ps);
+	//// 其他绘图操作代码
+	//// ......
+	//::EndPaint(hMainWnd, &ps);
+
+	//HDC hMemDC = ::CreateCompatibleDC(hDest);
+	//// 其他绘图操作代码
+	//// ......
+	//::BitBlt(hDest, x, y, cx, cy, hMemDC, 0, 0, SRCCOPY); //将内存DC拷贝到目标DC
+	//::DeleteDC(hMemDC);
+
 	HDC hMainDC = ::GetDC(hMainWnd);
-	// 其他绘图操作代码
-	// ......
+	LOGFONT lf = { 0 };
+	lf.lfWidth = 16;
+	lf.lfHeight = 40;
+	lf.lfCharSet = GB2312_CHARSET;
+	HFONT hFont = ::CreateFontIndirect(&lf);
+	HFONT hOldFont = static_cast<HFONT>(::SelectObject(hMainDC, (HGDIOBJ)hFont));
+	RECT rect;
+	::GetClientRect(hMainWnd, &rect);
+	DrawText(hMainDC, _T("ABC"), 3, &rect, DT_LEFT);
+
+	::SelectObject(hMainDC, hOldFont);
+	::DeleteObject(hFont);
 	::ReleaseDC(hMainWnd, hMainDC);
 }
