@@ -108,6 +108,15 @@ void GDI_MainDlg::OnPaint()
 		::SetTextColor(hMainDC, clrOldText);
 		::SelectObject(hMainDC, hOldFont);
 		::DeleteObject(hFont);
+
+		//»­Ïß
+		HPEN hPen = CreatePen(PS_DOT, 1, RGB(42, 178, 203));
+		HPEN hOldPen = (HPEN)::SelectObject(hMainDC, hPen);
+		MoveToEx(hMainDC, 50, 50, NULL);
+		LineTo(hMainDC, 200, 300);
+		::SelectObject(hMainDC, hOldPen);
+		::DeleteObject(hPen);
+		
 		::ReleaseDC(hMainWnd, hMainDC);
 		CDialogEx::OnPaint();
 	}
