@@ -1,0 +1,231 @@
+data={
+	marginBody = 1,		--角色格子与容纳角色格子的容器的边框的距离
+
+	--whoRoleGrid角色格子，这里控制格子边框()、选择框()、小怪目标框()、团确背景(Image_ReadyCheck)
+	wholeRoleGrid={
+		width=128,	--格子宽度
+		height=60,	--格子高度
+		margin_x=2,	--格子与格子之间的距离x方向
+		margin_y=2,	--格子与格子之间的距离y方向
+	},
+
+	--roleName角色名字(Text_RoleName)
+	roleName={
+		top=-4,		--格子内部上边距
+		left=24,		--格子内部左边距
+		width=128,	--名字长度
+		height=24,	--名字高度
+		valign=0,	--1:垂直居中；2：底对齐；0：顶对齐
+		halign=0,	--1:水平居中；2：右对齐；0：左对齐
+	},
+
+	--lifeBar  血条设置(Image_LifeBG、Shadow_Life_Fade)
+	lifeBar={
+		top=0,
+		left=0,
+		width=128,
+		height=56,
+	},
+
+	--manaBar 蓝条设置(Image_ManaBG、Image_Mana)
+	--蓝条设置包含了门派元件(Image_CJRage、Image_TMRage)
+	manaBar={
+		top=56,
+		left=0,
+		width=128,
+		height=4,
+	},
+
+	--kungfuText 心法名字设置(Text_Kungfu)
+	kungfuText={
+		top=-4,
+		left=-4,
+		width=28,
+		height=28,
+	},
+	
+	--kungfuImage 心法图片(Image_Kungfu)
+	kungfuImage={
+		top=-16,
+		left=-16,
+		width=40,
+		height=40,
+	},
+
+	--distanceText(距离文字)
+	distanceText={
+		top=24,
+		left=0,
+		width=120,
+		height=20,
+	},
+
+	--groupEyeImage 阵眼 (Image_GroupEye)
+	groupEyeImage={
+		top=24,
+		left=-5,
+		width=20,
+		height=20,
+	},
+
+	--bossTargetImage boss对象(Image_BossTarget)
+	bossTargetImage={
+		top=24,
+		left=90,
+		width=28,
+		height=28,
+	},
+
+	--团长图标 (Image_Leader)
+	leaderImage={
+		top=1,
+		left=114,
+		width=16,
+		height=16,
+	},
+
+	--标记权限者图标(Image_Mark)
+	markerImage={
+		top=23,
+		left=114,
+		width=16,
+		height=16,
+	},
+
+	--分配权限者图标 (Image_Looter)
+	looterImage={
+		top=45,
+		left=114,
+		width=16,
+		height=16,
+	},
+
+	--世界标记图片(Image_WorldMark)
+	worldMarkImage={
+		top=-8,
+		left=82,
+		width=32,
+		height=32,
+	},
+
+	--lifeText 血量文字 (Text_LifeValue)
+	lifeText={
+		top=16,
+		left=0,
+		width=110,
+		height=24,	
+		valign=1,	--1:垂直居中；2：底对齐；0：顶对齐
+		halign=2,	--1:水平居中；2：右对齐；0：左对齐
+	},
+
+
+	--buffhandle ()
+	handleBuff={
+		top=28,
+		left=0,
+		width=128,
+		height=30,
+		fontscale=0.9,
+	},
+
+	handleBuffBox={
+		[1]={
+			top=0,
+			left=0,
+			width=28,
+			height=28,
+		},
+		[2]={
+			top=0,
+			left=30,
+			width=28,
+			height=28,
+		},
+		[3]={
+			top=0,
+			left=60,
+			width=28,
+			height=28,
+		},
+		[4]={
+			top=0,
+			left=90,
+			width=28,
+			height=28,
+		},
+	},
+
+	--confirmImage团确图标设置，等待(Image_Vote_Wait)、同意(Image_Vote_Yes)、不同意(Image_Vote_No)、团确没准备好(Image_ReadyCheck_No)
+	confirmImage={
+		top=25,
+		left=15,
+		width=90,
+		height=45,
+	},
+
+	--边角指示器
+	edgeIndicato = {
+		["TopLeft"] = {
+			top = 24,
+			left = 80,
+			width = 10,
+			height = 10,
+		},
+		["TopRight"] = {
+			top = 24,
+			left = 100,
+			width = 10,
+			height = 10,
+		},
+		["BottomLeft"] = {
+			top = 70,
+			left = 1,
+			width = 10,
+			height = 10,
+		},
+		["BottomRight"] = {
+			top = 70,
+			left = 118,
+			width = 10,
+			height = 10,
+		},
+	},
+	
+	--语音状态
+	micStatus = {
+		["MicOpen"] = {
+			top = 22,
+			left = 22,
+			width = 30,
+			height = 24,
+		},
+		["MicDisable"] = {
+			top = 18,
+			left = 17,
+			width = 14,
+			height = 14,
+		},
+	},
+	
+	--特殊BUFF
+	specialBuff = {
+		["Handle"] = {
+			top = 0,
+			left = 0,
+			width = 120,
+			height = 60,
+		},
+		["Bg"] = {
+			top = 0,
+			left = 0,
+			width = 120,
+			height = 60,
+		},
+		["BuffBox"] = {
+			top = 43,
+			left = 0,
+			width = 40,
+			height = 40,
+		},
+	},
+}
