@@ -25,17 +25,47 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Star Catalogue file not found!"), _T("QAQ"), MB_ICONERROR, NULL);
 		return -1;
 	}
-	CStdioFile fileStarCata;
+	//CStdioFile fileStarCata;
+	//if (!fileStarCata.Open(strFilePath, CFile::modeRead))
+	//{
+	//	MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Faild to open Star Catalogue file!"), _T("QAQ"), MB_ICONERROR, NULL);
+	//	return -2;
+	//}
+
+	CFile fileStarCata;
 	if (!fileStarCata.Open(strFilePath, CFile::modeRead))
 	{
 		MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Faild to open Star Catalogue file!"), _T("QAQ"), MB_ICONERROR, NULL);
 		return -2;
 	}
-	CString strRead = _T("");
+	int fileLength = (int)fileStarCata.GetLength();
+	int iCount = fileLength / 208;
+	char* pData = new char[fileLength];
+	fileStarCata.Read(pData, fileLength);
+	fileStarCata.Close();
 
-	pMainDlg->m_iCurMakeNo = 0;
-	while (fileStarCata.ReadString(strRead) && pMainDlg->m_iCurMakeNo < 10)
+	bool bRet;
+	CDbSQLite sqlite;
+	// Open Sqlite database
+	bRet = sqlite.Open(_T("Tycho2_all.db"));
+	if (!bRet)
 	{
+		AfxMessageBox(_T("Error in sqlite.Open()"));
+		return -3;
+	}
+	// Create TABLE
+	bRet = sqlite.DirectStatement(_T("CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), VT numeric(6,3))"));
+	if (!bRet)
+		AfxMessageBox(_T("Error in CREATE TABLE"));
+
+	pMainDlg->m_MainProgBar.SetRange32(0, iCount);
+	CString strRead = _T("");
+	for (int i = 0; i < iCount; i++)
+	{
+		char lineBuffer[208];
+		memcpy_s(&lineBuffer, 208, pData + 208 * i, 208);
+		strRead = lineBuffer;
+
 		CString strID, strmRA, strmDE, strpmRA, strpmDE, strVT;
 		strID = strRead.Mid(0, 12);
 		strmRA = strRead.Mid(15, 12);
@@ -44,17 +74,26 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		strpmDE = strRead.Mid(49, 7);
 		strVT = strRead.Mid(123, 6);
 
-		pMainList->InsertItem(pMainDlg->m_iCurMakeNo, strID);
-		pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 1, strmRA);
-		pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 2, strmDE);
-		pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 3, strpmRA);
-		pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 4, strpmDE);
-		pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 5, strVT);
-		
-		pMainDlg->m_iCurMakeNo++;
+		// Insert into database
+		CString szQuery;
+		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.3f)"), strID, atof(strmRA), atof(strmDE), atof(strVT));
+		bRet = sqlite.DirectStatement(szQuery);
+		if (!bRet)
+			AfxMessageBox(_T("Error in INSERT"));
+
+		strRead.ReleaseBuffer();
+		pMainDlg->m_iCurMakeNo = i;
 	}
 
-	fileStarCata.Close();
+	//pMainList->InsertItem(pMainDlg->m_iCurMakeNo, strID);
+	//pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 1, strmRA);
+	//pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 2, strmDE);
+	//pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 3, strpmRA);
+	//pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 4, strpmDE);
+	//pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 5, strVT);
+	
+	delete[] pData;
+	TRACE(_T("OK!\n"));
 	return 0;
 }
 
@@ -156,7 +195,7 @@ void FSC_MainDlg::InitUI()
 	m_MainList.SetTextBkColor(RGB(205, 226, 252));
 	m_MainList.SetExtendedStyle(m_MainList.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-	m_MainProgBar.SetRange(0, 10);
+	m_MainProgBar.SetRange32(0, 2539913);
 
 	// UI Proc Timer
 	SetTimer(1, 300, NULL);
@@ -181,29 +220,19 @@ void FSC_MainDlg::OnTimer(UINT_PTR nIDEvent)
 void FSC_MainDlg::OnBnClickedBtnCreateDB()
 {
 	// TODO:
-	bool fTest;
+	bool bRet;
 	CDbSQLite sqlite;
 	// Open Sqlite database
-	fTest = sqlite.Open(_T("theTestSqlite.db"));
-	if (!fTest)
+	bRet = sqlite.Open(_T("Tycho2_all.db"));
+	if (!bRet)
 	{
 		AfxMessageBox(_T("Error in sqlite.Open()"));
 		return;
 	}
 	// Create TABLE
-	fTest = sqlite.DirectStatement(_T("CREATE TABLE usersInfo(name varchar(30), password varchar(20))"));
-	if (!fTest)
+	bRet = sqlite.DirectStatement(_T("CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), VT numeric(6,3))"));
+	if (!bRet)
 		AfxMessageBox(_T("Error in CREATE TABLE"));
-	// INSERT
-	CString szQuery;
-	szQuery = _T("INSERT INTO usersInfo VALUES ('xiaoWang','123')");
-	fTest = sqlite.DirectStatement(szQuery);
-	if (!fTest)
-		AfxMessageBox(_T("Error in INSERT"));
-	szQuery = _T("INSERT INTO usersInfo VALUES ('daWang','322')");
-	fTest = sqlite.DirectStatement(szQuery);
-	if (!fTest)
-		AfxMessageBox(_T("Error in INSERT"));
 	AfxMessageBox(_T("Success!"));
 }
 

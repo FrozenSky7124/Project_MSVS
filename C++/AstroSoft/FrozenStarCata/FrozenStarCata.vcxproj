@@ -184,9 +184,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="DbSqlite.h" />
     <ClInclude Include="FrozenStarCata.h" />
     <ClInclude Include="FSC_MainDlg.h" />
