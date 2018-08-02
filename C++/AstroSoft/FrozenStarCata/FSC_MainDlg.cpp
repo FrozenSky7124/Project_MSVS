@@ -40,6 +40,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	}
 	int fileLength = (int)fileStarCata.GetLength();
 	int iCount = fileLength / 208;
+	pMainDlg->m_MainProgBar.SetRange32(0, iCount);
 	char* pData = new char[fileLength];
 	fileStarCata.Read(pData, fileLength);
 	fileStarCata.Close();
@@ -58,31 +59,39 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	if (!bRet)
 		AfxMessageBox(_T("Error in CREATE TABLE"));
 
-	pMainDlg->m_MainProgBar.SetRange32(0, iCount);
 	CString strRead = _T("");
 	for (int i = 0; i < iCount; i++)
 	{
 		char lineBuffer[208];
 		memcpy_s(&lineBuffer, 208, pData + 208 * i, 208);
+		strRead.ReleaseBuffer();
 		strRead = lineBuffer;
 
 		CString strID, strmRA, strmDE, strpmRA, strpmDE, strVT;
+
 		strID = strRead.Mid(0, 12);
 		strmRA = strRead.Mid(15, 12);
 		strmDE = strRead.Mid(28, 12);
 		strpmRA = strRead.Mid(41, 7);
 		strpmDE = strRead.Mid(49, 7);
 		strVT = strRead.Mid(123, 6);
+		
+		pMainDlg->m_iCurMakeNo = i;
+		
+		// Filter VT: 2.0 ~ 5.0
+		if (-1 == strVT.Find(_T("."))) continue;
+		double dVT = atof(strVT);
+		if (dVT < 2.0 || dVT > 5.0) continue;
+		// Filter mRA and mDE exclude empty value
+		if (-1 == strmRA.Find(_T("."))) continue;
+		if (-1 == strmDE.Find(_T("."))) continue;
 
 		// Insert into database
 		CString szQuery;
-		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.3f)"), strID, atof(strmRA), atof(strmDE), atof(strVT));
+		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.3f)"), strID, atof(strmRA), atof(strmDE), dVT);
 		bRet = sqlite.DirectStatement(szQuery);
 		if (!bRet)
 			AfxMessageBox(_T("Error in INSERT"));
-
-		strRead.ReleaseBuffer();
-		pMainDlg->m_iCurMakeNo = i;
 	}
 
 	//pMainList->InsertItem(pMainDlg->m_iCurMakeNo, strID);
@@ -93,7 +102,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	//pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 5, strVT);
 	
 	delete[] pData;
-	TRACE(_T("OK!\n"));
+	MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Star Catalogue Making Success!"), _T("QwQ"), MB_ICONINFORMATION, NULL);
 	return 0;
 }
 
@@ -256,6 +265,4 @@ void FSC_MainDlg::OnBnClickedBtnMake()
 	m_hMakeThread = (HANDLE)_beginthreadex(NULL, 0, &uiProcFuncMake, this, 0, &m_uiMakeThreadID);
 	ASSERT(m_uiMakeThreadID);
 	SetThreadPriority(m_hMakeThread, THREAD_PRIORITY_HIGHEST);
-
-	
 }

@@ -47,7 +47,7 @@ public:
 	CListCtrl m_MainList;
 	CProgressCtrl m_MainProgBar;
 
-	int m_iCurMakeNo;
+	int m_iCurMakeNo;           //Cur Process
 
 	HANDLE m_hMakeThread;       //MakeThread Handle
 	UINT m_uiMakeThreadID;      //MakeThread ID
