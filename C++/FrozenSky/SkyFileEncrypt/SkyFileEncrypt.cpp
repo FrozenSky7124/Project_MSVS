@@ -22,8 +22,25 @@ int fileEncrypt(char* filePath, unsigned int secretKey)
 	}
 	memset(buffer, 0, sizeof(char));
 
-	//rewind(file);
+	// Get fileSize
+	struct _stat info;
+	_stat(filePath, &info);
+	int fileSize = info.st_size;
+	cout << "File Size: " << fileSize << endl;
+
+	if (fileSize == 0)
+	{
+		free(buffer);
+		fclose(file);
+		return -4;
+	}
+
 	int operateNum = 100;
+	if (fileSize < 100)
+	{
+		operateNum = fileSize;
+	}
+
 	for (int i = 0; i < operateNum; i++)
 	{
 		fseek(file, i, SEEK_SET);
@@ -69,11 +86,11 @@ int main(int argc, char* argv[])
 	int ret = fileEncrypt(argv[1], secretKey);
 	if (ret != 0)
 	{
-		cout << "Error in Function: fileEncrypt!" << endl;
+		cout << endl << "Error in Function: fileEncrypt!" << endl;
 	}
 	else
 	{
-		cout << "File Encrypt Complete!" << endl;
+		cout << endl << "File Encrypt Complete!" << endl;
 	}
 	
 	system("pause");
