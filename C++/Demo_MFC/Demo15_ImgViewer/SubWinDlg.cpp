@@ -77,3 +77,12 @@ void SubWinDlg::ShowViewImage()
 {
 	(m_pSubWinParam->pViewImage)->Draw(m_pCDC, CPoint(0, 0), CSize(256, 256));
 }
+
+
+void SubWinDlg::OnCancel()
+{
+	TRACE(_T("OnCancel!\n"));
+	DestroyWindow();
+
+	//CDialogEx::OnCancel();
+}

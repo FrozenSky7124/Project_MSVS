@@ -30,10 +30,10 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Dib_Ex.h">
+    <ClInclude Include="SubWinDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SubWinDlg.h">
+    <ClInclude Include="..\Demo_ImageProcLite\Dib_Ex.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

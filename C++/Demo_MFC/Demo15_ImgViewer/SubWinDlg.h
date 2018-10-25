@@ -38,4 +38,5 @@ public:
 	CDC* m_pCDC;
 	CRect m_mainRect;
 	CRect m_viewRect;
+	virtual void OnCancel();
 };

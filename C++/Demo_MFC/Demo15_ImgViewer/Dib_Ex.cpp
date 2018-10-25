@@ -156,8 +156,10 @@ BOOL CDib::LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT 
 		return FALSE;
 
 	// 计算位图每行的字节数
-	UINT uBmpLineByte = (lWidth * iBitCount + 31) / 8;
-	uBmpLineByte = uBmpLineByte / 4 * 4;
+	//UINT uBmpLineByte = (lWidth * iBitCount + 31) / 8;
+	//uBmpLineByte = uBmpLineByte / 4 * 4;
+	UINT uBmpLineByte = (lWidth * iBitCount + 31) / 32 * 4;
+
 	// 计算位图数据区字节数
 	DWORD dwBmpDataSize = uBmpLineByte * lHeight;
 
@@ -361,7 +363,8 @@ WORD CDib::GetBitCount()
 //=======================================================
 UINT CDib::GetLineByte()
 { 
-    return (GetWidth() * GetBitCount() / 8 + 3) / 4 * 4;;
+    //return (GetWidth() * GetBitCount() / 8 + 3) / 4 * 4;;
+	return (GetWidth() * GetBitCount() + 31) / 32 * 4;
 }
 
 //=======================================================
@@ -380,7 +383,7 @@ DWORD CDib::GetNumOfColor()
 		{
 		    case 1: dwNumOfColor = 2; break;
 		    case 4: dwNumOfColor = 16; break;
-		    case 8: dwNumOfColor = 256;
+			case 8: dwNumOfColor = 256;
 		}
 	}
     else

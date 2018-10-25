@@ -179,8 +179,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Demo_ImageProcLite\Dib_Ex.h" />
     <ClInclude Include="Demo15_ImgViewer.h" />
-    <ClInclude Include="Dib_Ex.h" />
     <ClInclude Include="ImgViewerDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />

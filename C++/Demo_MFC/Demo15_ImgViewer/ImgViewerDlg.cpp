@@ -126,7 +126,6 @@ HCURSOR ImgViewerDlg::OnQueryDragIcon()
 }
 
 
-
 void ImgViewerDlg::OnOK()
 {
 	// TODO: 在此添加专用代码和/或调用基类
@@ -137,11 +136,20 @@ void ImgViewerDlg::OnOK()
 
 void ImgViewerDlg::OnCancel()
 {
-	// TODO: 在此添加专用代码和/或调用基类
+	// TODO:
+	
 	// 释放预览图像数据缓存
 	if (m_lpCDibDataBuffer)
 		delete[] m_lpCDibDataBuffer;
 
+	// 释放预览窗口
+	if (m_SubWin != NULL)
+	{
+		m_SubWin->OnCancel();
+		delete m_SubWin;
+		m_SubWin = NULL;
+	}
+	
 	CDialogEx::OnCancel();
 }
 
@@ -162,7 +170,7 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 
 	// 载入位图数据
 	m_cDibImage.LoadFromFile(tcFilePath);
-	m_cDibImage.RgbToGrade();
+	//m_cDibImage.RgbToGrade();
 	m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
 	m_SubWinParam.pViewImage = NULL;
 
@@ -179,11 +187,12 @@ void ImgViewerDlg::BuildTempCDibImage(int x, int y, int width, int height)
 {
 	int iTempx = x - 10 - width / 2;
 	int iTempy = y - 10 - height / 2;
-	int iBitCount = 8;
+	int iBitCount = 24;
 
 	// 计算位图每行的字节数
-	UINT uBmpLineByte = (width * iBitCount + 31) / 8;
-	uBmpLineByte = uBmpLineByte / 4 * 4;
+	//UINT uBmpLineByte = (width * iBitCount + 31) / 8;
+	//uBmpLineByte = uBmpLineByte / 4 * 4;
+	UINT uBmpLineByte = (width * iBitCount + 31) / 32 * 4;
 	// 计算位图数据区字节数
 	DWORD dwBmpDataSize = uBmpLineByte * height;
 
@@ -196,11 +205,12 @@ void ImgViewerDlg::BuildTempCDibImage(int x, int y, int width, int height)
 	int iLineByteNum = m_cDibImage.GetLineByte();
 	for (int ci = 0; ci < height; ci++)
 	{
-		memcpy_s(m_lpCDibDataBuffer + ci * uBmpLineByte, uBmpLineByte, lpData + (768 - (iTempy + height - ci)) * iLineByteNum + iTempx, uBmpLineByte);
+		memcpy_s(m_lpCDibDataBuffer + ci * uBmpLineByte, uBmpLineByte, lpData + (768 - (iTempy + height - ci)) * iLineByteNum + iTempx * iBitCount / 8, uBmpLineByte);
 	}
 	
 	// 创建预览图像Dib对象
-	m_cDibTemp.LoadFromBuffer(m_lpCDibDataBuffer, width, height, 8);
+	//m_cDibTemp.LoadFromBuffer(m_lpCDibDataBuffer, width, height, 8);
+	m_cDibTemp.LoadFromBuffer(m_lpCDibDataBuffer, width, height, 24);
 }
 
 void ImgViewerDlg::OnMouseMove(UINT nFlags, CPoint point)
