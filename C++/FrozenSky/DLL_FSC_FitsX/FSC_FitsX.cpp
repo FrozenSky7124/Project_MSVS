@@ -1,14 +1,3 @@
-//======================================================================
-// FSC_FitsX.cpp
-//
-// FrozenSky's FITS Format Class Library
-// 
-// Func:
-//       1.
-//       2.
-//====================================================================== 
-
-
 #include "FSC_FitsX.h"
 
 
@@ -32,6 +21,9 @@ FSC_FitsX::~FSC_FitsX()
 
 bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 {
+	BYTE bLow, bHigh;
+	SHORT sTmpValue;
+
 	// Release old data
 	if (m_pFitsData != NULL)
 	{
@@ -89,23 +81,22 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 	FitsFile.Read(lpFitsData, lDataSize);
 	for (int i = 0; i < m_iNAXIS2; i++)
 	{
+		int iWidthSize = i * m_iNAXIS1 * iPixelSize;
 		for (int j = 0; j < m_iNAXIS1; j++)
 		{
-			BYTE bLow, bHigh;
-			SHORT sTmpValue = 0;
-			bHigh = *(lpFitsData + i * m_iNAXIS1 * iPixelSize + j * iPixelSize);
-			bLow = *(lpFitsData + i * m_iNAXIS1 * iPixelSize + j * iPixelSize + 1);
+			bHigh = *(lpFitsData + iWidthSize + j * iPixelSize);
+			bLow = *(lpFitsData + iWidthSize + j * iPixelSize + 1);
+			sTmpValue = 0;
 			sTmpValue = ((sTmpValue + bHigh) << 8) + bLow;
-			m_pFitsData[i * m_iNAXIS1 + j] = sTmpValue * m_dBSCALE + m_dBZERO;
+			//m_pFitsData[i * m_iNAXIS1 + j] = sTmpValue * (int)m_dBSCALE + (int)m_dBZERO;
+			m_pFitsData[i * m_iNAXIS1 + j] = sTmpValue + (int)m_dBZERO;
 		}
 	}
 
-	for (int i = 0; i < m_iHDUNum; i++)
-	{
-		TRACE(_T("%-8s=%s\n"), m_vHDUKey.at(i), m_vHDUValue.at(i));
-	}
-
-	//TRACE(_T("%d\n"), m_vFitsData.at(5 * 4096 + 100));
+	//for (int i = 0; i < m_iHDUNum; i++)
+	//{
+	//	TRACE(_T("%-8s=%s\n"), m_vHDUKey.at(i), m_vHDUValue.at(i));
+	//}
 
 	delete[] lpFitsData;
 	FitsFile.Close();
@@ -115,5 +106,20 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 
 int FSC_FitsX::GetFitsData(int x, int y)
 {
-	return m_pFitsData[y * 4096 + x];
+	if (!m_pFitsData) return -1;
+	if (x >= GetWidth()) return -1;
+	if (y >= GetHeight()) return -1;
+	return m_pFitsData[y * GetWidth() + x];
+}
+
+
+int FSC_FitsX::GetWidth()
+{
+	return m_iNAXIS1;
+}
+
+
+int FSC_FitsX::GetHeight()
+{
+	return m_iNAXIS2;
 }

@@ -1,12 +1,11 @@
-//======================================================================
-// FSC_FitsX.h
-//
-// FrozenSky's FITS Format Class Library
-// 
-// Func:
-//       1.
-//       2.
-//====================================================================== 
+/**********************************************************************
+* Name:      FSC_FitsX.h
+* Function:  Open & Read FITS Format Files.
+* Author:    FrozenSky
+* Created:   2018-10-25
+* Copyright: FrozenSky@Avalon
+* License:   GPL
+**********************************************************************/
 
 
 #include "afx.h"
@@ -34,9 +33,21 @@ public:
 	//=================================================
 	// @Method: Get FITS Data by (x, y)
 	// @Param: {int} x (x | 0 from left to right)   {int} y (y | 0 from top to bottom)
-	// @Return: {int} (FITS file data)
+	// @Return: {int} (FITS file data, -1 when error)
 	//=================================================
 	int GetFitsData(int x, int y);
+
+	//=================================================
+	// @Method: Get FITS data width
+	// @Return: {int} (FITS data width)
+	//=================================================
+	int GetWidth();
+
+	//=================================================
+	// @Method: Get FITS data height
+	// @Return: {int} (FITS data height)
+	//=================================================
+	int GetHeight();
 
 private:
 	char m_filePath[_MAX_PATH];         // FITS file name
