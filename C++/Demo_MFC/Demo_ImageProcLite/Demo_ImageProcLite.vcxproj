@@ -75,6 +75,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\Project_MSVS\C++\FrozenSky\DLL_FSC_FitsX;D:\Project_MSVS\C++\FrozenSky\DLL_CDib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -178,19 +179,20 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClInclude Include="..\..\FrozenSky\DLL_CDib\Dib_Ex.h" />
+    <ClInclude Include="..\..\FrozenSky\DLL_FSC_FitsX\FSC_FitsX.h" />
     <ClInclude Include="Demo_ImageProcLite.h" />
-    <ClInclude Include="Dib_Ex.h" />
     <ClInclude Include="IPLDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\FrozenSky\DLL_CDib\Dib_Ex.cpp" />
+    <ClCompile Include="..\..\FrozenSky\DLL_FSC_FitsX\FSC_FitsX.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Demo_ImageProcLite.cpp" />
-    <ClCompile Include="Dib_Ex.cpp" />
     <ClCompile Include="IPLDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
