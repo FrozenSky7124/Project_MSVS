@@ -175,10 +175,39 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 	// FSC_FitsX Test
 	FSC_FitsX testFX;
 	testFX.OpenFitsFile(tcFilePath);
-	// 从 FITS 文件载入
-	//m_cDibImage.LoadFromFitsFile(tcFilePath);
-	//m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
+	
+	// 计算 BMP 文件数据区的长度(Byte)
+	long iBmpDataSize = testFX.GetWidth() * testFX.GetHeight();
+	// 创建 BMP 数据空间
+	BYTE* pBmpData = (BYTE*) new BYTE[iBmpDataSize];
+	memset(pBmpData, 0, iBmpDataSize);
+	// 复制 FITS 数据到 BMP 数据空间
+	int minPixelCount = 65535;
+	int maxPixelCount = 0;
+	double dRate = 1.0f / 65535 * 255;
+	for (int i = 0; i < testFX.GetHeight(); i++)
+	{
+		for (int j = 0; j < testFX.GetWidth(); j++)
+		{
+			int iFValue = testFX.GetFitsData(j, i);
+			if (iFValue < minPixelCount) minPixelCount = iFValue;
+			if (iFValue > maxPixelCount) maxPixelCount = iFValue;
 
+			iFValue = (float)(iFValue - 0) * dRate;
+			if (iFValue < 0) iFValue = 0;
+			if (iFValue > 255) iFValue = 255;
+			BYTE tempValue;
+			memset(&tempValue, 0, 1);
+			tempValue = tempValue + BYTE(iFValue);
+			// 复制到 BMP 文件数据区
+			memcpy_s(pBmpData + (testFX.GetHeight() - i - 1) * testFX.GetWidth() + j, 1, &tempValue, 1);
+		}
+	}
+	TRACE(_T("\nminPixValue = %d\nmaxPixValue = %d\n"), minPixelCount, maxPixelCount);
+	// 从外部数据生成 BMP 位图
+	m_cDibImage.LoadFromBuffer(pBmpData, testFX.GetWidth(), testFX.GetHeight(), 8);
+	m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
+	delete[] pBmpData;
 	/*
 	// 载入位图数据
 	m_cDibImage.LoadFromFile(tcFilePath);
