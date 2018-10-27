@@ -15,6 +15,9 @@
 #pragma once
 
 #include "afx.h"
+#include "math.h"
+#include <iostream>
+#include <algorithm>
 
 class CDib : public CObject
 {
@@ -27,6 +30,9 @@ public:
 
     // 从文件加载位图
     BOOL LoadFromFile(LPCTSTR lpszPath);
+
+	// 从FITS文件加载，并转换为位图
+	BOOL LoadFromFitsFile(LPCTSTR lpszPath);
 
 	// Ex:从外部数据加载位图
 	BOOL LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT iBitCount = 8);
@@ -80,10 +86,7 @@ public:
     BOOL IsGrade();
 
     // 判断位图是否有效
-    BOOL IsValid();  
-
-	// Ex:预构建指定的颜色表内存空间
-	BOOL MakeRgbQuadMem(WORD wBitCount);
+    BOOL IsValid();
 
 protected:
     // 计算位图颜色表长度
@@ -127,8 +130,5 @@ private:
     BOOL m_bValid;
 
 	// Ex:预构建的位图颜色表颜色数
-	UINT m_iClrUse;
-
-	// Ex:预构建的位图颜色表内存区域的指针
-	LPRGBQUAD m_lpRgbQuad_Mem;
+//	UINT m_iClrUse;
 };
