@@ -28,7 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v100</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
@@ -179,8 +179,9 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Demo_ImageProcLite\Dib_Ex.h" />
     <ClInclude Include="Demo15_ImgViewer.h" />
+    <ClInclude Include="Dib_Ex.h" />
+    <ClInclude Include="FSC_FitsX\FSC_FitsX.h" />
     <ClInclude Include="ImgViewerDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -190,6 +191,9 @@
   <ItemGroup>
     <ClCompile Include="Demo15_ImgViewer.cpp" />
     <ClCompile Include="Dib_Ex.cpp" />
+    <ClCompile Include="FSC_FitsX\FSC_FitsX.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ImgViewerDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

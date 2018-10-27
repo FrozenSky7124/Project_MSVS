@@ -6,6 +6,7 @@
 #include "Demo15_ImgViewer.h"
 #include "ImgViewerDlg.h"
 #include "afxdialogex.h"
+#include "FSC_FitsX\FSC_FitsX.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -76,7 +77,6 @@ BOOL ImgViewerDlg::OnInitDialog()
 	// 设置成员变量
 	m_pCDC = GetDlgItem(IDC_STATIC_VIEW)->GetDC();
 	m_SubWin = NULL;
-	m_cDibTemp.MakeRgbQuadMem(8);
 	m_lpCDibDataBuffer = NULL;
 
 	GetClientRect(&m_mainRect);
@@ -131,6 +131,10 @@ void ImgViewerDlg::OnOK()
 	// TODO: 在此添加专用代码和/或调用基类
 
 	//CDialogEx::OnOK();
+
+	// FSC_FitsX Test
+	FSC_FitsX testFX;
+	testFX.OpenFitsFile(_T("F:\\FrozenSky_Data\\Astronomy\\TeleImages\\36585-000000-0000-20181023125044050.fit"));
 }
 
 
@@ -167,7 +171,15 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 
 	// 判断文件类型
 	// ......
+	
+	// FSC_FitsX Test
+	FSC_FitsX testFX;
+	testFX.OpenFitsFile(tcFilePath);
+	// 从 FITS 文件载入
+	//m_cDibImage.LoadFromFitsFile(tcFilePath);
+	//m_cDibImage.Draw(m_pCDC, CPoint(0, 0), CSize(1024, 768));
 
+	/*
 	// 载入位图数据
 	m_cDibImage.LoadFromFile(tcFilePath);
 	//m_cDibImage.RgbToGrade();
@@ -178,7 +190,7 @@ void ImgViewerDlg::OnDropFiles(HDROP hDropInfo)
 	m_SubWin = new SubWinDlg(&m_SubWinParam, this);
 	m_SubWin->Create(IDD_SUBWIN_DIALOG, this);
 	//m_SubWin->ShowWindow(SW_SHOW);
-
+	*/
 	CDialogEx::OnDropFiles(hDropInfo);
 }
 

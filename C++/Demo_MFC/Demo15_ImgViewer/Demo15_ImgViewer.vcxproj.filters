@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="FSC_FitsX">
+      <UniqueIdentifier>{65fb2192-cddc-4dbc-b703-c1ff681b7d3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo15_ImgViewer.h">
@@ -33,8 +36,11 @@
     <ClInclude Include="SubWinDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\Demo_ImageProcLite\Dib_Ex.h">
+    <ClInclude Include="Dib_Ex.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FSC_FitsX\FSC_FitsX.h">
+      <Filter>FSC_FitsX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="SubWinDlg.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FSC_FitsX\FSC_FitsX.cpp">
+      <Filter>FSC_FitsX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -33,7 +33,6 @@ CDib::CDib(void)
     m_hPalette = NULL;
     m_bHasRgbQuad = FALSE;
     m_bValid = FALSE;
-	m_lpRgbQuad_Mem = NULL;
 }
 
 //=======================================================
@@ -145,6 +144,143 @@ BOOL CDib::LoadFromFile(LPCTSTR lpszPath)
 
 }
 
+
+//=======================================================
+// 函数功能： 从FITS文件加载，并转换为位图
+// 输入参数： LPCTSTR lpszPath - 待加载FITS文件路径
+// 返回值：   BOOL-TRUE 成功；FALSE 失败
+//=======================================================
+BOOL CDib::LoadFromFitsFile(LPCTSTR lpszPath)
+{
+	// 记录FITS文件名
+	strcpy(m_fileName, lpszPath);
+
+	// 以读模式打开FITS文件
+	CFile FitsFile;
+	if (!FitsFile.Open(m_fileName, CFile::modeRead | CFile::shareDenyWrite))
+	{
+		return FALSE;
+	}
+
+	// 读取 FITS HEADER 结构
+	CHAR FitsHeader[2880];
+	memset(&FitsHeader, 0, 2880);
+	FitsFile.Read(&FitsHeader, 2880);
+
+	// 校验 FITS 文件格式
+	if ((FitsHeader[29] != 'T') && (FitsHeader[29] != 'F'))
+	{
+		FitsFile.Close();
+		return FALSE;
+	}
+	// 读取 FITS 文件 BITPIX
+	char cBITPIX[64];
+	memcpy_s(&cBITPIX, 64, FitsHeader + 96, 64);
+	cBITPIX[63] = '\0';
+	CString csBITPIX(cBITPIX);
+	int iBITPIX = atoi(csBITPIX);
+	// 读取 FITS 文件 NAXIS1，即图像宽度（4096）
+	char cNAXIS1[64];
+	memcpy_s(&cNAXIS1, 64, FitsHeader + 256, 64);
+	cNAXIS1[63] = '\0';
+	CString csNAXIS1(cNAXIS1);
+	LONG lWidth = atoi(csNAXIS1);
+	// 读取 FITS 文件 NAXIS2，即图像高度（4108）
+	char cNAXIS2[64];
+	memcpy_s(&cNAXIS2, 64, FitsHeader + 336, 64);
+	cNAXIS2[63] = '\0';
+	CString csNAXIS2(cNAXIS2);
+	LONG lHeight = atoi(csNAXIS2);
+
+	// 计算 FITS 文件数据区的长度(Byte)
+	int iFitsDataSize = lWidth * lHeight * (iBITPIX / 8);
+	// 计算 BMP 文件数据区的长度(Byte)
+	int iBmpDataSize = lWidth * lHeight;
+	// 创建 FITS 数据空间
+	BYTE* pFitsData = (BYTE*) new BYTE[iFitsDataSize];
+	memset(pFitsData, 0, iFitsDataSize);
+	FitsFile.Read(pFitsData, iFitsDataSize);
+	// 创建 BMP 数据空间
+	BYTE* pBmpData = (BYTE*) new BYTE[iBmpDataSize];
+	memset(pBmpData, 0, iBmpDataSize);
+	// 进行空间传送
+	USHORT minPixValue = 65535;
+	USHORT maxPixValue = 0;
+
+	// 
+	USHORT uLow;
+	USHORT uHigh;
+	LONG lPixsNum = lWidth * lHeight;
+	INT iNum = lPixsNum >= 100000 ? 100000 : lPixsNum;
+	double dRate = lPixsNum * 1.0f / iNum;
+
+	USHORT* pUSHORT = new USHORT[iNum];
+	for (int i = 0; i < iNum; i++)
+	{
+		USHORT sValue;
+		memset(&sValue, 0, 2);
+		memcpy_s(&sValue, 2, pFitsData + int(i * dRate) * (iBITPIX / 8), 2);
+		pUSHORT[i] = sValue;
+	}
+	INT iLow = iNum * 0.432506;
+	INT iHigh = iNum * 0.97725;
+	std::nth_element(pUSHORT, pUSHORT + iLow, pUSHORT + iNum);
+	uLow = pUSHORT[iLow];
+	std::nth_element(pUSHORT, pUSHORT + iHigh, pUSHORT + iNum);
+	uHigh = pUSHORT[iHigh];
+	delete[] pUSHORT;
+
+	for (int i = 0; i < lHeight; i++)
+	{
+		for (int j = 0; j < lWidth; j++)
+		{
+			// BYTE临时变量temp[2] 存储1像元共16位的FITS数据块
+			//BYTE temp[2];
+			//memcpy_s(temp + 1, 1, &pFitsData[i * lWidth * (iBITPIX / 8) + j * (iBITPIX / 8)], 1);
+			//memcpy_s(temp + 0, 1, &pFitsData[i * lWidth * (iBITPIX / 8) + j * (iBITPIX / 8) + 1], 1);
+			// 重新映射8位灰度值
+			USHORT sValue;
+			memset(&sValue, 0, 2);
+			memcpy_s(&sValue, 2, &pFitsData[i * lWidth * (iBITPIX / 8) + j * (iBITPIX / 8)], 2);
+			USHORT realValue = sValue;
+			if (realValue < minPixValue) minPixValue = realValue;
+			if (realValue > maxPixValue) maxPixValue = realValue;
+
+			realValue = (float)(realValue - uLow) / (float)(uHigh - uLow) * 255.0f;
+			if (realValue < 0) realValue = 0;
+			if (realValue > 255) realValue = 255;
+			BYTE tempValue;
+			memset(&tempValue, 0, 1);
+			tempValue = tempValue + BYTE(realValue);
+			// 复制到 BMP 文件数据区
+			memcpy_s(pBmpData + (lHeight - i - 1) * lWidth + j, 1, &tempValue, 1);
+			// 将temp[2]中数据复制到BMP数据空间
+			//memcpy_s(pBmpData + (lHeight - i - 1) * lWidth * (iBITPIX / 8) + j * (iBITPIX / 8), 2, &temp, 2);
+			//BYTE temp;
+			//memcpy_s(&temp, 1, &pFitsData[i * lWidth * (iBITPIX / 8) + j * (iBITPIX / 8) + 1], 1);
+			//int realTemp = (SHORT)temp;
+			//memcpy_s(pBmpData + (lHeight - i - 1) * lWidth + j, 1, &temp, 1);
+		}
+	}
+	TRACE(_T("\nminPixValue = %d\nmaxPixValue = %d\n"), minPixValue, maxPixValue);
+	// 从外部数据生成 BMP 位图
+	LoadFromBuffer(pBmpData, lWidth, lHeight, 8);
+
+	if (pFitsData != NULL)
+	{
+		delete[] pFitsData;
+		pFitsData = NULL;
+	}
+	if (pBmpData != NULL)
+	{
+		delete[] pBmpData;
+		pBmpData = NULL;
+	}
+	FitsFile.Close();
+	return TRUE;
+}
+
+
 //=======================================================
 // 函数功能： 从外部位图数据加载位图
 // 输入参数： BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT iBitCount = 8/24
@@ -205,8 +341,6 @@ BOOL CDib::LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT 
 	m_lpBmpInfoHeader->biPlanes = 1;
 	m_lpBmpInfoHeader->biSize = sizeof(BITMAPINFOHEADER);
 	m_lpBmpInfoHeader->biSizeImage = dwBmpDataSize;
-	//m_lpBmpInfoHeader->biXPelsPerMeter = 2834;
-	//m_lpBmpInfoHeader->biYPelsPerMeter = 2834;
 	m_lpBmpInfoHeader->biXPelsPerMeter = 0;
 	m_lpBmpInfoHeader->biYPelsPerMeter = 0;
 	if (iBitCount > 8)
@@ -218,7 +352,13 @@ BOOL CDib::LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT 
 	m_lpRgbQuad = (LPRGBQUAD)(m_lpDib + sizeof(BITMAPINFOHEADER));
 	if (iBitCount == 8)
 	{
-		memcpy(m_lpRgbQuad, m_lpRgbQuad_Mem, m_iClrUse * sizeof(RGBQUAD));
+		for (int i = 0; i < 256; i++)
+		{
+			m_lpRgbQuad[i].rgbBlue = i;
+			m_lpRgbQuad[i].rgbGreen = i;
+			m_lpRgbQuad[i].rgbRed = i;
+			m_lpRgbQuad[i].rgbReserved = 0;
+		}
 	}
 
 	// 设置BMP图像数据
@@ -792,17 +932,6 @@ void CDib::Empty(BOOL bFlag)
         strcpy(m_fileName, "");
     }      
 
-	// 释放预构建颜色表内存
-	if (m_lpRgbQuad_Mem != NULL)
-	{
-		//for (UINT i = 0; i < m_iClrUse; i++)
-		//{
-		//	delete [] (m_lpRgbQuad_Mem + i);
-		//}
-		delete[] m_lpRgbQuad_Mem;
-		m_lpRgbQuad_Mem = NULL;
-	}
-
     // 释放位图文件头指针空间
     if(m_lpBmpFileHeader != NULL)
     {
@@ -834,34 +963,4 @@ void CDib::Empty(BOOL bFlag)
     // 设置位图无效
     m_bValid = FALSE;
 
-}  
-
-//=======================================================
-// 函数功能： Ex:预构建指定的颜色表内存空间
-// 输入参数： 无
-// 返回值：   TRUE:成功 FALSE:失败
-//=======================================================
-BOOL CDib::MakeRgbQuadMem(WORD wBitCount)
-{
-	if (wBitCount == 8)
-	{
-		// 为预构建的颜色表分配空间
-		m_lpRgbQuad_Mem = (LPRGBQUAD)new BYTE[sizeof(RGBQUAD) * 256];
-		if (!m_lpRgbQuad_Mem) return FALSE;
-
-		// 设置预构建颜色表的颜色数
-		m_iClrUse = 256;
-
-		for (int i = 0; i < 256; i++)
-		{
-			LPRGBQUAD lpTempRgbQuad = m_lpRgbQuad_Mem + i;
-			lpTempRgbQuad->rgbBlue = i;
-			lpTempRgbQuad->rgbGreen = i;
-			lpTempRgbQuad->rgbRed = i;
-			lpTempRgbQuad->rgbReserved = 0;
-		}
-		
-		return TRUE;
-	}
-	return FALSE;
 }
