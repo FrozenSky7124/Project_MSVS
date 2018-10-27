@@ -132,3 +132,9 @@ private:
 	// Ex:预构建的位图颜色表颜色数
 //	UINT m_iClrUse;
 };
+
+
+class FSC_DibX : public CDib
+{
+
+};
