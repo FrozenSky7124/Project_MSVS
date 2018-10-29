@@ -76,7 +76,7 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 	int iPixelSize = m_iBITPIX / 8;
 	LONG lDataSize = iPixelSize * m_iNAXIS1 * m_iNAXIS2;
 	BYTE* lpFitsData = (BYTE*) new BYTE[lDataSize];
-	m_pFitsData = (int*) new int[m_iNAXIS1 * m_iNAXIS2 * sizeof(int)];
+	m_pFitsData = (int*) new int[m_iNAXIS1 * m_iNAXIS2];
 	memset(lpFitsData, 0, lDataSize);
 	FitsFile.Read(lpFitsData, lDataSize);
 	for (int i = 0; i < m_iNAXIS2; i++)
@@ -113,6 +113,14 @@ int FSC_FitsX::GetFitsData(int x, int y)
 }
 
 
+int FSC_FitsX::GetFitsData(long lIndex)
+{
+	if (!m_pFitsData) return -1;
+	if (lIndex > GetWidth() * GetHeight()) return -1;
+	return m_pFitsData[lIndex];
+}
+
+
 int FSC_FitsX::GetWidth()
 {
 	return m_iNAXIS1;
@@ -122,4 +130,24 @@ int FSC_FitsX::GetWidth()
 int FSC_FitsX::GetHeight()
 {
 	return m_iNAXIS2;
+}
+
+
+int FSC_FitsX::GetHDUNum()
+{
+	return m_iHDUNum;
+}
+
+
+CString FSC_FitsX::GetHDUKey(int iPos)
+{
+	if (iPos >= m_iHDUNum) return _T("");
+	return m_vHDUKey.at(iPos);
+}
+
+
+CString FSC_FitsX::GetHDUValue(int iPos)
+{
+	if (iPos >= m_iHDUNum) return _T("");
+	return m_vHDUValue.at(iPos);
 }

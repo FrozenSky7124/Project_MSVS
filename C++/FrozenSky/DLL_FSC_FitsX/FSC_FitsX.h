@@ -11,6 +11,7 @@
 #include "afx.h"
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 
 using namespace std;
@@ -38,6 +39,13 @@ public:
 	int GetFitsData(int x, int y);
 
 	//=================================================
+	// @Method: Get FITS Data by position
+	// @Param: {long} lIndex (the ÒðµÙ¿ËË¿ of data)
+	// @Return: {int} (FITS file data, -1 when error)
+	//=================================================
+	int GetFitsData(long lIndex);
+
+	//=================================================
 	// @Method: Get FITS data width
 	// @Return: {int} (FITS data width)
 	//=================================================
@@ -48,6 +56,26 @@ public:
 	// @Return: {int} (FITS data height)
 	//=================================================
 	int GetHeight();
+
+	//=================================================
+	// @Method: Get HDU Number
+	// @Return: {int} (FITS HDU Number)
+	//=================================================
+	int GetHDUNum();
+
+	//=================================================
+	// @Method: Get FITS HDU Header Key
+	// @Param: {int} (HDU Header Key Position)
+	// @Return: {CString} (HDU Header Key)
+	//=================================================
+	CString GetHDUKey(int iPos);
+
+	//=================================================
+	// @Method: Get FITS HDU Header Value
+	// @Param: {int} (HDU Header Value Position)
+	// @Return: {CString} (HDU Header Value)
+	//=================================================
+	CString GetHDUValue(int iPos);
 
 private:
 	char m_filePath[_MAX_PATH];         // FITS file name
