@@ -23,6 +23,7 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 {
 	BYTE bLow, bHigh;
 	SHORT sTmpValue;
+	INT iValue;
 
 	// Release old data
 	if (m_pFitsData != NULL)
@@ -73,6 +74,8 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 		m_vHDUValue.push_back(csTmpValue);
 	}
 	// Load FITS Data
+	int minPixelCount = 65535;
+	int maxPixelCount = 0;
 	int iPixelSize = m_iBITPIX / 8;
 	LONG lDataSize = iPixelSize * m_iNAXIS1 * m_iNAXIS2;
 	BYTE* lpFitsData = (BYTE*) new BYTE[lDataSize];
@@ -89,9 +92,14 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 			sTmpValue = 0;
 			sTmpValue = ((sTmpValue + bHigh) << 8) + bLow;
 			//m_pFitsData[i * m_iNAXIS1 + j] = sTmpValue * (int)m_dBSCALE + (int)m_dBZERO;
-			m_pFitsData[i * m_iNAXIS1 + j] = sTmpValue + (int)m_dBZERO;
+			iValue = sTmpValue + (int)m_dBZERO;
+			m_pFitsData[i * m_iNAXIS1 + j] = iValue;
+			if (iValue < minPixelCount) minPixelCount = iValue;
+			if (iValue > maxPixelCount) maxPixelCount = iValue;
 		}
 	}
+	m_iMinPixelCount = minPixelCount;
+	m_iMaxPixelCount = maxPixelCount;
 
 	//for (int i = 0; i < m_iHDUNum; i++)
 	//{
@@ -101,6 +109,12 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 	delete[] lpFitsData;
 	FitsFile.Close();
 	return true;
+}
+
+
+int * FSC_FitsX::GetFitsDataPtr()
+{
+	return m_pFitsData;
 }
 
 
@@ -136,6 +150,18 @@ int FSC_FitsX::GetHeight()
 int FSC_FitsX::GetHDUNum()
 {
 	return m_iHDUNum;
+}
+
+
+int FSC_FitsX::GetMinPixelCount()
+{
+	return m_iMinPixelCount;
+}
+
+
+int FSC_FitsX::GetMaxPixelCount()
+{
+	return m_iMaxPixelCount;
 }
 
 

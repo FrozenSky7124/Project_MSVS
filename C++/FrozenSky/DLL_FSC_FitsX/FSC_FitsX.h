@@ -32,6 +32,12 @@ public:
 	bool OpenFitsFile(LPCTSTR lpszPath);
 
 	//=================================================
+	// @Method: Get FITS Data Ptr
+	// @Return: {int*} (FITS file data pointer)
+	//=================================================
+	int* GetFitsDataPtr();
+
+	//=================================================
 	// @Method: Get FITS Data by (x, y)
 	// @Param: {int} x (x | 0 from left to right)   {int} y (y | 0 from top to bottom)
 	// @Return: {int} (FITS file data, -1 when error)
@@ -64,6 +70,18 @@ public:
 	int GetHDUNum();
 
 	//=================================================
+	// @Method: Get Min pixel data value
+	// @Return: {int} (Min pixel data value)
+	//=================================================
+	int GetMinPixelCount();
+
+	//=================================================
+	// @Method: Get Max pixel data value
+	// @Return: {int} (Max pixel data value)
+	//=================================================
+	int GetMaxPixelCount();
+
+	//=================================================
 	// @Method: Get FITS HDU Header Key
 	// @Param: {int} (HDU Header Key Position)
 	// @Return: {CString} (HDU Header Key)
@@ -88,4 +106,7 @@ private:
 	int m_iNAXIS2;                      // NAXIS2
 	double m_dBSCALE;                   // BSCALE
 	double m_dBZERO;                    // BZERO
+
+	int m_iMinPixelCount;               // Min pixel data value
+	int m_iMaxPixelCount;               // Max pixel data value
 };
