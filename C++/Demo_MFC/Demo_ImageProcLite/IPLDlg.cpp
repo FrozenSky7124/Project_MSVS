@@ -18,23 +18,27 @@
 
 
 IPLDlg::IPLDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_DEMO_IMAGEPROCLITE_DIALOG, pParent)
+	: CDialog(IDD_DEMO_IMAGEPROCLITE_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_iProcConfig = 0;
+	m_ipFitsDataTmp = NULL;
 }
 
 void IPLDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_EditFitsInfo, m_EditFitsInfo);
 	DDX_Control(pDX, IDC_EditImgInfo, m_EditImgInfo);
 }
 
-BEGIN_MESSAGE_MAP(IPLDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DROPFILES()
 	ON_COMMAND(ID_MenuFile_Open, &IPLDlg::OnMenu_File_Open)
+	ON_BN_CLICKED(IDC_BtnLinearGE, &IPLDlg::OnBnClickedBtnLinearGE)
+	ON_BN_CLICKED(IDC_BtnReset, &IPLDlg::OnBnClickedBtnReset)
 END_MESSAGE_MAP()
 
 
@@ -42,7 +46,7 @@ END_MESSAGE_MAP()
 
 BOOL IPLDlg::OnInitDialog()
 {
-	CDialogEx::OnInitDialog();
+	CDialog::OnInitDialog();
 
 	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
@@ -57,6 +61,14 @@ BOOL IPLDlg::OnInitDialog()
 	m_FontStandard.CreatePointFont(110, _T("宋体"));
 	m_EditFitsInfo.SetFont(&m_FontStandard);
 	m_EditImgInfo.SetFont(&m_FontStandard);
+
+	RECT editRect;
+	GetDlgItem(IDC_EditLowPer)->GetClientRect(&editRect);
+	OffsetRect(&editRect, 0, 4);
+	GetDlgItem(IDC_EditLowPer)->SendMessage(EM_SETRECT, 0, (LPARAM)&editRect);
+	GetDlgItem(IDC_EditHighPer)->GetClientRect(&editRect);
+	OffsetRect(&editRect, 0, 4);
+	GetDlgItem(IDC_EditHighPer)->SendMessage(EM_SETRECT, 0, (LPARAM)&editRect);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -86,7 +98,7 @@ void IPLDlg::OnPaint()
 	}
 	else
 	{
-		CDialogEx::OnPaint();
+		CDialog::OnPaint();
 	}
 }
 
@@ -108,6 +120,16 @@ void IPLDlg::OnOK()
 }
 
 
+void IPLDlg::OnCancel()
+{
+	// TODO:
+	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
+	m_ipFitsDataTmp = NULL;
+
+	CDialog::OnCancel();
+}
+
+
 void IPLDlg::OnDropFiles(HDROP hDropInfo)
 {
 	// Get count of files drop in
@@ -125,34 +147,52 @@ void IPLDlg::OnDropFiles(HDROP hDropInfo)
 	// FITS
 	OpenFile_FITS(tcFilePath);
 
-	CDialogEx::OnDropFiles(hDropInfo);
+	CDialog::OnDropFiles(hDropInfo);
 }
 
 
 bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 {
+	// 读取 FITS 文件
 	m_FSCFitsX.OpenFitsFile(lpszPath);
+	// 创建 FITS 数据临时存储空间
+	long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
+	m_ipFitsDataTmp = new int[lDataSize];
+	memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+	// 读取 FITS 文件 PixelCount 最大值和最小值
+	m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
+	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
+	// 根据默认参数计算线性灰度阈值
+	ComputeGrayLimit(0.432506, 0.977250);
+	// 创建 FSC_DibX 位图对象
+	CreateDibX();
 
-	ComputeGrayLimit(0.432506, 0.92);
+	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+	ListFitsHDU();
+	ListImgInfo();
+	return true;
+}
 
+
+bool IPLDlg::CreateDibX()
+{
 	// 计算 BMP 文件数据区的长度(Byte)
-	long lBmpDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight();
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
+	long lBmpDataSize = iWidth * iHeight;
 	// 创建 BMP 数据空间
 	BYTE* pBmpData = (BYTE*) new BYTE[lBmpDataSize];
 	memset(pBmpData, 0, lBmpDataSize);
-	// 复制 FITS 数据到 BMP 数据空间
-	int minPixelCount = 65535;
-	int maxPixelCount = 0;
 	double dRate = 1.0f / (float)(m_iHighPixelCount - m_iLowPixelCount) * 255.;
 	//double dRate = 1.0f / (float)(3444 - 2760) * 255.;
-	for (int i = 0; i < m_FSCFitsX.GetHeight(); i++)
+	// 复制 FITS 数据到 BMP 数据空间
+	for (int i = 0; i < iHeight; i++)
 	{
-		for (int j = 0; j < m_FSCFitsX.GetWidth(); j++)
+		for (int j = 0; j < iWidth; j++)
 		{
-			int iFValue = m_FSCFitsX.GetFitsData(j, i);
-			if (iFValue < minPixelCount) minPixelCount = iFValue;
-			if (iFValue > maxPixelCount) maxPixelCount = iFValue;
-
+			//int iFValue = m_FSCFitsX.GetFitsData(j, i);
+			int iFValue = *(m_ipFitsDataTmp + i * iWidth + j);
+			// 使用自动灰度阈值进行线性灰度增强
 			iFValue = ((float)iFValue - (float)m_iLowPixelCount) * dRate;
 			if (iFValue < 0) iFValue = 0;
 			if (iFValue > 255) iFValue = 255;
@@ -160,17 +200,12 @@ bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 			memset(&tempValue, 0, 1);
 			tempValue = tempValue + BYTE(iFValue);
 			// 复制到 BMP 文件数据区
-			memcpy_s(pBmpData + (m_FSCFitsX.GetHeight() - i - 1) * m_FSCFitsX.GetWidth() + j, 1, &tempValue, 1);
+			memcpy_s(pBmpData + (iHeight - i - 1) * iWidth + j, 1, &tempValue, 1);
 		}
 	}
-	m_iMinPixelCount = minPixelCount;
-	m_iMaxPixelCount = maxPixelCount;
 	// 从外部数据生成 BMP 位图
-	m_FSCDibX.LoadFromBuffer(pBmpData, m_FSCFitsX.GetWidth(), m_FSCFitsX.GetHeight(), 8);
-	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(780, 780));
+	m_FSCDibX.LoadFromBuffer(pBmpData, iWidth, iHeight, 8);
 	delete[] pBmpData;
-	ListFitsHDU();
-	ListImgInfo();
 	return true;
 }
 
@@ -223,6 +258,11 @@ void IPLDlg::ListImgInfo()
 
 void IPLDlg::ComputeGrayLimit(double dLowPer, double dHighPer)
 {
+	CString csTmp;
+	csTmp.Format(_T("%.4f"), dLowPer * 100);
+	SetDlgItemText(IDC_EditLowPer, csTmp);
+	csTmp.Format(_T("%.4f"), dHighPer * 100);
+	SetDlgItemText(IDC_EditHighPer, csTmp);
 	// Compute Low Percentile Pixel Value & High Percentile Pixel Value
 	int iLow; //Low percentile pixel value
 	int iHigh; //High percentile pixel value
@@ -230,11 +270,14 @@ void IPLDlg::ComputeGrayLimit(double dLowPer, double dHighPer)
 	int iSampleNum = lPixelNum >= 10000 ? 10000 : lPixelNum; //Sample Count (Max: 10000)
 	int iLowNum = iSampleNum * dLowPer; //0.432506 default
 	int iHighNum = iSampleNum * dHighPer; //0.97725 default
+	if (iLowNum < 0) iLowNum = 0;
+	if (iHighNum >= iSampleNum) iHighNum = iSampleNum - 1;
 	double dRate = lPixelNum * 1.0f / iSampleNum;
 	int* pSampleData = new int[iSampleNum];
 	for (int i = 0; i < iSampleNum; i++)
 	{
-		pSampleData[i] = m_FSCFitsX.GetFitsData(i * dRate);
+		//pSampleData[i] = m_FSCFitsX.GetFitsData(i * dRate);
+		pSampleData[i] = *(m_ipFitsDataTmp + int(i * dRate));
 	}
 	std::nth_element(pSampleData, pSampleData + iLowNum, pSampleData + iSampleNum);
 	iLow = pSampleData[iLowNum];
@@ -257,4 +300,49 @@ void IPLDlg::OnMenu_File_Open()
 		strFilePath = selectFileDlg.GetPathName();
 		OpenFile_FITS(strFilePath);
 	}
+}
+
+
+void IPLDlg::OnBnClickedBtnLinearGE()
+{
+	// TODO:
+	CString csTmp;
+	GetDlgItemText(IDC_EditLowPer, csTmp);
+	double dLowPercent  = atof(csTmp) / 100.0;
+	GetDlgItemText(IDC_EditHighPer, csTmp);
+	double dHighPercent = atof(csTmp) / 100.0;
+	if (dLowPercent < 0) dLowPercent = 0.00000000;
+	if (dHighPercent > 1) dHighPercent = 1.00000000;
+	// 根据自定义参数计算线性灰度阈值
+	ComputeGrayLimit(dLowPercent, dHighPercent);
+	// 创建 FSC_DibX 位图对象
+	CreateDibX();
+
+	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+	ListFitsHDU();
+	ListImgInfo();
+}
+
+
+void IPLDlg::OnBnClickedBtnReset()
+{
+	// TODO:
+	// 清理数据
+	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
+	m_ipFitsDataTmp = NULL;
+	// 创建 FITS 数据临时存储空间
+	long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
+	m_ipFitsDataTmp = new int[lDataSize];
+	memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+	// 读取 FITS 文件 PixelCount 最大值和最小值
+	m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
+	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
+	// 根据默认参数计算线性灰度阈值
+	ComputeGrayLimit(0.432506, 0.977250);
+	// 创建 FSC_DibX 位图对象
+	CreateDibX();
+
+	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+	ListFitsHDU();
+	ListImgInfo();
 }

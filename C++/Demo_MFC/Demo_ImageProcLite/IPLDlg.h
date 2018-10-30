@@ -8,8 +8,10 @@
 #include "FSC_FitsX.h"
 #include "afxwin.h"
 
+#define LinearGrayEnhancement 0x00000001 // 线性灰度增强
+
 // IPLDlg 对话框
-class IPLDlg : public CDialogEx
+class IPLDlg : public CDialog
 {
 // 构造
 public:
@@ -33,20 +35,26 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMenu_File_Open();
-	DECLARE_MESSAGE_MAP()
+	afx_msg void OnBnClickedBtnLinearGE();
+	afx_msg void OnBnClickedBtnReset();
 	virtual void OnOK();
+	virtual void OnCancel();
+	DECLARE_MESSAGE_MAP()
 
 public:
 
 	bool OpenFile_FITS(LPCTSTR lpszPath);
+	bool CreateDibX();
+	void ComputeGrayLimit(double dLowPer, double dHighPer);
 	void ListFitsHDU();
 	void ListImgInfo();
-	void ComputeGrayLimit(double dLowPer, double dHighPer);
 
 private:
 	CDC* m_pCDCImgMain;
 	FSC_FitsX m_FSCFitsX;
 	FSC_DibX m_FSCDibX;
+	int m_iProcConfig;
+	int* m_ipFitsDataTmp;
 	int m_iMinPixelCount;
 	int m_iMaxPixelCount;
 	int m_iLowPixelCount;
