@@ -36,6 +36,7 @@ protected:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMenu_File_Open();
 	afx_msg void OnBnClickedBtnLinearGE();
+	afx_msg void OnBnClickedBtnBinaryConv();
 	afx_msg void OnBnClickedBtnReset();
 	virtual void OnOK();
 	virtual void OnCancel();
@@ -45,6 +46,7 @@ public:
 
 	bool OpenFile_FITS(LPCTSTR lpszPath);
 	bool CreateDibX();
+	bool CreateDibX_BinaryConv(int iBinThreshoud);
 	void ComputeGrayLimit(double dLowPer, double dHighPer);
 	void ListFitsHDU();
 	void ListImgInfo();
@@ -63,5 +65,4 @@ private:
 	CFont m_FontStandard;
 	CEdit m_EditFitsInfo;
 	CEdit m_EditImgInfo;
-public:
 };

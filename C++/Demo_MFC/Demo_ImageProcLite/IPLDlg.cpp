@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_COMMAND(ID_MenuFile_Open, &IPLDlg::OnMenu_File_Open)
 	ON_BN_CLICKED(IDC_BtnLinearGE, &IPLDlg::OnBnClickedBtnLinearGE)
 	ON_BN_CLICKED(IDC_BtnReset, &IPLDlg::OnBnClickedBtnReset)
+	ON_BN_CLICKED(IDC_BtnBinaryConv, &IPLDlg::OnBnClickedBtnBinaryConv)
 END_MESSAGE_MAP()
 
 
@@ -58,7 +59,7 @@ BOOL IPLDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 	m_pCDCImgMain = GetDlgItem(IDC_StaticImgMain)->GetDC();
 
-	m_FontStandard.CreatePointFont(110, _T("宋体"));
+	m_FontStandard.CreatePointFont(90, _T("宋体"));
 	m_EditFitsInfo.SetFont(&m_FontStandard);
 	m_EditImgInfo.SetFont(&m_FontStandard);
 
@@ -69,6 +70,9 @@ BOOL IPLDlg::OnInitDialog()
 	GetDlgItem(IDC_EditHighPer)->GetClientRect(&editRect);
 	OffsetRect(&editRect, 0, 4);
 	GetDlgItem(IDC_EditHighPer)->SendMessage(EM_SETRECT, 0, (LPARAM)&editRect);
+	GetDlgItem(IDC_EditBinThreshold)->GetClientRect(&editRect);
+	OffsetRect(&editRect, 0, 4);
+	GetDlgItem(IDC_EditBinThreshold)->SendMessage(EM_SETRECT, 0, (LPARAM)&editRect);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -210,6 +214,37 @@ bool IPLDlg::CreateDibX()
 }
 
 
+bool IPLDlg::CreateDibX_BinaryConv(int iBinThreshoud)
+{
+	// 计算 BMP 文件数据区的长度(Byte)
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
+	long lBmpDataSize = iWidth * iHeight;
+	// 创建 BMP 数据空间
+	BYTE* pBmpData = (BYTE*) new BYTE[lBmpDataSize];
+	memset(pBmpData, 0, lBmpDataSize);
+	// 复制 FITS 数据到 BMP 数据空间
+	for (int i = 0; i < iHeight; i++)
+	{
+		for (int j = 0; j < iWidth; j++)
+		{
+			int iFValue = *(m_ipFitsDataTmp + i * iWidth + j);
+			if (iFValue >= iBinThreshoud) iFValue = 255;
+			else iFValue = 0;
+			BYTE tempValue;
+			memset(&tempValue, 0, 1);
+			tempValue = tempValue + BYTE(iFValue);
+			// 复制到 BMP 文件数据区
+			memcpy_s(pBmpData + (iHeight - i - 1) * iWidth + j, 1, &tempValue, 1);
+		}
+	}
+	// 从外部数据生成 BMP 位图
+	m_FSCDibX.LoadFromBuffer(pBmpData, iWidth, iHeight, 8);
+	delete[] pBmpData;
+	return true;
+}
+
+
 void IPLDlg::ListFitsHDU()
 {
 	int iLength;
@@ -317,6 +352,19 @@ void IPLDlg::OnBnClickedBtnLinearGE()
 	ComputeGrayLimit(dLowPercent, dHighPercent);
 	// 创建 FSC_DibX 位图对象
 	CreateDibX();
+
+	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+	ListFitsHDU();
+	ListImgInfo();
+}
+
+
+void IPLDlg::OnBnClickedBtnBinaryConv()
+{
+	// TODO:
+	int iBinThreshoud = GetDlgItemInt(IDC_EditBinThreshold);
+	// 创建 FSC_DibX 位图对象
+	CreateDibX_BinaryConv(iBinThreshoud);
 
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
 	ListFitsHDU();
