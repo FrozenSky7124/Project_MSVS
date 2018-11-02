@@ -35,6 +35,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMenu_File_Open();
+	afx_msg void OnMenu_File_Save();
+	afx_msg void OnMenu_File_Quit();
+	afx_msg void OnMenu_Analyse_OutStand();
 	afx_msg void OnBnClickedBtnLinearGE();
 	afx_msg void OnBnClickedBtnBinaryConv();
 	afx_msg void OnBnClickedBtnReset();

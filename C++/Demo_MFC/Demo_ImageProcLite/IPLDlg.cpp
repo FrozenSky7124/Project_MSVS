@@ -40,6 +40,9 @@ BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_BN_CLICKED(IDC_BtnLinearGE, &IPLDlg::OnBnClickedBtnLinearGE)
 	ON_BN_CLICKED(IDC_BtnReset, &IPLDlg::OnBnClickedBtnReset)
 	ON_BN_CLICKED(IDC_BtnBinaryConv, &IPLDlg::OnBnClickedBtnBinaryConv)
+	ON_COMMAND(ID_MenuFile_Save, &IPLDlg::OnMenu_File_Save)
+	ON_COMMAND(ID_MenuFile_Quit, &IPLDlg::OnMenu_File_Quit)
+	ON_COMMAND(ID_MenuAnalyse_OutStand, &IPLDlg::OnMenu_Analyse_OutStand)
 END_MESSAGE_MAP()
 
 
@@ -157,6 +160,9 @@ void IPLDlg::OnDropFiles(HDROP hDropInfo)
 
 bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 {
+	// 清理数据
+	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
+	m_ipFitsDataTmp = NULL;
 	// 读取 FITS 文件
 	m_FSCFitsX.OpenFitsFile(lpszPath);
 	// 创建 FITS 数据临时存储空间
@@ -197,7 +203,8 @@ bool IPLDlg::CreateDibX()
 			//int iFValue = m_FSCFitsX.GetFitsData(j, i);
 			int iFValue = *(m_ipFitsDataTmp + i * iWidth + j);
 			// 使用自动灰度阈值进行线性灰度增强
-			iFValue = ((float)iFValue - (float)m_iLowPixelCount) * dRate;
+			//iFValue = ((float)iFValue - (float)m_iLowPixelCount) * dRate;
+			iFValue = 255 * double(iFValue) / 65535;
 			if (iFValue < 0) iFValue = 0;
 			if (iFValue > 255) iFValue = 255;
 			BYTE tempValue;
@@ -393,4 +400,85 @@ void IPLDlg::OnBnClickedBtnReset()
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
 	ListFitsHDU();
 	ListImgInfo();
+}
+
+
+void IPLDlg::OnMenu_File_Save()
+{
+	// TODO:
+	CString csSavePath(_T(".\\SaveImg.bmp"));
+	if (m_FSCDibX.IsValid())
+		m_FSCDibX.SaveToFile(csSavePath);
+}
+
+
+void IPLDlg::OnMenu_File_Quit()
+{
+	// TODO:
+	this->OnCancel();
+}
+
+
+void IPLDlg::OnMenu_Analyse_OutStand()
+{
+	// TODO:
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
+
+	int iAve = m_FSCFitsX.GetAveragePixelCount();
+	int iMin = INT_MAX;
+	int iMax = INT_MIN;
+	for (int i = 0; i < iHeight; i++)
+	{
+		for (int j = 0; j < iWidth; j++)
+		{
+			int *pValue = m_ipFitsDataTmp + i * iWidth + j;
+			int iValue = *pValue;
+			int S1 = pow(iValue - iAve, 2);
+			*pValue = S1;
+			if (S1 < iMin) iMin = S1;
+			if (S1 > iMax) iMax = S1;
+		}
+	}
+	int iFSMin = INT_MAX;
+	int iFSMax = INT_MIN;
+	for (long i = 0; i < iHeight * iWidth; i++)
+	{
+		int *pValue = m_ipFitsDataTmp + i;
+		*pValue = 65535 * double(*pValue - iMin) / (*pValue - iMax);
+		//*pValue = 65535 * double(*pValue - iMax) / (*pValue - iMin);
+		//if (*pValue < 0) *pValue = 0;
+		//if (*pValue > 65535) *pValue = 65535;
+	}
+
+
+	CString tempStr;
+	tempStr.Format(_T("AvePixelCount = %d\n"), iAve);
+	int iLength = m_EditImgInfo.GetWindowTextLength();
+	m_EditImgInfo.SetSel(iLength, iLength);
+	m_EditImgInfo.ReplaceSel(tempStr);
+	// 计算 BMP 文件数据区的长度(Byte)
+	long lBmpDataSize = iWidth * iHeight;
+	// 创建 BMP 数据空间
+	BYTE* pBmpData = (BYTE*) new BYTE[lBmpDataSize];
+	memset(pBmpData, 0, lBmpDataSize);
+	// 复制 FITS 数据到 BMP 数据空间
+	for (int i = 0; i < iHeight; i++)
+	{
+		for (int j = 0; j < iWidth; j++)
+		{
+			int FS1 = *(m_ipFitsDataTmp + i * iWidth + j);
+			FS1 = 255 * double(FS1) / 65535;
+			BYTE tempValue;
+			memset(&tempValue, 0, 1);
+			tempValue = tempValue + BYTE(FS1);
+			// 复制到 BMP 文件数据区
+			memcpy_s(pBmpData + (iHeight - i - 1) * iWidth + j, 1, &tempValue, 1);
+		}
+	}
+	// 从外部数据生成 BMP 位图
+	m_FSCDibX.LoadFromBuffer(pBmpData, iWidth, iHeight, 8);
+	delete[] pBmpData;
+	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+	return;
 }
