@@ -82,6 +82,12 @@ public:
 	int GetMaxPixelCount();
 
 	//=================================================
+	// @Method: Get Average pixel data value
+	// @Return: {int} (Average pixel data value)
+	//=================================================
+	int GetAveragePixelCount();
+
+	//=================================================
 	// @Method: Get FITS HDU Header Key
 	// @Param: {int} (HDU Header Key Position)
 	// @Return: {CString} (HDU Header Key)
@@ -109,4 +115,5 @@ private:
 
 	int m_iMinPixelCount;               // Min pixel data value
 	int m_iMaxPixelCount;               // Max pixel data value
+	int m_iAveragePixelCount;           // Average pixel data value
 };

@@ -165,6 +165,21 @@ int FSC_FitsX::GetMaxPixelCount()
 }
 
 
+int FSC_FitsX::GetAveragePixelCount()
+{
+	long long lTotal = 0;
+	for (int i = 0; i < GetHeight(); i++)
+	{
+		for (int j = 0; j < GetWidth(); j++)
+		{
+			lTotal += *(GetFitsDataPtr() + i * GetWidth() + j);
+		}
+	}
+	m_iAveragePixelCount = lTotal / GetWidth() / GetHeight();
+	return m_iAveragePixelCount;
+}
+
+
 CString FSC_FitsX::GetHDUKey(int iPos)
 {
 	if (iPos >= m_iHDUNum) return _T("");
