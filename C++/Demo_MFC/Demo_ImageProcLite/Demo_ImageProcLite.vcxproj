@@ -75,7 +75,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\Project_MSVS\C++\FrozenSky\DLL_FSC_FitsX;D:\Project_MSVS\C++\FrozenSky\DLL_CDib;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Application\OpenCV-3.0.0\build_FSC\install\include\opencv2;D:\Application\OpenCV-3.0.0\build_FSC\install\include\opencv;D:\Application\OpenCV-3.0.0\build_FSC\install\include;D:\Project_MSVS\C++\FrozenSky\DLL_FSC_FitsX;D:\Project_MSVS\C++\FrozenSky\DLL_CDib;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Application\OpenCV-3.0.0\build_FSC\install\x86\vc14\staticlib;D:\Application\OpenCV-3.0.0\build_FSC\install\x86\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -95,6 +96,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>D:\Application\OpenCV-3.0.0\build_FSC\install\x86\vc14\staticlib\*.lib;D:\Application\OpenCV-3.0.0\build_FSC\install\x86\vc14\lib\*.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>

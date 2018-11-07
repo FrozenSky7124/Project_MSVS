@@ -43,6 +43,7 @@ BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_COMMAND(ID_MenuFile_Save, &IPLDlg::OnMenu_File_Save)
 	ON_COMMAND(ID_MenuFile_Quit, &IPLDlg::OnMenu_File_Quit)
 	ON_COMMAND(ID_MenuAnalyse_OutStand, &IPLDlg::OnMenu_Analyse_OutStand)
+	ON_COMMAND(ID_MenuOpenCV_OpenImg, &IPLDlg::OnMenu_OpenCV_OpenImg)
 END_MESSAGE_MAP()
 
 
@@ -481,4 +482,50 @@ void IPLDlg::OnMenu_Analyse_OutStand()
 	delete[] pBmpData;
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
 	return;
+}
+
+
+void IPLDlg::OnMenu_OpenCV_OpenImg()
+{
+	using namespace std;
+	// TODO:
+	CString strFilePath;
+	CString strFileType;
+	static TCHAR strFileFilter[] = _T("Image File (*.bmp;*.jpg;*.png;*.fit;*.fits)|*.bmp;*.jpg;*.png;*.fit;*.fits||");
+	CFileDialog selectFileDlg(true, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, strFileFilter, this);
+	if (IDOK == selectFileDlg.DoModal())
+	{
+		strFilePath = selectFileDlg.GetPathName();
+		// 过滤文件名
+		int iLength = strFilePath.GetLength();
+		for (int i = 0; i < iLength; i++)
+		{
+			if (strFilePath.GetAt(iLength - i - 1) == '.')
+			{
+				iLength = i;
+				break;
+			}
+		}
+		strFileType = strFilePath.Right(iLength);
+		if ((strFileType == "fit") || (strFileType == "fits"))
+		{
+			cv::Mat cvMa(4108, 4096, CV_16U);
+			for (int i = 0; i < 4108 * 4096; i++)
+			{
+				unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+				cvMa.data[i] = usTmp;
+			}
+			cv::imshow("OpenCV Viewer", cvMa);
+			cv::waitKey(0);
+		}
+		else
+		{
+			cv::Mat cvImg;
+			cvImg = cv::imread(strFilePath.GetString());
+			cv::namedWindow("OpenCV Viewer");
+			cv::resizeWindow("OpenCV Viewer", 1280, 960);
+			cv::imshow("OpenCV Viewer", cvImg);
+			cv::waitKey(0);
+		}
+	}
 }

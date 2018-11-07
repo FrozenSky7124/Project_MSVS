@@ -7,6 +7,8 @@
 #include "Dib_Ex.h"
 #include "FSC_FitsX.h"
 #include "afxwin.h"
+#include "opencv2/core.hpp"
+#include "opencv2/highgui.hpp"
 
 #define LinearGrayEnhancement 0x00000001 // 线性灰度增强
 
@@ -68,4 +70,6 @@ private:
 	CFont m_FontStandard;
 	CEdit m_EditFitsInfo;
 	CEdit m_EditImgInfo;
+public:
+	afx_msg void OnMenu_OpenCV_OpenImg();
 };
