@@ -44,6 +44,7 @@ BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_COMMAND(ID_MenuFile_Quit, &IPLDlg::OnMenu_File_Quit)
 	ON_COMMAND(ID_MenuAnalyse_OutStand, &IPLDlg::OnMenu_Analyse_OutStand)
 	ON_COMMAND(ID_MenuOpenCV_OpenImg, &IPLDlg::OnMenu_OpenCV_OpenImg)
+	ON_COMMAND(ID_MenuOpenCV_Threshold, &IPLDlg::OnMenu_OpenCV_Threshold)
 END_MESSAGE_MAP()
 
 
@@ -131,9 +132,11 @@ void IPLDlg::OnOK()
 void IPLDlg::OnCancel()
 {
 	// TODO:
+	// Release Fits temp data
 	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
 	m_ipFitsDataTmp = NULL;
-
+	// Release OpenCV Mat
+	m_cvMat.release();
 	CDialog::OnCancel();
 }
 
@@ -173,6 +176,14 @@ bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 	// 读取 FITS 文件 PixelCount 最大值和最小值
 	m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
 	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
+	// 创建 OpenCV 16位存储空间
+	m_cvMat.release();
+	m_cvMat.create(4108, 4096, CV_16U);
+	for (int i = 0; i < 4108 * 4096; i++)
+	{
+		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+		m_cvMat.at<unsigned short>(i) = usTmp;
+	}
 	// 根据默认参数计算线性灰度阈值
 	ComputeGrayLimit(0.432506, 0.977250);
 	// 创建 FSC_DibX 位图对象
@@ -509,23 +520,53 @@ void IPLDlg::OnMenu_OpenCV_OpenImg()
 		strFileType = strFilePath.Right(iLength);
 		if ((strFileType == "fit") || (strFileType == "fits"))
 		{
+			// 清理数据
+			if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
+			m_ipFitsDataTmp = NULL;
+			// 读取 FITS 文件
+			m_FSCFitsX.OpenFitsFile(strFilePath);
+			// 创建 FITS 数据临时存储空间
+			long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
+			m_ipFitsDataTmp = new int[lDataSize];
+			memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+			// 读取 FITS 文件 PixelCount 最大值和最小值
+			m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
+			m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
 			cv::Mat cvMa(4108, 4096, CV_16U);
 			for (int i = 0; i < 4108 * 4096; i++)
 			{
 				unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
-				cvMa.data[i] = usTmp;
+				cvMa.at<unsigned short>(i)= usTmp;
 			}
-			cv::imshow("OpenCV Viewer", cvMa);
+			cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
+			cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+			cv::Mat cvGrayMa;
+			cvMa.convertTo(cvGrayMa, CV_8U, 1/255.0, 0.0);
+			cv::imshow("OpenCV Viewer", cvGrayMa);
 			cv::waitKey(0);
 		}
 		else
 		{
 			cv::Mat cvImg;
 			cvImg = cv::imread(strFilePath.GetString());
-			cv::namedWindow("OpenCV Viewer");
-			cv::resizeWindow("OpenCV Viewer", 1280, 960);
 			cv::imshow("OpenCV Viewer", cvImg);
 			cv::waitKey(0);
 		}
 	}
+}
+
+
+void IPLDlg::OnMenu_OpenCV_Threshold()
+{
+	// OpenCV Threshold Process
+	cv::Mat cvGrayMat;
+	cv::Mat cvTmpMat;
+	cvGrayMat.create(4108, 4096, CV_8U);
+	cvTmpMat.create(4108, 4096, CV_8U);
+	m_cvMat.convertTo(cvGrayMat, CV_8U, 1 / 255.0, 0.0);
+	cv::threshold(cvGrayMat, cvTmpMat, 100, 255, CV_THRESH_BINARY);
+	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
+	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+	cv::imshow("OpenCV Viewer", cvTmpMat);
+	cv::waitKey(0);
 }

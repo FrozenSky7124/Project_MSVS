@@ -7,6 +7,7 @@
 #include "Dib_Ex.h"
 #include "FSC_FitsX.h"
 #include "afxwin.h"
+#include "opencv2/opencv.hpp"
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
 
@@ -40,6 +41,8 @@ protected:
 	afx_msg void OnMenu_File_Save();
 	afx_msg void OnMenu_File_Quit();
 	afx_msg void OnMenu_Analyse_OutStand();
+	afx_msg void OnMenu_OpenCV_OpenImg();
+	afx_msg void OnMenu_OpenCV_Threshold();
 	afx_msg void OnBnClickedBtnLinearGE();
 	afx_msg void OnBnClickedBtnBinaryConv();
 	afx_msg void OnBnClickedBtnReset();
@@ -70,6 +73,8 @@ private:
 	CFont m_FontStandard;
 	CEdit m_EditFitsInfo;
 	CEdit m_EditImgInfo;
+
+	// OpenCV support
+	cv::Mat m_cvMat;
 public:
-	afx_msg void OnMenu_OpenCV_OpenImg();
 };
