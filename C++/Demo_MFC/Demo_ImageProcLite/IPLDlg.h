@@ -42,10 +42,13 @@ protected:
 	afx_msg void OnMenu_File_Quit();
 	afx_msg void OnMenu_Analyse_OutStand();
 	afx_msg void OnMenu_OpenCV_OpenImg();
+	afx_msg void OnMenu_OpenCV_NolinearGE();
 	afx_msg void OnMenu_OpenCV_Threshold();
+	afx_msg void OnMenu_OpenCV_EqualizeHist();
 	afx_msg void OnBnClickedBtnLinearGE();
 	afx_msg void OnBnClickedBtnBinaryConv();
 	afx_msg void OnBnClickedBtnReset();
+	afx_msg void OnBnClickedBtnProc();
 	virtual void OnOK();
 	virtual void OnCancel();
 	DECLARE_MESSAGE_MAP()
@@ -76,5 +79,6 @@ private:
 
 	// OpenCV support
 	cv::Mat m_cvMat;
+	cv::Mat m_cvMat8U;
 public:
 };

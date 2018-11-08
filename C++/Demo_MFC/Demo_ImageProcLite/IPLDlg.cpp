@@ -7,6 +7,7 @@
 #include "Demo_ImageProcLite.h"
 #include "IPLDlg.h"
 #include <iostream>
+#include <cmath>
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -45,6 +46,9 @@ BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_COMMAND(ID_MenuAnalyse_OutStand, &IPLDlg::OnMenu_Analyse_OutStand)
 	ON_COMMAND(ID_MenuOpenCV_OpenImg, &IPLDlg::OnMenu_OpenCV_OpenImg)
 	ON_COMMAND(ID_MenuOpenCV_Threshold, &IPLDlg::OnMenu_OpenCV_Threshold)
+	ON_COMMAND(ID_MenuOpenCV_NolinearGE, &IPLDlg::OnMenu_OpenCV_NolinearGE)
+	ON_COMMAND(ID_MenuOpenCV_EqualH, &IPLDlg::OnMenu_OpenCV_EqualizeHist)
+	ON_BN_CLICKED(IDC_BtnProc, &IPLDlg::OnBnClickedBtnProc)
 END_MESSAGE_MAP()
 
 
@@ -131,12 +135,13 @@ void IPLDlg::OnOK()
 
 void IPLDlg::OnCancel()
 {
-	// TODO:
 	// Release Fits temp data
 	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
 	m_ipFitsDataTmp = NULL;
 	// Release OpenCV Mat
 	m_cvMat.release();
+	m_cvMat8U.release();
+
 	CDialog::OnCancel();
 }
 
@@ -184,6 +189,8 @@ bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
 		m_cvMat.at<unsigned short>(i) = usTmp;
 	}
+	m_cvMat8U.release();
+	m_cvMat.convertTo(m_cvMat8U, CV_8U, 1 / 255.0, 0.0);
 	// 根据默认参数计算线性灰度阈值
 	ComputeGrayLimit(0.432506, 0.977250);
 	// 创建 FSC_DibX 位图对象
@@ -215,8 +222,8 @@ bool IPLDlg::CreateDibX()
 			//int iFValue = m_FSCFitsX.GetFitsData(j, i);
 			int iFValue = *(m_ipFitsDataTmp + i * iWidth + j);
 			// 使用自动灰度阈值进行线性灰度增强
-			//iFValue = ((float)iFValue - (float)m_iLowPixelCount) * dRate;
-			iFValue = 255 * double(iFValue) / 65535;
+			iFValue = ((float)iFValue - (float)m_iLowPixelCount) * dRate;
+			//iFValue = 255 * double(iFValue) / 65535;
 			if (iFValue < 0) iFValue = 0;
 			if (iFValue > 255) iFValue = 255;
 			BYTE tempValue;
@@ -568,5 +575,56 @@ void IPLDlg::OnMenu_OpenCV_Threshold()
 	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
 	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
 	cv::imshow("OpenCV Viewer", cvTmpMat);
+	cv::waitKey(0);
+}
+
+
+void IPLDlg::OnMenu_OpenCV_NolinearGE()
+{
+	int m = m_iMinPixelCount;
+	int M = m_iMaxPixelCount;
+	m_cvMat8U.release();
+	m_cvMat8U.create(4108, 4096, CV_8U);
+	for (int i = 0; i < 4108 * 4096; i++)
+	{
+		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+		if (usTmp <= m)
+			m_cvMat8U.at<unsigned char>(i) = 0;
+		else if (usTmp >= M)
+			m_cvMat8U.at<unsigned char>(i) = 255;
+		else
+			m_cvMat8U.at<unsigned char>(i) = unsigned char((255.0 / log(256)) * log(1 + 255 * (usTmp - m) / (M - m)));
+	}
+	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
+	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+	cv::imshow("OpenCV Viewer", m_cvMat8U);
+	cv::waitKey(0);
+}
+
+
+void IPLDlg::OnMenu_OpenCV_EqualizeHist()
+{
+	cv::Mat tmpMat(4108, 4096, CV_8U);
+	cv::equalizeHist(m_cvMat8U, tmpMat);
+	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
+	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+	cv::imshow("OpenCV Viewer", tmpMat);
+	cv::waitKey(0);
+}
+
+
+void IPLDlg::OnBnClickedBtnProc()
+{
+	m_cvMat8U.release();
+	m_cvMat8U.create(4108, 4096, CV_8U);
+	for (int i = 0; i < 4108 * 4096; i++)
+	{
+		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+		m_cvMat8U.at<unsigned char>(i) = usTmp / 255.0;
+	}
+	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
+	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+	cv::imshow("OpenCV Viewer", m_cvMat8U);
+	cv::imwrite("./ImgProc.bmp", m_cvMat8U);
 	cv::waitKey(0);
 }
