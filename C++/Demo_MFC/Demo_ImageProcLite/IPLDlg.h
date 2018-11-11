@@ -61,6 +61,7 @@ public:
 	void ComputeGrayLimit(double dLowPer, double dHighPer);
 	void ListFitsHDU();
 	void ListImgInfo();
+	void OutputContoursFile(TCHAR* pszFileName, std::vector<std::vector<cv::Point>> & contours);
 
 private:
 	CDC* m_pCDCImgMain;

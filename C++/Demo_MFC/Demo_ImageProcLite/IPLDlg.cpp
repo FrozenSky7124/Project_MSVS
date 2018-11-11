@@ -183,8 +183,8 @@ bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
 	// 创建 OpenCV 16位存储空间
 	m_cvMat.release();
-	m_cvMat.create(4108, 4096, CV_16U);
-	for (int i = 0; i < 4108 * 4096; i++)
+	m_cvMat.create(m_FSCFitsX.GetHeight(), m_FSCFitsX.GetWidth(), CV_16U);
+	for (int i = 0; i < m_FSCFitsX.GetHeight() * m_FSCFitsX.GetWidth(); i++)
 	{
 		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
 		m_cvMat.at<unsigned short>(i) = usTmp;
@@ -314,6 +314,30 @@ void IPLDlg::ListImgInfo()
 	iLength = m_EditImgInfo.GetWindowTextLength();
 	m_EditImgInfo.SetSel(iLength, iLength);
 	m_EditImgInfo.ReplaceSel(tempStr);
+}
+
+
+void IPLDlg::OutputContoursFile(TCHAR * pszFileName, std::vector<std::vector<cv::Point>>& contours)
+{
+	CFile output;
+	CFileException e;
+	if (!output.Open(pszFileName, CFile::modeCreate | CFile::modeWrite, &e))
+	{
+		TRACE(_T("Output file could not be opened %d\n"), e.m_cause);
+	}
+	CString csOutput = _T("");
+	for (int i = 0; i < contours.size(); i++)
+	{
+		CString csTmp;
+		for (int j = 0; j < contours[i].size(); j++)
+		{
+			csTmp.Format(_T("%s[%4d,%4d] "), csTmp, contours[i][j].x, contours[i][j].y);
+		}
+		csOutput.Format(_T("%s%3d %s\n"), csOutput, i, csTmp);
+	}
+	output.Write(csOutput, csOutput.GetLength());
+	output.Flush();
+	output.Close();
 }
 
 
@@ -539,14 +563,14 @@ void IPLDlg::OnMenu_OpenCV_OpenImg()
 			// 读取 FITS 文件 PixelCount 最大值和最小值
 			m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
 			m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
-			cv::Mat cvMa(4108, 4096, CV_16U);
-			for (int i = 0; i < 4108 * 4096; i++)
+			cv::Mat cvMa(m_FSCFitsX.GetHeight(), m_FSCFitsX.GetWidth(), CV_16U);
+			for (int i = 0; i < m_FSCFitsX.GetHeight() * m_FSCFitsX.GetWidth(); i++)
 			{
 				unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
 				cvMa.at<unsigned short>(i)= usTmp;
 			}
 			cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
-			cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+			cv::resizeWindow("OpenCV Viewer", m_FSCFitsX.GetWidth() / 4, m_FSCFitsX.GetHeight() / 4);
 			cv::Mat cvGrayMa;
 			cvMa.convertTo(cvGrayMa, CV_8U, 1/255.0, 0.0);
 			cv::imshow("OpenCV Viewer", cvGrayMa);
@@ -565,15 +589,17 @@ void IPLDlg::OnMenu_OpenCV_OpenImg()
 
 void IPLDlg::OnMenu_OpenCV_Threshold()
 {
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
 	// OpenCV Threshold Process
 	cv::Mat cvGrayMat;
 	cv::Mat cvTmpMat;
-	cvGrayMat.create(4108, 4096, CV_8U);
-	cvTmpMat.create(4108, 4096, CV_8U);
+	cvGrayMat.create(iHeight, iWidth, CV_8U);
+	cvTmpMat.create(iHeight, iWidth, CV_8U);
 	m_cvMat.convertTo(cvGrayMat, CV_8U, 1 / 255.0, 0.0);
 	cv::threshold(cvGrayMat, cvTmpMat, 100, 255, CV_THRESH_BINARY);
 	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
-	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+	cv::resizeWindow("OpenCV Viewer", iWidth / 4, iHeight / 4);
 	cv::imshow("OpenCV Viewer", cvTmpMat);
 	cv::waitKey(0);
 }
@@ -583,9 +609,11 @@ void IPLDlg::OnMenu_OpenCV_NolinearGE()
 {
 	int m = m_iMinPixelCount;
 	int M = m_iMaxPixelCount;
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
 	m_cvMat8U.release();
-	m_cvMat8U.create(4108, 4096, CV_8U);
-	for (int i = 0; i < 4108 * 4096; i++)
+	m_cvMat8U.create(m_FSCFitsX.GetHeight(), iWidth, CV_8U);
+	for (int i = 0; i < iHeight * iWidth; i++)
 	{
 		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
 		if (usTmp <= m)
@@ -596,7 +624,7 @@ void IPLDlg::OnMenu_OpenCV_NolinearGE()
 			m_cvMat8U.at<unsigned char>(i) = unsigned char((255.0 / log(256)) * log(1 + 255 * (usTmp - m) / (M - m)));
 	}
 	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
-	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+	cv::resizeWindow("OpenCV Viewer", iWidth / 4, iHeight / 4);
 	cv::imshow("OpenCV Viewer", m_cvMat8U);
 	cv::waitKey(0);
 }
@@ -604,10 +632,12 @@ void IPLDlg::OnMenu_OpenCV_NolinearGE()
 
 void IPLDlg::OnMenu_OpenCV_EqualizeHist()
 {
-	cv::Mat tmpMat(4108, 4096, CV_8U);
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
+	cv::Mat tmpMat(iHeight, iWidth, CV_8U);
 	cv::equalizeHist(m_cvMat8U, tmpMat);
 	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
-	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
+	cv::resizeWindow("OpenCV Viewer", iWidth / 4, iHeight / 4);
 	cv::imshow("OpenCV Viewer", tmpMat);
 	cv::waitKey(0);
 }
@@ -615,16 +645,51 @@ void IPLDlg::OnMenu_OpenCV_EqualizeHist()
 
 void IPLDlg::OnBnClickedBtnProc()
 {
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
 	m_cvMat8U.release();
-	m_cvMat8U.create(4108, 4096, CV_8U);
-	for (int i = 0; i < 4108 * 4096; i++)
+	m_cvMat8U.create(iHeight, iWidth, CV_8U);
+	for (int i = 0; i < iHeight * iWidth; i++)
 	{
 		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
 		m_cvMat8U.at<unsigned char>(i) = usTmp / 255.0;
 	}
+	cv::Mat tmpMat;
+	cv::threshold(m_cvMat8U, tmpMat, 5, 255, CV_THRESH_BINARY);
+	// 形态学滤波器膨胀图像
+	//cv::Mat element10(10, 10, CV_8U, cv::Scalar(255));
+	//cv::morphologyEx(tmpMat, tmpMat, cv::MORPH_CLOSE, element10);
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(20, 20));
+	cv::dilate(tmpMat, tmpMat, element);
+
 	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
-	cv::resizeWindow("OpenCV Viewer", 4096 / 4, 4108 / 4);
-	cv::imshow("OpenCV Viewer", m_cvMat8U);
-	cv::imwrite("./ImgProc.bmp", m_cvMat8U);
+	cv::resizeWindow("OpenCV Viewer", iWidth / 4, iHeight / 4);
+	cv::imshow("OpenCV Viewer", tmpMat);
+	cv::imwrite("./ImgProc_Ori.bmp", tmpMat);
+
+	// 提取轮廓
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(tmpMat, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+	// 过滤轮廓
+	std::vector<std::vector<cv::Point>> contoursFinal;
+	int iCMin = 10;
+	int iCMax = 70;
+	for (int i = 0; i < contours.size(); i++)
+	{
+		if (contours[i].size() > iCMin && contours[i].size() < iCMax)
+			contoursFinal.push_back(contours[i]);
+	}
+	// 输出轮廓数据
+	TCHAR* pszFileName = _T("ContoursFile.txt");
+	OutputContoursFile(pszFileName, contoursFinal);
+
+	cv::Mat showMat(m_cvMat8U.size(), CV_8U, cv::Scalar(255));
+	cv::drawContours(showMat, contoursFinal, -1, 0, 2);
+	TRACE(_T("\nNumber of contours: %d\n"), contoursFinal.size());
+
+	cv::namedWindow("OpenCV Viewer 2", CV_WINDOW_NORMAL);
+	cv::resizeWindow("OpenCV Viewer 2", iWidth / 4, iHeight / 4);
+	cv::imshow("OpenCV Viewer 2", showMat);
+	cv::imwrite("./ImgProc_Show.bmp", showMat);
 	cv::waitKey(0);
 }
