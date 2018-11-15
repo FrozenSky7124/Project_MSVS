@@ -671,6 +671,7 @@ void IPLDlg::OnBnClickedBtnProc()
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(tmpMat, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
 	// 过滤轮廓
+	/*
 	std::vector<std::vector<cv::Point>> contoursFinal;
 	int iCMin = 10;
 	int iCMax = 70;
@@ -679,13 +680,35 @@ void IPLDlg::OnBnClickedBtnProc()
 		if (contours[i].size() > iCMin && contours[i].size() < iCMax)
 			contoursFinal.push_back(contours[i]);
 	}
+	*/
+	std::vector<cv::Point> vCenterPoint;
+	for (int i = 0; i < contours.size(); i++)
+	{
+		int ixm = INT_MAX, ixM = INT_MIN;
+		int iym = INT_MAX, iyM = INT_MIN;
+		for (int j = 0; j < contours[i].size(); j++)
+		{
+			if (contours[i][j].x < ixm) ixm = contours[i][j].x;
+			if (contours[i][j].x > ixM) ixM = contours[i][j].x;
+			if (contours[i][j].y < iym) iym = contours[i][j].y;
+			if (contours[i][j].y > iyM) iyM = contours[i][j].y;
+		}
+		vCenterPoint.push_back(cv::Point((ixM - ixm) / 2, (iyM - iym) / 2));
+	}
+
 	// 输出轮廓数据
 	TCHAR* pszFileName = _T("ContoursFile.txt");
-	OutputContoursFile(pszFileName, contoursFinal);
+	OutputContoursFile(pszFileName, contours);
 
 	cv::Mat showMat(m_cvMat8U.size(), CV_8U, cv::Scalar(255));
-	cv::drawContours(showMat, contoursFinal, -1, 0, 2);
-	TRACE(_T("\nNumber of contours: %d\n"), contoursFinal.size());
+	cv::drawContours(showMat, contours, -1, 0, 2);
+	// 标记所有轮廓
+	for (int i = 0; i < contours.size(); i++)
+	{
+		cv::Rect cvRec = cv::boundingRect(contours[i]);
+		cv::rectangle(showMat, cvRec, cv::Scalar(0), 2);
+	}
+	TRACE(_T("\nNumber of contours: %d\n"), contours.size());
 
 	cv::namedWindow("OpenCV Viewer 2", CV_WINDOW_NORMAL);
 	cv::resizeWindow("OpenCV Viewer 2", iWidth / 4, iHeight / 4);
