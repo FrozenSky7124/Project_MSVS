@@ -705,8 +705,15 @@ void IPLDlg::OnBnClickedBtnProc()
 	// 标记所有轮廓
 	for (int i = 0; i < contours.size(); i++)
 	{
-		cv::Rect cvRec = cv::boundingRect(contours[i]);
-		cv::rectangle(showMat, cvRec, cv::Scalar(0), 2);
+		//cv::Rect cvRec = cv::boundingRect(contours[i]);
+		//cv::rectangle(showMat, cvRec, cv::Scalar(0), 2, 4);
+		cv::RotatedRect rRect = cv::minAreaRect(contours[i]);
+		cv::Point2f rPoint[4];
+		rRect.points(rPoint);
+		cv::line(showMat, rPoint[0], rPoint[1], 0, 2);
+		cv::line(showMat, rPoint[1], rPoint[2], 0, 2);
+		cv::line(showMat, rPoint[2], rPoint[3], 0, 2);
+		cv::line(showMat, rPoint[3], rPoint[0], 0, 2);
 	}
 	TRACE(_T("\nNumber of contours: %d\n"), contours.size());
 
