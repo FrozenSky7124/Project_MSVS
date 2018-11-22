@@ -52,3 +52,6 @@
 #endif
 
 
+#include "IPL_Macro.h"
+
+#include "FrozenSkyFunc.h"

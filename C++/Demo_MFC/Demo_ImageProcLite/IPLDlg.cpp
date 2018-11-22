@@ -647,6 +647,12 @@ void IPLDlg::OnBnClickedBtnProc()
 {
 	int iWidth = m_FSCFitsX.GetWidth();
 	int iHeight = m_FSCFitsX.GetHeight();
+	double dLongti = 126.331;
+	double dLati = 43.817;
+	double dRA, dDEC;
+	SYSTEMTIME sysTime;
+	m_FSCFitsX.GetOBSData(sysTime, dRA, dDEC);
+
 	m_cvMat8U.release();
 	m_cvMat8U.create(iHeight, iWidth, CV_8U);
 	for (int i = 0; i < iHeight * iWidth; i++)
@@ -681,6 +687,9 @@ void IPLDlg::OnBnClickedBtnProc()
 			contoursFinal.push_back(contours[i]);
 	}
 	*/
+
+	// 中心坐标
+	/*
 	std::vector<cv::Point> vCenterPoint;
 	for (int i = 0; i < contours.size(); i++)
 	{
@@ -695,6 +704,7 @@ void IPLDlg::OnBnClickedBtnProc()
 		}
 		vCenterPoint.push_back(cv::Point((ixM - ixm) / 2, (iyM - iym) / 2));
 	}
+	*/
 
 	// 输出轮廓数据
 	TCHAR* pszFileName = _T("ContoursFile.txt");
@@ -702,7 +712,8 @@ void IPLDlg::OnBnClickedBtnProc()
 
 	cv::Mat showMat(m_cvMat8U.size(), CV_8U, cv::Scalar(255));
 	cv::drawContours(showMat, contours, -1, 0, 2);
-	// 标记所有轮廓
+	// 标记所有目标，获得目标中心坐标
+	std::vector<cv::Point2f> vCenter;
 	for (int i = 0; i < contours.size(); i++)
 	{
 		//cv::Rect cvRec = cv::boundingRect(contours[i]);
@@ -714,7 +725,36 @@ void IPLDlg::OnBnClickedBtnProc()
 		cv::line(showMat, rPoint[1], rPoint[2], 0, 2);
 		cv::line(showMat, rPoint[2], rPoint[3], 0, 2);
 		cv::line(showMat, rPoint[3], rPoint[0], 0, 2);
+
+		vCenter.push_back(rRect.center);
 	}
+	// 计算恒星时
+	double LST;
+	GetLocalSiderealTime(dLongti, sysTime, &LST);
+	// 计算视场中心的时角 （恒星的时角t、赤经α和当地的恒星时θ之间的关系为t=θ-α）
+	double dHourAngle = LST - dRA;
+	YXRange(&dHourAngle, 24.);
+	// 计算视场中心的方位角、高度角
+	double Az, El;
+	EquCoordToHorCoord(dDEC, dHourAngle, dLati, Az, El);
+	// 输出目标中心
+	pszFileName = _T("CentersFile.txt");
+	CFile output;
+	CFileException e;
+	if (!output.Open(pszFileName, CFile::modeCreate | CFile::modeWrite, &e))
+	{
+		TRACE(_T("Output file could not be opened %d\n"), e.m_cause);
+	}
+	CString csOutput = _T("");
+	csOutput.Format(_T("恒星时：%8.04f\n视场中心赤经：%8.04f  赤纬：%8.04f\n视场中心方位：%8.04f  高度：%8.04f\n\n"), dHourAngle, dRA, dDEC, Az * ToAngle, El * ToAngle);
+	for (int i = 0; i < vCenter.size(); i++)
+	{
+		csOutput.Format(_T("%s %3d [%7.02f, %7.02f]\n"), csOutput, i, vCenter[i].x, vCenter[i].y);
+	}
+	output.Write(csOutput, csOutput.GetLength());
+	output.Flush();
+	output.Close();
+
 	TRACE(_T("\nNumber of contours: %d\n"), contours.size());
 
 	cv::namedWindow("OpenCV Viewer 2", CV_WINDOW_NORMAL);
