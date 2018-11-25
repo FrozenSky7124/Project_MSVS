@@ -24,6 +24,7 @@ IPLDlg::IPLDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_iProcConfig = 0;
 	m_ipFitsDataTmp = NULL;
+	m_iImgCount = 0;
 }
 
 void IPLDlg::DoDataExchange(CDataExchange* pDX)
@@ -49,6 +50,7 @@ BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_COMMAND(ID_MenuOpenCV_NolinearGE, &IPLDlg::OnMenu_OpenCV_NolinearGE)
 	ON_COMMAND(ID_MenuOpenCV_EqualH, &IPLDlg::OnMenu_OpenCV_EqualizeHist)
 	ON_BN_CLICKED(IDC_BtnProc, &IPLDlg::OnBnClickedBtnProc)
+	ON_BN_CLICKED(IDC_BtnTest, &IPLDlg::OnBnClickedBtnTEST)
 END_MESSAGE_MAP()
 
 
@@ -199,6 +201,8 @@ bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
 	ListFitsHDU();
 	ListImgInfo();
+	// 计数器+1
+	m_iImgCount++;
 	return true;
 }
 
@@ -317,7 +321,7 @@ void IPLDlg::ListImgInfo()
 }
 
 
-void IPLDlg::OutputContoursFile(TCHAR * pszFileName, std::vector<std::vector<cv::Point>>& contours)
+void IPLDlg::OutputContoursFile(TCHAR * pszFileName, std::vector<std::vector<cv::Point>>& cont)
 {
 	CFile output;
 	CFileException e;
@@ -326,12 +330,12 @@ void IPLDlg::OutputContoursFile(TCHAR * pszFileName, std::vector<std::vector<cv:
 		TRACE(_T("Output file could not be opened %d\n"), e.m_cause);
 	}
 	CString csOutput = _T("");
-	for (int i = 0; i < contours.size(); i++)
+	for (int i = 0; i < cont.size(); i++)
 	{
 		CString csTmp;
-		for (int j = 0; j < contours[i].size(); j++)
+		for (int j = 0; j < cont[i].size(); j++)
 		{
-			csTmp.Format(_T("%s[%4d,%4d] "), csTmp, contours[i][j].x, contours[i][j].y);
+			csTmp.Format(_T("%s[%4d,%4d] "), csTmp, cont[i][j].x, cont[i][j].y);
 		}
 		csOutput.Format(_T("%s%3d %s\n"), csOutput, i, csTmp);
 	}
@@ -443,6 +447,25 @@ void IPLDlg::OnBnClickedBtnReset()
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
 	ListFitsHDU();
 	ListImgInfo();
+}
+
+
+void IPLDlg::OnBnClickedBtnTEST()
+{
+	double A, a, H, Ra, Dec;
+	double longitude = 126.331;
+	double latitude = 43.823;
+	double LST;
+	GetLocalSiderealTime(longitude, &LST);
+	Ra = 13.792;
+	Dec = 49.313;
+	H = LST - Ra;
+	YXRange(&H, 24.0f);
+	EquCoordToHorCoord(Dec, H, latitude, A, a);
+	TRACE(_T("H = %.2f A = %.2f a = %.2f\n"), H, A * ToAngle, a * ToAngle);
+	HorCoordToEquCoord(A, a, latitude, Dec, H);
+	YXRange(&H, 24.0f);
+	TRACE(_T("H = %.2f Dec = %.2f\n"), H, Dec);
 }
 
 
@@ -668,13 +691,18 @@ void IPLDlg::OnBnClickedBtnProc()
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(20, 20));
 	cv::dilate(tmpMat, tmpMat, element);
 
-	cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
-	cv::resizeWindow("OpenCV Viewer", iWidth / 4, iHeight / 4);
-	cv::imshow("OpenCV Viewer", tmpMat);
-	cv::imwrite("./ImgProc_Ori.bmp", tmpMat);
+	if (m_iImgCount % 2 == 0)
+	{
+		cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
+		cv::resizeWindow("OpenCV Viewer", iWidth / 4, iHeight / 4);
+		cv::imshow("OpenCV Viewer", tmpMat);
+		cv::imwrite("./ImgProc_Ori.bmp", tmpMat);
+	}
 
 	// 提取轮廓
 	std::vector<std::vector<cv::Point>> contours;
+	//std::vector<cv::Mat> contours(1024);
+	//cv::Mat hierarchy;
 	cv::findContours(tmpMat, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
 	// 过滤轮廓
 	/*
@@ -708,12 +736,11 @@ void IPLDlg::OnBnClickedBtnProc()
 
 	// 输出轮廓数据
 	TCHAR* pszFileName = _T("ContoursFile.txt");
-	OutputContoursFile(pszFileName, contours);
+	//OutputContoursFile(pszFileName, contours);
 
 	cv::Mat showMat(m_cvMat8U.size(), CV_8U, cv::Scalar(255));
 	cv::drawContours(showMat, contours, -1, 0, 2);
 	// 标记所有目标，获得目标中心坐标
-	std::vector<cv::Point2f> vCenter;
 	for (int i = 0; i < contours.size(); i++)
 	{
 		//cv::Rect cvRec = cv::boundingRect(contours[i]);
@@ -725,8 +752,7 @@ void IPLDlg::OnBnClickedBtnProc()
 		cv::line(showMat, rPoint[1], rPoint[2], 0, 2);
 		cv::line(showMat, rPoint[2], rPoint[3], 0, 2);
 		cv::line(showMat, rPoint[3], rPoint[0], 0, 2);
-
-		vCenter.push_back(rRect.center);
+		vCenter[m_iImgCount % 2].push_back(rRect.center);
 	}
 	// 计算恒星时
 	double LST;
@@ -737,7 +763,31 @@ void IPLDlg::OnBnClickedBtnProc()
 	// 计算视场中心的方位角、高度角
 	double Az, El;
 	EquCoordToHorCoord(dDEC, dHourAngle, dLati, Az, El);
-	// 输出目标中心
+	// 计算视场中心的赤经赤纬
+	YXRange(&dRA, 24.);
+	cRA[m_iImgCount % 2] = dRA;
+	cDEC[m_iImgCount % 2] = dDEC;
+	// 计算所有目标的赤经赤纬
+	double A0 = Az;
+	double E0 = El;
+	double X0 = iWidth / 2.;
+	double Y0 = iHeight / 2.;
+	double SY = 6.3729159639520310744535933610831e-6;
+	double SX = 6.3915866161901717904920316228831e-6;
+	double AS, ES, YS, XS;
+	for (int i = 0; i < vCenter[m_iImgCount % 2].size(); i++)
+	{
+		double RA, DEC, H;
+		XS = vCenter[m_iImgCount % 2][i].x;
+		YS = vCenter[m_iImgCount % 2][i].y;
+		ES = E0 + (YS - Y0) * SY;
+		AS = A0 + (XS - X0) * SX / cos(ES);
+		HorCoordToEquCoord(AS, ES, dLati, DEC, H);
+		RA = LST - H;
+		YXRange(&RA, 24.);
+		vRaDec[m_iImgCount % 2].push_back(cv::Point2f(RA, DEC));
+	}
+	// 输出所有目标的坐标和赤经赤纬
 	pszFileName = _T("CentersFile.txt");
 	CFile output;
 	CFileException e;
@@ -746,20 +796,56 @@ void IPLDlg::OnBnClickedBtnProc()
 		TRACE(_T("Output file could not be opened %d\n"), e.m_cause);
 	}
 	CString csOutput = _T("");
-	csOutput.Format(_T("恒星时：%8.04f\n视场中心赤经：%8.04f  赤纬：%8.04f\n视场中心方位：%8.04f  高度：%8.04f\n\n"), dHourAngle, dRA, dDEC, Az * ToAngle, El * ToAngle);
-	for (int i = 0; i < vCenter.size(); i++)
+	csOutput.Format(_T("恒星时：%8.04f\n视场中心赤经：%8.04f  赤纬：%8.04f\n视场中心方位：%8.04f  高度：%8.04f\n\n"), 
+						dHourAngle, dRA, dDEC, Az * ToAngle, El * ToAngle);
+	for (int i = 0; i < vCenter[m_iImgCount % 2].size(); i++)
 	{
-		csOutput.Format(_T("%s %3d [%7.02f, %7.02f]\n"), csOutput, i, vCenter[i].x, vCenter[i].y);
+		csOutput.Format(_T("%s %3d   [%7.02f, %7.02f]   [%5.02f, %5.02f]\n"), 
+							csOutput, i, vCenter[m_iImgCount % 2][i].x, vCenter[m_iImgCount % 2][i].y, vRaDec[m_iImgCount % 2][i].x, vRaDec[m_iImgCount % 2][i].y);
 	}
 	output.Write(csOutput, csOutput.GetLength());
 	output.Flush();
 	output.Close();
 
-	TRACE(_T("\nNumber of contours: %d\n"), contours.size());
+	// 搜索目标
+	int iTarIndex;
+	if (m_iImgCount % 2 == 0)
+	{
+		double kx0, ky0;
+		kx0 = cRA[0] - cRA[1];
+		ky0 = cDEC[0] - cDEC[1];
+		double kMin0 = 256;
 
-	cv::namedWindow("OpenCV Viewer 2", CV_WINDOW_NORMAL);
-	cv::resizeWindow("OpenCV Viewer 2", iWidth / 4, iHeight / 4);
-	cv::imshow("OpenCV Viewer 2", showMat);
-	cv::imwrite("./ImgProc_Show.bmp", showMat);
-	cv::waitKey(0);
+		for (int iA = 0; iA < vRaDec[0].size(); iA++)
+		{
+			double kMin1 = 256;
+			for (int iB = 0; iB < vRaDec[1].size(); iB++)
+			{
+				double xTmp = fabs(1 - (vRaDec[0][iA].x - vRaDec[1][iB].x) / kx0);
+				double yTmp = fabs(1 - (vRaDec[0][iA].y - vRaDec[1][iB].y) / ky0);
+				double xandy = xTmp + yTmp;
+				if (xandy < kMin1) kMin1 = xandy;
+			}
+			if (kMin1 < kMin0)
+			{
+				kMin0 = kMin1;
+				iTarIndex = iA;
+			}
+		}
+	}
+	// 标记目标
+	if (m_iImgCount % 2 == 0)
+	{
+		cv::circle(showMat, cv::Point(vCenter[0][iTarIndex].x, vCenter[0][iTarIndex].y), 50, cv::Scalar(0), 1);
+	}
+
+	TRACE(_T("\nNumber of contours: %d\n"), contours.size());
+	if (m_iImgCount % 2 == 0)
+	{
+		cv::namedWindow("OpenCV Viewer 2", CV_WINDOW_NORMAL);
+		cv::resizeWindow("OpenCV Viewer 2", iWidth / 4, iHeight / 4);
+		cv::imshow("OpenCV Viewer 2", showMat);
+		cv::imwrite("./ImgProc_Show.bmp", showMat);
+		cv::waitKey(0);
+	}
 }

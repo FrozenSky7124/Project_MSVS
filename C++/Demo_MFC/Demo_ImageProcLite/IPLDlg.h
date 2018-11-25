@@ -8,10 +8,9 @@
 #include "FSC_FitsX.h"
 #include "afxwin.h"
 #include "opencv2/opencv.hpp"
-#include "opencv2/core.hpp"
-#include "opencv2/highgui.hpp"
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
 
-#define LinearGrayEnhancement 0x00000001 // 线性灰度增强
 
 // IPLDlg 对话框
 class IPLDlg : public CDialog
@@ -49,6 +48,7 @@ protected:
 	afx_msg void OnBnClickedBtnBinaryConv();
 	afx_msg void OnBnClickedBtnReset();
 	afx_msg void OnBnClickedBtnProc();
+	afx_msg void OnBnClickedBtnTEST();
 	virtual void OnOK();
 	virtual void OnCancel();
 	DECLARE_MESSAGE_MAP()
@@ -61,7 +61,7 @@ public:
 	void ComputeGrayLimit(double dLowPer, double dHighPer);
 	void ListFitsHDU();
 	void ListImgInfo();
-	void OutputContoursFile(TCHAR* pszFileName, std::vector<std::vector<cv::Point>> & contours);
+	void OutputContoursFile(TCHAR* pszFileName, std::vector<std::vector<cv::Point>> & cont);
 
 private:
 	CDC* m_pCDCImgMain;
@@ -73,7 +73,13 @@ private:
 	int m_iMaxPixelCount;
 	int m_iLowPixelCount;
 	int m_iHighPixelCount;
+	int m_iImgCount;
 
+	std::vector<cv::Point2f> vCenter[2];
+	std::vector<cv::Point2f> vRaDec[2];
+	double cRA[2], cDEC[2];
+
+	// UI
 	CFont m_FontStandard;
 	CEdit m_EditFitsInfo;
 	CEdit m_EditImgInfo;
@@ -81,5 +87,4 @@ private:
 	// OpenCV support
 	cv::Mat m_cvMat;
 	cv::Mat m_cvMat8U;
-public:
 };
