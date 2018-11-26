@@ -64,10 +64,34 @@ public:
 	int GetHeight();
 
 	//=================================================
-	// @Method: Get HDU Number
-	// @Return: {int} (FITS HDU Number)
+	// @Method: Get FITS data height
+	// @Return: {int} (FITS data height)
 	//=================================================
-	int GetHDUNum();
+	void GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC);
+
+	//=================================================
+	// @Method: Calc FITS data OBS-DATE
+	// @Return: {bool} (Success or Fail)
+	//=================================================
+	bool CalcOBSDate(CString & csDate, SYSTEMTIME & OT);
+
+	//=================================================
+	// @Method: Calc FITS data OBS-TIME
+	// @Return: {bool} (Success or Fail)
+	//=================================================
+	bool CalcOBSTime(CString & csTime, SYSTEMTIME & OT);
+
+	//=================================================
+	// @Method: Calc FITS data RA
+	// @Return: {double} (RA h)
+	//=================================================
+	double CalcRA(CString & csRA);
+
+	//=================================================
+	// @Method: Calc FITS data DEC
+	// @Return: {double} (DEC deg)
+	//=================================================
+	double CalcDEC(CString & csDEC);
 
 	//=================================================
 	// @Method: Get Min pixel data value
@@ -87,6 +111,12 @@ public:
 	//=================================================
 	int GetAveragePixelCount();
 
+	//=================================================
+	// @Method: Get HDU Number
+	// @Return: {int} (FITS HDU Number)
+	//=================================================
+	int GetHDUNum();
+	
 	//=================================================
 	// @Method: Get FITS HDU Header Key
 	// @Param: {int} (HDU Header Key Position)
@@ -112,6 +142,9 @@ private:
 	int m_iNAXIS2;                      // NAXIS2
 	double m_dBSCALE;                   // BSCALE
 	double m_dBZERO;                    // BZERO
+	double m_dRA;                       // RA(h)
+	double m_dDEC;                      // DEC(deg)
+	SYSTEMTIME m_SysTime;               // Date & Time
 
 	int m_iMinPixelCount;               // Min pixel data value
 	int m_iMaxPixelCount;               // Max pixel data value

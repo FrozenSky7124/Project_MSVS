@@ -69,6 +69,10 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 		if (csTmpKey == _T("NAXIS2")) m_iNAXIS2 = atoi(csTmpValue);
 		if (csTmpKey == _T("BSCALE")) m_dBSCALE = atof(csTmpValue);
 		if (csTmpKey == _T("BZERO"))  m_dBZERO  = atof(csTmpValue);
+		if (csTmpKey == _T("DATE-OBS")) CalcOBSDate(csTmpValue, m_SysTime);
+		if (csTmpKey == _T("TIME-OBS")) CalcOBSTime(csTmpValue, m_SysTime);
+		if (csTmpKey == _T("RA")) m_dRA = CalcRA(csTmpValue);
+		if (csTmpKey == _T("DEC")) m_dDEC = CalcDEC(csTmpValue);
 		if (csTmpKey == _T("END")) break;
 		m_vHDUKey.push_back(csTmpKey);
 		m_vHDUValue.push_back(csTmpValue);
@@ -147,9 +151,65 @@ int FSC_FitsX::GetHeight()
 }
 
 
-int FSC_FitsX::GetHDUNum()
+void FSC_FitsX::GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC)
 {
-	return m_iHDUNum;
+	sysTime = m_SysTime;
+	RA = m_dRA;
+	DEC = m_dDEC;
+}
+
+
+bool FSC_FitsX::CalcOBSDate(CString & csDate, SYSTEMTIME & OT)
+{
+	int iYear = atoi(csDate.Mid(1));
+	int iMonth = atoi(csDate.Mid(6));
+	int iDay = atoi(csDate.Mid(9));
+	if (iYear < 0 || iMonth < 1 || iMonth > 12 || iDay < 1 || iDay > 32) return false;
+	OT.wYear = iYear;
+	OT.wMonth = iMonth;
+	OT.wDay = iDay;
+	return true;
+}
+
+
+bool FSC_FitsX::CalcOBSTime(CString & csTime, SYSTEMTIME & OT)
+{
+	int iH = atoi(csTime.Mid(1));
+	int iM = atoi(csTime.Mid(4));
+	int iS = atoi(csTime.Mid(7));
+	int iMS = atoi(csTime.Mid(10));
+	if (iH < 0 || iH > 24 || iM < 0 || iM > 60 || iS < 0) return false;
+	OT.wHour = iH;
+	OT.wMinute = iM;
+	OT.wSecond = iS;
+	OT.wMilliseconds = iMS;
+	return true;
+}
+
+
+double FSC_FitsX::CalcRA(CString & csRA)
+{
+	int h = atoi(csRA.Mid(1));
+	int m = atoi(csRA.Mid(4));
+	double s = atof(csRA.Mid(7));
+	return h + m / 60. + s / 3600.;
+}
+
+
+double FSC_FitsX::CalcDEC(CString & csDEC)
+{
+	int split1 = csDEC.Find(_T(":"), 0);
+	int split2 = csDEC.Find(_T(":"), split1 + 1);
+	if (split1 == -1 || split2 == -1) throw _T("Error in func: GetDEC(CString & csDEC).");
+
+	int D = atoi(csDEC.Mid(1));
+	D = abs(D);
+	int M = atoi(csDEC.Mid(split1 + 1));
+	double S = atof(csDEC.Mid(split2 + 1));
+
+	double DEC = D + M / 60. + S / 3600.;
+	if (0 == csDEC.Find(_T("-"))) DEC = -DEC;
+	return DEC;
 }
 
 
@@ -177,6 +237,12 @@ int FSC_FitsX::GetAveragePixelCount()
 	}
 	m_iAveragePixelCount = lTotal / GetWidth() / GetHeight();
 	return m_iAveragePixelCount;
+}
+
+
+int FSC_FitsX::GetHDUNum()
+{
+	return m_iHDUNum;
 }
 
 
