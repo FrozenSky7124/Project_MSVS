@@ -48,6 +48,7 @@ protected:
 	afx_msg void OnBnClickedBtnBinaryConv();
 	afx_msg void OnBnClickedBtnReset();
 	afx_msg void OnBnClickedBtnProc();
+	afx_msg void OnBnClickedBtnAutoProc();
 	afx_msg void OnBnClickedBtnTEST();
 	virtual void OnOK();
 	virtual void OnCancel();
@@ -59,6 +60,8 @@ public:
 	bool CreateDibX();
 	bool CreateDibX_BinaryConv(int iBinThreshoud);
 	void ComputeGrayLimit(double dLowPer, double dHighPer);
+	void Proc_OutStand();
+	void Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* pvCenter, std::vector<cv::Point2f>* pvRD, double* pcRA, double* pcDEC);
 	void ListFitsHDU();
 	void ListImgInfo();
 	void OutputContoursFile(TCHAR* pszFileName, std::vector<std::vector<cv::Point>> & cont);
@@ -75,10 +78,6 @@ private:
 	int m_iHighPixelCount;
 	int m_iImgCount;
 
-	std::vector<cv::Point2f> vCenter[2];
-	std::vector<cv::Point2f> vRaDec[2];
-	double cRA[2], cDEC[2];
-
 	// UI
 	CFont m_FontStandard;
 	CEdit m_EditFitsInfo;
@@ -87,4 +86,14 @@ private:
 	// OpenCV support
 	cv::Mat m_cvMat;
 	cv::Mat m_cvMat8U;
+
+public:
+	// 以下变量不安全
+	// AutoProc Data
+	CString m_csFitsDir;
+	int m_iFitsCount;
+	std::vector<CString> m_vFitsName;
+	std::vector<cv::Point2f> vCenter[2];
+	std::vector<cv::Point2f> vRaDec[2];
+	double cRA[2], cDEC[2];
 };
