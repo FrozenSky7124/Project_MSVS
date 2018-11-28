@@ -11,6 +11,11 @@
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+struct ObjIKMap
+{
+	int Index;
+	double KValue;
+};
 
 // IPLDlg ¶Ô»°¿ò
 class IPLDlg : public CDialog
@@ -62,9 +67,12 @@ public:
 	void ComputeGrayLimit(double dLowPer, double dHighPer);
 	void Proc_OutStand();
 	void Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* pvCenter, std::vector<cv::Point2f>* pvRD, double* pcRA, double* pcDEC);
+	void Proc_SearchObject(int iIndex, double * pcRAPre, double * pcRACur, double * pcDECPre, double * pcDECCur,
+		std::vector<cv::Point2f>* pvCPre, std::vector<cv::Point2f>* pvCCur, std::vector<cv::Point2f>* pvRDPre, std::vector<cv::Point2f>* pvRDCur);
 	void ListFitsHDU();
 	void ListImgInfo();
 	void OutputContoursFile(TCHAR* pszFileName, std::vector<std::vector<cv::Point>> & cont);
+	void OutputAutoProcFile(CString & csFilePath, std::vector<cv::Point2f>* pvCenter, std::vector<cv::Point2f>* pvRD, std::vector<ObjIKMap>* pIKMap);
 
 private:
 	CDC* m_pCDCImgMain;
@@ -96,4 +104,6 @@ public:
 	std::vector<cv::Point2f> vCenter[2];
 	std::vector<cv::Point2f> vRaDec[2];
 	double cRA[2], cDEC[2];
+	double m_CurLST;
+	double m_CurRA, m_CurDEC, m_CurAz, m_CurEl;
 };

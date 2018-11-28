@@ -19,6 +19,7 @@ using namespace cv;
 
 
 // Global
+
 bool CompareFitsTime(CString & cs1, CString & cs2)
 {
 	CString sub1 = cs1.Right(21);
@@ -29,6 +30,11 @@ bool CompareFitsTime(CString & cs1, CString & cs2)
 		return false;
 	else
 		return true;
+}
+
+bool CompareIKMap(ObjIKMap & ik1, ObjIKMap & ik2)
+{
+	return ik1.KValue < ik2.KValue;
 }
 
 
@@ -84,8 +90,13 @@ UINT WINAPI uiFunc_Proc(LPVOID lpParam)
 		CString csFitsPath = pIPLDLG->m_csFitsDir + _T("\\") + lpvFitsName->at(iImgIndex);
 		// Load Fits
 		pIPLDLG->OpenFile_FITS(csFitsPath);
+		// Outstanding conversion
 		pIPLDLG->Proc_OutStand();
+		// Extract posible objects
 		pIPLDLG->Proc_ExtractObject(iImgIndex, pvCurCenter, pvCurRD, pcRA_Cur, pcDEC_Cur);
+		// Search main object
+		if (iImgInQueue >= 2)
+			pIPLDLG->Proc_SearchObject(iImgIndex, pcRA_Pre, pcRA_Cur, pcDEC_Pre, pcDEC_Cur, pvPreCenter, pvCurCenter, pvPreRD, pvCurRD);
 	}
 	return 0;
 }
@@ -415,6 +426,28 @@ void IPLDlg::OutputContoursFile(TCHAR * pszFileName, std::vector<std::vector<cv:
 			csTmp.Format(_T("%s[%4d,%4d] "), csTmp, cont[i][j].x, cont[i][j].y);
 		}
 		csOutput.Format(_T("%s%3d %s\n"), csOutput, i, csTmp);
+	}
+	output.Write(csOutput, csOutput.GetLength());
+	output.Flush();
+	output.Close();
+}
+
+
+void IPLDlg::OutputAutoProcFile(CString & csFilePath, std::vector<cv::Point2f>* pvCenter, std::vector<cv::Point2f>* pvRD, std::vector<ObjIKMap>* pIKMap)
+{
+	CFile output;
+	CFileException e;
+	if (!output.Open(csFilePath, CFile::modeCreate | CFile::modeWrite, &e))
+	{
+		TRACE(_T("Output file could not be opened %d\n"), e.m_cause);
+	}
+	CString csOutput = _T("");
+	csOutput.Format(_T("LST: %8.04f\nCenterRA:  %8.04f  CenterDEC: %8.04f\nCenterAz:  %8.04f  CenterEl:  %8.04f\n\n"),
+		m_CurLST, m_CurRA, m_CurDEC, m_CurAz * ToAngle, m_CurEl * ToAngle);
+	for (int i = 0; i < pvCenter->size(); i++)
+	{
+		csOutput.Format(_T("%s %3d   [%7.02f, %7.02f]   [%5.02f, %5.02f]   KValue = %7.04f\n"),
+			csOutput, i, pvCenter->at(i).x, pvCenter->at(i).y, pvRD->at(i).x, pvRD->at(i).y, pIKMap->at(i).KValue);
 	}
 	output.Write(csOutput, csOutput.GetLength());
 	output.Flush();
@@ -818,35 +851,35 @@ void IPLDlg::OnBnClickedBtnProc()
 
 	// 提取轮廓
 
-	vector<vector<Point>> m_contours(512);
+	vector<vector<Point>> cvContours(512);
 	vector<Vec4i> hierarchy(512);
-	//std::vector<std::vector<cv::Point>> m_contours(512);
-	cv::findContours(tmpMat, m_contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+	//std::vector<std::vector<cv::Point>> cvContours(512);
+	cv::findContours(tmpMat, cvContours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
 	// 过滤轮廓
 	/*
 	std::vector<std::vector<cv::Point>> contoursFinal;
 	int iCMin = 10;
 	int iCMax = 70;
-	for (int i = 0; i < m_contours.size(); i++)
+	for (int i = 0; i < cvContours.size(); i++)
 	{
-		if (m_contours[i].size() > iCMin && m_contours[i].size() < iCMax)
-			contoursFinal.push_back(m_contours[i]);
+		if (cvContours[i].size() > iCMin && cvContours[i].size() < iCMax)
+			contoursFinal.push_back(cvContours[i]);
 	}
 	*/
 
 	// 中心坐标
 	/*
 	std::vector<cv::Point> vCenterPoint;
-	for (int i = 0; i < m_contours.size(); i++)
+	for (int i = 0; i < cvContours.size(); i++)
 	{
 		int ixm = INT_MAX, ixM = INT_MIN;
 		int iym = INT_MAX, iyM = INT_MIN;
-		for (int j = 0; j < m_contours[i].size(); j++)
+		for (int j = 0; j < cvContours[i].size(); j++)
 		{
-			if (m_contours[i][j].x < ixm) ixm = m_contours[i][j].x;
-			if (m_contours[i][j].x > ixM) ixM = m_contours[i][j].x;
-			if (m_contours[i][j].y < iym) iym = m_contours[i][j].y;
-			if (m_contours[i][j].y > iyM) iyM = m_contours[i][j].y;
+			if (cvContours[i][j].x < ixm) ixm = cvContours[i][j].x;
+			if (cvContours[i][j].x > ixM) ixM = cvContours[i][j].x;
+			if (cvContours[i][j].y < iym) iym = cvContours[i][j].y;
+			if (cvContours[i][j].y > iyM) iyM = cvContours[i][j].y;
 		}
 		vCenterPoint.push_back(cv::Point((ixM - ixm) / 2, (iyM - iym) / 2));
 	}
@@ -854,16 +887,16 @@ void IPLDlg::OnBnClickedBtnProc()
 
 	// 输出轮廓数据
 	TCHAR* pszFileName = _T("ContoursFile.txt");
-	//OutputContoursFile(pszFileName, m_contours);
+	//OutputContoursFile(pszFileName, cvContours);
 
 	cv::Mat showMat(m_cvMat8U.size(), CV_8U, cv::Scalar(255));
-	cv::drawContours(showMat, m_contours, -1, 0, 2);
+	cv::drawContours(showMat, cvContours, -1, 0, 2);
 	// 标记所有目标，获得目标中心坐标
-	for (int i = 0; i < m_contours.size(); i++)
+	for (int i = 0; i < cvContours.size(); i++)
 	{
-		//cv::Rect cvRec = cv::boundingRect(m_contours[i]);
+		//cv::Rect cvRec = cv::boundingRect(cvContours[i]);
 		//cv::rectangle(showMat, cvRec, cv::Scalar(0), 2, 4);
-		cv::RotatedRect rRect = cv::minAreaRect(m_contours[i]);
+		cv::RotatedRect rRect = cv::minAreaRect(cvContours[i]);
 		cv::Point2f rPoint[4];
 		rRect.points(rPoint);
 		cv::line(showMat, rPoint[0], rPoint[1], 0, 2);
@@ -957,7 +990,7 @@ void IPLDlg::OnBnClickedBtnProc()
 		cv::circle(showMat, cv::Point(vCenter[0][iTarIndex].x, vCenter[0][iTarIndex].y), 50, cv::Scalar(0), 1);
 	}
 
-	TRACE(_T("\nNumber of m_contours: %d\n"), m_contours.size());
+	TRACE(_T("\nNumber of cvContours: %d\n"), cvContours.size());
 	if (m_iImgCount % 2 == 0)
 	{
 		cv::namedWindow("OpenCV Viewer 2", CV_WINDOW_NORMAL);
@@ -966,7 +999,7 @@ void IPLDlg::OnBnClickedBtnProc()
 		cv::imwrite("./ImgProc_Show.bmp", showMat);
 		cv::waitKey(0);
 	}
-	m_contours.clear();
+	cvContours.clear();
 	hierarchy.clear();
 }
 
@@ -998,22 +1031,22 @@ void IPLDlg::Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* pvCenter, 
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(20, 20));
 	cv::dilate(tmpMat, tmpMat, element);
 	// OpenCV 提取轮廓
-	vector<vector<Point>> m_contours(512);
+	vector<vector<Point>> cvContours(512);
 	vector<Vec4i> hierarchy(512);
-	cv::findContours(tmpMat, m_contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+	cv::findContours(tmpMat, cvContours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
 	
 	// 输出轮廓点阵数据
 	//const TCHAR* pszFileName = _T("ContoursFile.txt");
-	//OutputContoursFile(pszFileName, m_contours);
+	//OutputContoursFile(pszFileName, cvContours);
 
 	cv::Mat showMat(m_cvMat8U.size(), CV_8U, cv::Scalar(255));
-	cv::drawContours(showMat, m_contours, -1, 0, 2);
+	cv::drawContours(showMat, cvContours, -1, 0, 2);
 	// 标记所有目标，获得目标中心坐标
-	for (int i = 0; i < m_contours.size(); i++)
+	for (int i = 0; i < cvContours.size(); i++)
 	{
-		//cv::Rect cvRec = cv::boundingRect(m_contours[i]);
+		//cv::Rect cvRec = cv::boundingRect(cvContours[i]);
 		//cv::rectangle(showMat, cvRec, cv::Scalar(0), 2, 4);
-		cv::RotatedRect rRect = cv::minAreaRect(m_contours[i]);
+		cv::RotatedRect rRect = cv::minAreaRect(cvContours[i]);
 		cv::Point2f rPoint[4];
 		rRect.points(rPoint);
 		cv::line(showMat, rPoint[0], rPoint[1], 0, 2);
@@ -1055,71 +1088,56 @@ void IPLDlg::Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* pvCenter, 
 		YXRange(&RA, 24.);
 		pvRD->push_back(cv::Point2f(RA, DEC));
 	}
-	// 输出所有目标的坐标和赤经赤纬
+	// Store Data
+	m_CurLST = LST;
+	m_CurAz = Az;
+	m_CurEl = El;
+	m_CurRA = dRA;
+	m_CurDEC = dDEC;
+	
+	cvContours.clear();
+	hierarchy.clear();
+}
+
+
+void IPLDlg::Proc_SearchObject(int iIndex, double * pcRAPre, double * pcRACur, double * pcDECPre, double * pcDECCur,
+	std::vector<cv::Point2f>* pvCPre, std::vector<cv::Point2f>* pvCCur, std::vector<cv::Point2f>* pvRDPre, std::vector<cv::Point2f>* pvRDCur)
+{
+	std::vector<ObjIKMap> vObjIK;
+	
+	double kx0, ky0;
+	kx0 = *pcRACur - *pcRAPre; //kx0: RA_k0
+	ky0 = *pcDECCur - *pcDECPre; //ky0: DEC_k0
+
+	for (int iCur = 0; iCur < pvRDCur->size(); iCur++)
+	{
+		double subMin = 1024.;
+		for (int iPre = 0; iPre < pvRDPre->size(); iPre++)
+		{
+			double xTmp = fabs(1 - (pvRDCur->at(iCur).x - pvRDPre->at(iPre).x) / kx0);
+			double yTmp = fabs(1 - (pvRDCur->at(iCur).y - pvRDPre->at(iPre).y) / ky0);
+			double xandy = xTmp + yTmp;
+			if (xandy < subMin) subMin = xandy;
+		}
+		ObjIKMap ik = { iCur, subMin };
+		vObjIK.push_back(ik);
+	}
+	// 对IK列表排序
+	std::sort(vObjIK.begin(), vObjIK.end(), &CompareIKMap);
+	// 输出IK列表
 	CString csFilePath;
 	csFilePath.Format(_T("%s\\OBS_DATA\\%s.txt"), m_csFitsDir, m_vFitsName.at(iIndex).Left(35));
-	CFile output;
-	CFileException e;
-	if (!output.Open(csFilePath, CFile::modeCreate | CFile::modeWrite, &e))
-	{
-		TRACE(_T("Output file could not be opened %d\n"), e.m_cause);
-	}
-	CString csOutput = _T("");
-	csOutput.Format(_T("恒星时：%8.04f\n视场中心赤经：%8.04f  赤纬：%8.04f\n视场中心方位：%8.04f  高度：%8.04f\n\n"),
-					LST, dRA, dDEC, Az * ToAngle, El * ToAngle);
-	for (int i = 0; i < pvCenter->size(); i++)
-	{
-		csOutput.Format(_T("%s %3d   [%7.02f, %7.02f]   [%5.02f, %5.02f]\n"),
-			csOutput, i, pvCenter->at(i).x, pvCenter->at(i).y, pvRD->at(i).x, pvRD->at(i).y);
-	}
-	output.Write(csOutput, csOutput.GetLength());
-	output.Flush();
-	output.Close();
-	/*
-	// 搜索目标
-	int iTarIndex;
-	if (m_iImgCount % 2 == 0)
-	{
-		double kx0, ky0;
-		kx0 = cRA[0] - cRA[1];
-		ky0 = cDEC[0] - cDEC[1];
-		double kMin0 = 256;
+	OutputAutoProcFile(csFilePath, pvCCur, pvRDCur, &vObjIK);
 
-		for (int iA = 0; iA < vRaDec[0].size(); iA++)
-		{
-			double kMin1 = 256;
-			for (int iB = 0; iB < vRaDec[1].size(); iB++)
-			{
-				double xTmp = fabs(1 - (vRaDec[0][iA].x - vRaDec[1][iB].x) / kx0);
-				double yTmp = fabs(1 - (vRaDec[0][iA].y - vRaDec[1][iB].y) / ky0);
-				double xandy = xTmp + yTmp;
-				if (xandy < kMin1) kMin1 = xandy;
-			}
-			if (kMin1 < kMin0)
-			{
-				kMin0 = kMin1;
-				iTarIndex = iA;
-			}
-		}
-	}
-	// 标记目标
-	if (m_iImgCount % 2 == 0)
+	// 多目标标记
+	for (int i = 0; i < 5; i++)
 	{
-		cv::circle(showMat, cv::Point(vCenter[0][iTarIndex].x, vCenter[0][iTarIndex].y), 50, cv::Scalar(0), 1);
+		int iObjIndex = vObjIK.at(i).Index;
+		cv::circle(m_cvMat8U, cv::Point((*pvCCur)[iObjIndex].x, (*pvCCur)[iObjIndex].y), 50, cv::Scalar(255), 3);
 	}
-
-	TRACE(_T("\nNumber of m_contours: %d\n"), m_contours.size());
-	if (m_iImgCount % 2 == 0)
-	{
-		cv::namedWindow("OpenCV Viewer 2", CV_WINDOW_NORMAL);
-		cv::resizeWindow("OpenCV Viewer 2", iWidth / 4, iHeight / 4);
-		cv::imshow("OpenCV Viewer 2", showMat);
-		cv::imwrite("./ImgProc_Show.bmp", showMat);
-		cv::waitKey(0);
-	}
-	*/
-	m_contours.clear();
-	hierarchy.clear();
+	CString csOutputImgPath;
+	csOutputImgPath.Format(_T("%s\\OBS_DATA\\%s.jpg"), m_csFitsDir, m_vFitsName.at(iIndex).Left(35));
+	cv::imwrite(csOutputImgPath.GetString(), m_cvMat8U);
 }
 
 
