@@ -43,12 +43,17 @@ protected:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMenu_File_Open();
 	afx_msg void OnMenu_File_Save();
+	afx_msg void OnMenu_File_Reset();
 	afx_msg void OnMenu_File_Quit();
 	afx_msg void OnMenu_Analyse_OutStand();
+	afx_msg void OnMenu_Analyse_LineGrayEnhance();
+	afx_msg void OnMenu_Analyse_Threshold();
 	afx_msg void OnMenu_OpenCV_OpenImg();
 	afx_msg void OnMenu_OpenCV_NolinearGE();
 	afx_msg void OnMenu_OpenCV_Threshold();
 	afx_msg void OnMenu_OpenCV_EqualizeHist();
+	afx_msg void OnMenu_Process_ManualProc();
+	afx_msg void OnMenu_Process_Stop();
 	afx_msg void OnBnClickedBtnLinearGE();
 	afx_msg void OnBnClickedBtnBinaryConv();
 	afx_msg void OnBnClickedBtnReset();
@@ -65,6 +70,7 @@ public:
 	bool CreateDibX();
 	bool CreateDibX_BinaryConv(int iBinThreshoud);
 	void ComputeGrayLimit(double dLowPer, double dHighPer);
+	void Proc_LoadFile(LPCTSTR lpszPath);
 	void Proc_OutStand();
 	void Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* pvCenter, std::vector<cv::Point2f>* pvRD, double* pcRA, double* pcDEC);
 	void Proc_SearchObject(int iIndex, double * pcRAPre, double * pcRACur, double * pcDECPre, double * pcDECCur,
@@ -93,6 +99,7 @@ private:
 
 	// OpenCV support
 	cv::Mat m_cvMat;
+	cv::Mat m_cvMatShow;
 	cv::Mat m_cvMat8U;
 
 public:
@@ -106,4 +113,6 @@ public:
 	double cRA[2], cDEC[2];
 	double m_CurLST;
 	double m_CurRA, m_CurDEC, m_CurAz, m_CurEl;
+	HANDLE m_hThread_Proc;
+	int m_iThreadStatus; //Thread status. 0 Stop, 1 Running.
 };

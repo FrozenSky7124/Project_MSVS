@@ -47,7 +47,6 @@ UINT WINAPI uiFunc_Proc(LPVOID lpParam)
 	std::vector<cv::Point2f> *pvPreRD, *pvCurRD; //vRaDec[2]
 	double *pcRA_Pre, *pcRA_Cur; //cRA[2]
 	double *pcDEC_Pre, *pcDEC_Cur; //cDEC[2]
-	void *pTmp;
 
 	int iPreObjNID = 0;
 	int iImgInQueue = 0;
@@ -89,7 +88,7 @@ UINT WINAPI uiFunc_Proc(LPVOID lpParam)
 		// Get Fits file path
 		CString csFitsPath = pIPLDLG->m_csFitsDir + _T("\\") + lpvFitsName->at(iImgIndex);
 		// Load Fits
-		pIPLDLG->OpenFile_FITS(csFitsPath);
+		pIPLDLG->Proc_LoadFile(csFitsPath);
 		// Outstanding conversion
 		pIPLDLG->Proc_OutStand();
 		// Extract posible objects
@@ -97,6 +96,9 @@ UINT WINAPI uiFunc_Proc(LPVOID lpParam)
 		// Search main object
 		if (iImgInQueue >= 2)
 			pIPLDLG->Proc_SearchObject(iImgIndex, pcRA_Pre, pcRA_Cur, pcDEC_Pre, pcDEC_Cur, pvPreCenter, pvCurCenter, pvPreRD, pvCurRD);
+
+		// Stop and Release when ThreadStatus is 0;
+		if (pIPLDLG->m_iThreadStatus == 0) break;
 	}
 	return 0;
 }
@@ -112,6 +114,7 @@ IPLDlg::IPLDlg(CWnd* pParent /*=NULL*/)
 	m_iProcConfig = 0;
 	m_ipFitsDataTmp = NULL;
 	m_iImgCount = 0;
+	m_iThreadStatus = 0;
 }
 
 void IPLDlg::DoDataExchange(CDataExchange* pDX)
@@ -139,6 +142,11 @@ BEGIN_MESSAGE_MAP(IPLDlg, CDialog)
 	ON_BN_CLICKED(IDC_BtnProc, &IPLDlg::OnBnClickedBtnProc)
 	ON_BN_CLICKED(IDC_BtnTest, &IPLDlg::OnBnClickedBtnTEST)
 	ON_BN_CLICKED(IDC_BtnAutoProc, &IPLDlg::OnBnClickedBtnAutoProc)
+	ON_COMMAND(ID_MenuAnalyse_LineGrayEnhance, &IPLDlg::OnMenu_Analyse_LineGrayEnhance)
+	ON_COMMAND(ID_MenuAnalyse_Threshold, &IPLDlg::OnMenu_Analyse_Threshold)
+	ON_COMMAND(ID_MenuProcess_ManualProc, &IPLDlg::OnMenu_Process_ManualProc)
+	ON_COMMAND(ID_MenuFile_Reset, &IPLDlg::OnMenu_File_Reset)
+	ON_COMMAND(ID_MenuProcess_Stop, &IPLDlg::OnMenu_Process_Stop)
 END_MESSAGE_MAP()
 
 
@@ -444,10 +452,12 @@ void IPLDlg::OutputAutoProcFile(CString & csFilePath, std::vector<cv::Point2f>* 
 	CString csOutput = _T("");
 	csOutput.Format(_T("LST: %8.04f\nCenterRA:  %8.04f  CenterDEC: %8.04f\nCenterAz:  %8.04f  CenterEl:  %8.04f\n\n"),
 		m_CurLST, m_CurRA, m_CurDEC, m_CurAz * ToAngle, m_CurEl * ToAngle);
-	for (int i = 0; i < pvCenter->size(); i++)
+	csOutput.Format(_T("%s NO    [X, Y]               [RA, DEC]         K\n\n"), csOutput);
+	for (int i = 0; i < pIKMap->size(); i++)
 	{
-		csOutput.Format(_T("%s %3d   [%7.02f, %7.02f]   [%5.02f, %5.02f]   KValue = %7.04f\n"),
-			csOutput, i, pvCenter->at(i).x, pvCenter->at(i).y, pvRD->at(i).x, pvRD->at(i).y, pIKMap->at(i).KValue);
+		int index = pIKMap->at(i).Index;
+		csOutput.Format(_T("%s %-3d   [%7.02f, %7.02f]   [%5.02f, %5.02f]   %7.04f\n"),
+			csOutput, i, pvCenter->at(index).x, pvCenter->at(index).y, pvRD->at(index).x, pvRD->at(index).y, pIKMap->at(i).KValue);
 	}
 	output.Write(csOutput, csOutput.GetLength());
 	output.Flush();
@@ -485,6 +495,41 @@ void IPLDlg::ComputeGrayLimit(double dLowPer, double dHighPer)
 	delete[] pSampleData;
 	m_iLowPixelCount = iLow;
 	m_iHighPixelCount = iHigh;
+}
+
+
+void IPLDlg::Proc_LoadFile(LPCTSTR lpszPath)
+{
+	// Release data
+	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
+	m_ipFitsDataTmp = NULL;
+	// Load FITS file
+	m_FSCFitsX.OpenFitsFile(lpszPath);
+	// Create FITS temp data
+	int iWidth = m_FSCFitsX.GetWidth();
+	int iHeight = m_FSCFitsX.GetHeight();
+	long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
+	m_ipFitsDataTmp = new int[iWidth * iHeight];
+	memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+	// Get FITS PixelCount Maximun and Minimum
+	m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
+	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
+	// Create cvMat16U
+	m_cvMat.release();
+	m_cvMat.create(iHeight, iWidth, CV_16U);
+	for (int i = 0; i < iHeight * iWidth; i++)
+	{
+		m_cvMat.at<unsigned short>(i) = unsigned short(*(m_ipFitsDataTmp + i));
+	}
+	// Create cvMat8U
+	m_cvMatShow.release();
+	m_cvMat.convertTo(m_cvMatShow, CV_8U, 1 / 255.0, 0.0);
+	// Create FSCDibX
+	m_FSCDibX.LoadFromBuffer(m_cvMatShow.data, iWidth, iHeight, 8);
+	// Show Image
+	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+	ListFitsHDU();
+	//ListImgInfo();
 }
 
 
@@ -588,6 +633,12 @@ void IPLDlg::OnMenu_File_Save()
 }
 
 
+void IPLDlg::OnMenu_File_Reset()
+{
+	this->OnBnClickedBtnReset();
+}
+
+
 void IPLDlg::OnMenu_File_Quit()
 {
 	// TODO:
@@ -657,6 +708,18 @@ void IPLDlg::OnMenu_Analyse_OutStand()
 	delete[] pBmpData;
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
 	return;
+}
+
+
+void IPLDlg::OnMenu_Analyse_LineGrayEnhance()
+{
+	OnBnClickedBtnLinearGE();
+}
+
+
+void IPLDlg::OnMenu_Analyse_Threshold()
+{
+	OnBnClickedBtnBinaryConv();
 }
 
 
@@ -813,6 +876,23 @@ void IPLDlg::OnMenu_OpenCV_EqualizeHist()
 	cv::resizeWindow("OpenCV Viewer", iWidth / 4, iHeight / 4);
 	cv::imshow("OpenCV Viewer", tmpMat);
 	cv::waitKey(0);
+}
+
+
+void IPLDlg::OnMenu_Process_ManualProc()
+{
+	OnBnClickedBtnProc();
+}
+
+
+void IPLDlg::OnMenu_Process_Stop()
+{
+	if (m_iThreadStatus == 1)
+	{
+		m_iThreadStatus = 0;
+		WaitForSingleObject(m_hThread_Proc, INFINITE);
+		MessageBoxEx(GetSafeHwnd(), _T("Process Stopped."), _T("QwQ"), MB_OK | MB_ICONINFORMATION, 0);
+	}
 }
 
 
@@ -1130,19 +1210,25 @@ void IPLDlg::Proc_SearchObject(int iIndex, double * pcRAPre, double * pcRACur, d
 	OutputAutoProcFile(csFilePath, pvCCur, pvRDCur, &vObjIK);
 
 	// 多目标标记
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		int iObjIndex = vObjIK.at(i).Index;
 		cv::circle(m_cvMat8U, cv::Point((*pvCCur)[iObjIndex].x, (*pvCCur)[iObjIndex].y), 50, cv::Scalar(255), 3);
 	}
+	m_FSCDibX.LoadFromBuffer(m_cvMat8U.data, m_cvMat8U.cols, m_cvMat8U.rows, 8);
+	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+
 	CString csOutputImgPath;
-	csOutputImgPath.Format(_T("%s\\OBS_DATA\\%s.jpg"), m_csFitsDir, m_vFitsName.at(iIndex).Left(35));
+	csOutputImgPath.Format(_T("%s\\OBS_DATA\\%s.bmp"), m_csFitsDir, m_vFitsName.at(iIndex).Left(35));
 	cv::imwrite(csOutputImgPath.GetString(), m_cvMat8U);
 }
 
 
 void IPLDlg::OnBnClickedBtnAutoProc()
 {
+	// If Process is already running, refuse to execute.
+	if (m_iThreadStatus == 1) return;
+
 	//typedef struct _browseinfo {
 	//	HWND hwndOwner;            // 父窗口句柄  
 	//	LPCITEMIDLIST pidlRoot;    // 要显示的文件目录对话框的根(Root)  
@@ -1205,8 +1291,10 @@ void IPLDlg::OnBnClickedBtnAutoProc()
 	TRACE(_T("m_iFitsCount = %d\n"), m_iFitsCount);
 
 	// Start processing thread
+	m_iThreadStatus = 1; //Set thread status Running.
+
 	UINT uiThread_Proc;
-	HANDLE hThread_Proc = (HANDLE)_beginthreadex(NULL, 0, &uiFunc_Proc, this, 0, &uiThread_Proc);
-	ASSERT(hThread_Proc);
-	SetThreadPriority(hThread_Proc, THREAD_PRIORITY_HIGHEST);
+	m_hThread_Proc = (HANDLE)_beginthreadex(NULL, 0, &uiFunc_Proc, this, 0, &uiThread_Proc);
+	ASSERT(m_hThread_Proc);
+	SetThreadPriority(m_hThread_Proc, THREAD_PRIORITY_HIGHEST);
 }
