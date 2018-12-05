@@ -70,9 +70,18 @@ BOOL ImageProcLiteApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
+	// Add GDI+ Support
+	Gdiplus::GdiplusStartupInput m_gdiplusStartupInput;
+	ULONG_PTR m_pGdiToken;
+	Gdiplus::GdiplusStartup(&m_pGdiToken, &m_gdiplusStartupInput, NULL);
+
 	IPLDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
+
+	// Release GDI+
+	Gdiplus::GdiplusShutdown(m_pGdiToken);
+
 	if (nResponse == IDOK)
 	{
 		// TODO: 在此放置处理何时用

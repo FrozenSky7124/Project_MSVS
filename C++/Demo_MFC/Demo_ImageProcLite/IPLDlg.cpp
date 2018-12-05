@@ -16,6 +16,7 @@
 
 using namespace std;
 using namespace cv;
+using namespace Gdiplus;
 
 
 // Global
@@ -95,7 +96,9 @@ UINT WINAPI uiFunc_Proc(LPVOID lpParam)
 		pIPLDLG->Proc_ExtractObject(iImgIndex, pvCurCenter, pvCurRD, pcRA_Cur, pcDEC_Cur);
 		// Search main object
 		if (iImgInQueue >= 2)
+		{
 			pIPLDLG->Proc_SearchObject(iImgIndex, pcRA_Pre, pcRA_Cur, pcDEC_Pre, pcDEC_Cur, pvPreCenter, pvCurCenter, pvPreRD, pvCurRD);
+		}
 
 		// Stop and Release when ThreadStatus is 0;
 		if (pIPLDLG->m_iThreadStatus == 0) break;
@@ -621,6 +624,12 @@ void IPLDlg::OnBnClickedBtnTEST()
 	HorCoordToEquCoord(A, a, latitude, Dec, H);
 	YXRange(&H, 24.0f);
 	TRACE(_T("H = %.2f Dec = %.2f\n"), H, Dec);
+
+	HWND hWnd = GetDlgItem(IDC_StaticImgMain)->GetSafeHwnd();
+	Graphics GP(hWnd);
+	Gdiplus::Rect rtMark(400 - 50, 400 - 50, 100, 100);
+	Pen GreenPen(Color(255, 0, 0, 255), 5);
+	GP.DrawRectangle(&GreenPen, rtMark);
 }
 
 
@@ -931,7 +940,7 @@ void IPLDlg::OnBnClickedBtnProc()
 
 	// 提取轮廓
 
-	vector<vector<Point>> cvContours(512);
+	vector<vector<cv::Point>> cvContours(512);
 	vector<Vec4i> hierarchy(512);
 	//std::vector<std::vector<cv::Point>> cvContours(512);
 	cv::findContours(tmpMat, cvContours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
@@ -1111,7 +1120,7 @@ void IPLDlg::Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* pvCenter, 
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(20, 20));
 	cv::dilate(tmpMat, tmpMat, element);
 	// OpenCV 提取轮廓
-	vector<vector<Point>> cvContours(512);
+	vector<vector<cv::Point>> cvContours(512);
 	vector<Vec4i> hierarchy(512);
 	cv::findContours(tmpMat, cvContours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
 	
@@ -1217,6 +1226,18 @@ void IPLDlg::Proc_SearchObject(int iIndex, double * pcRAPre, double * pcRACur, d
 	}
 	m_FSCDibX.LoadFromBuffer(m_cvMat8U.data, m_cvMat8U.cols, m_cvMat8U.rows, 8);
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
+
+	// Mark object
+	HWND hWnd = GetDlgItem(IDC_StaticImgMain)->GetSafeHwnd();
+	Graphics GP(hWnd);
+	int objIndex = vObjIK.at(0).Index;
+	int objX = pvCCur->at(objIndex).x;
+	int objY = m_FSCFitsX.GetHeight() - pvCCur->at(objIndex).y;
+	int markX = (double)objX / m_FSCFitsX.GetWidth() * 800;
+	int markY = (double)objY / m_FSCFitsX.GetHeight() * 800;
+	Gdiplus::Rect rtMark(markX - 25, markY - 25, 50, 50);
+	Pen GreenPen(Color(255, 0, 255, 0), 1);
+	GP.DrawRectangle(&GreenPen, rtMark);
 
 	CString csOutputImgPath;
 	csOutputImgPath.Format(_T("%s\\OBS_DATA\\%s.bmp"), m_csFitsDir, m_vFitsName.at(iIndex).Left(35));
