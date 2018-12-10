@@ -23,12 +23,18 @@ int fileEncrypt(char* filePath, unsigned int secretKey)
 	memset(buffer, 0, sizeof(char));
 
 	// Get fileSize
-	struct _stat info;
-	_stat(filePath, &info);
-	int fileSize = info.st_size;
-	cout << "File Size: " << fileSize << endl;
+	
+	//struct _stat info;
+	//_stat(filePath, &info);
+	//int fileSize = info.st_size;
 
-	if (fileSize == 0)
+	fpos_t pos;
+	fseek(file, 0, SEEK_END);
+	fgetpos(file, &pos);
+	fseek(file, 0, SEEK_SET);
+	cout << "File Size: " << pos << endl;
+
+	if (pos == 0)
 	{
 		free(buffer);
 		fclose(file);
@@ -36,9 +42,9 @@ int fileEncrypt(char* filePath, unsigned int secretKey)
 	}
 
 	int operateNum = 100;
-	if (fileSize < 100)
+	if (pos < 100)
 	{
-		operateNum = fileSize;
+		operateNum = pos;
 	}
 
 	for (int i = 0; i < operateNum; i++)
