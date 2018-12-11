@@ -10,6 +10,8 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "Interface/BtnST.h"
+#include "afxcmn.h"
 
 struct ObjIKMap
 {
@@ -59,6 +61,8 @@ protected:
 	afx_msg void OnBnClickedBtnReset();
 	afx_msg void OnBnClickedBtnProc();
 	afx_msg void OnBnClickedBtnAutoProc();
+	afx_msg void OnBnClickedBtnProcStart();
+	afx_msg void OnBnClickedBtnProcStop();
 	afx_msg void OnBnClickedBtnTEST();
 	virtual void OnOK();
 	virtual void OnCancel();
@@ -72,19 +76,26 @@ public:
 	void ComputeGrayLimit(double dLowPer, double dHighPer);
 	void Proc_LoadFile(LPCTSTR lpszPath);
 	void Proc_OutStand();
-	void Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* pvCenter, std::vector<cv::Point2f>* pvRD, double* pcRA, double* pcDEC);
+	void Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* vpPixel, std::vector<cv::Point2f>* vpRD, double* pcRA, double* pcDEC);
 	void Proc_SearchObject(int iIndex, double * pcRAPre, double * pcRACur, double * pcDECPre, double * pcDECCur,
-		std::vector<cv::Point2f>* pvCPre, std::vector<cv::Point2f>* pvCCur, std::vector<cv::Point2f>* pvRDPre, std::vector<cv::Point2f>* pvRDCur);
+		std::vector<cv::Point2f>* vpPixelPre, std::vector<cv::Point2f>* vpPixelCur, std::vector<cv::Point2f>* vpRDPre, std::vector<cv::Point2f>* vpRDCur);
+	void DrawMarkPre();
+	void DrawMarkCur();
+	void DrawSubImg();
 	void ListFitsHDU();
 	void ListImgInfo();
+	void UpdateUI();
 	void OutputContoursFile(TCHAR* pszFileName, std::vector<std::vector<cv::Point>> & cont);
-	void OutputAutoProcFile(CString & csFilePath, std::vector<cv::Point2f>* pvCenter, std::vector<cv::Point2f>* pvRD, std::vector<ObjIKMap>* pIKMap);
+	void OutputAutoProcFile(CString & csFilePath, std::vector<cv::Point2f>* vpPixel, std::vector<cv::Point2f>* vpRD, std::vector<ObjIKMap>* pIKMap);
+	void ReleaseAndInit();
+	void PrintLog(CString logStr);
 
 private:
 	CDC* m_pCDCImgMain;
+	CDC* m_pCDCImgSub;
 	FSC_FitsX m_FSCFitsX;
 	FSC_DibX m_FSCDibX;
-	int m_iProcConfig;
+	FSC_DibX m_FSCDibX_Sub;
 	int* m_ipFitsDataTmp;
 	int m_iMinPixelCount;
 	int m_iMaxPixelCount;
@@ -96,6 +107,8 @@ private:
 	CFont m_FontStandard;
 	CEdit m_EditFitsInfo;
 	CEdit m_EditImgInfo;
+	int m_iSubImgW;
+	int m_iSubImgH;
 
 	// OpenCV support
 	cv::Mat m_cvMat;
@@ -103,16 +116,32 @@ private:
 	cv::Mat m_cvMat8U;
 
 public:
-	// 以下变量不安全
 	// AutoProc Data
-	CString m_csFitsDir;
-	int m_iFitsCount;
-	std::vector<CString> m_vFitsName;
-	std::vector<cv::Point2f> vCenter[2];
+	CString m_csFitsDir; //Record path of OBJECT directory
+	int m_iFitsCount; //Record fits file count of OBJECT directory
+	std::vector<CString> m_vFitsName; //Record array of fits file names
+	std::vector<cv::Point2f> vPixel[2];
 	std::vector<cv::Point2f> vRaDec[2];
+	std::vector<cv::Point2f> *m_vpPixelPre, *m_vpPixelCur; //Record Ptr To vPixel[2]
+	std::vector<cv::Point2f> *m_vpRDPre, *m_vpRDCur; //Record Ptr To vRaDec[2]
+	std::vector<ObjIKMap> m_vObjIK; //Record I&K Value of OBJECT
 	double cRA[2], cDEC[2];
+	double *m_pcRA_Pre, *m_pcRA_Cur; //Record Ptr To cRA[2]
+	double *m_pcDEC_Pre, *m_pcDEC_Cur; //Record Ptr To cDEC[2]
+	int m_iPreObjNID;
+	int m_iCurObjNID;
+	int m_iImgInQueue;
+	int m_iImgIndex;
+	int m_MarkXPre, m_MarkXCur;
+	int m_MarkYPre, m_MarkYCur;
+	int m_iProcErrCount;
+	double m_dScale;
 	double m_CurLST;
 	double m_CurRA, m_CurDEC, m_CurAz, m_CurEl;
 	HANDLE m_hThread_Proc;
-	int m_iThreadStatus; //Thread status. 0 Stop, 1 Running.
+	int m_iThreadStatus; //Thread status. 0 Stop, 1 Running, 2 Pause.
+
+	CButtonST m_BtnSTStart;
+	CButtonST m_BtnSTStop;
+	CProgressCtrl m_ProgressMain;
 };

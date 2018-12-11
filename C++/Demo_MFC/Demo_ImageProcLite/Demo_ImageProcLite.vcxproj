@@ -192,6 +192,8 @@
     <ClInclude Include="..\..\FrozenSky\DLL_CDib\Dib_Ex.h" />
     <ClInclude Include="..\..\FrozenSky\DLL_FSC_FitsX\FSC_FitsX.h" />
     <ClInclude Include="Demo_ImageProcLite.h" />
+    <ClInclude Include="Interface\BCMenu.h" />
+    <ClInclude Include="Interface\BtnST.h" />
     <ClInclude Include="IPLDlg.h" />
     <ClInclude Include="IPL_Macro.h" />
     <ClInclude Include="Resource.h" />
@@ -207,6 +209,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Demo_ImageProcLite.cpp" />
+    <ClCompile Include="Interface\BCMenu.cpp" />
+    <ClCompile Include="Interface\BtnST.cpp" />
     <ClCompile Include="IPLDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -223,6 +227,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Demo_ImageProcLite.ico" />
+    <Image Include="res\imgPause.ico" />
+    <Image Include="res\imgPlay.ico" />
+    <Image Include="res\imgStop.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

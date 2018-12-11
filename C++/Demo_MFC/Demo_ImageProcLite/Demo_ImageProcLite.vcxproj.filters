@@ -22,6 +22,9 @@
     <Filter Include="FrozenSkyFunc">
       <UniqueIdentifier>{243c0017-26d6-4c29-bf89-d07a4bdc0046}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Interface">
+      <UniqueIdentifier>{dad1cc6e-503a-4f3b-8d3a-df0c00d07c6a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo_ImageProcLite.h">
@@ -51,6 +54,12 @@
     <ClInclude Include="IPL_Macro.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Interface\BtnST.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\BCMenu.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo_ImageProcLite.cpp">
@@ -71,6 +80,12 @@
     <ClCompile Include="..\..\..\..\Gitee\CHO_Project\HeavenTrack_Beta\FrozenSkyFunc.cpp">
       <Filter>FrozenSkyFunc</Filter>
     </ClCompile>
+    <ClCompile Include="Interface\BtnST.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface\BCMenu.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Demo_ImageProcLite.rc">
@@ -84,6 +99,15 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Demo_ImageProcLite.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\imgPause.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\imgPlay.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\imgStop.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
