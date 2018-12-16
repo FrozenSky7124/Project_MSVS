@@ -140,7 +140,7 @@ IPLDlg::IPLDlg(CWnd* pParent /*=NULL*/)
 	m_iLowPixelCount = -1;
 	m_iHighPixelCount = -1;
 	// Auto Proc Data
-	m_ipFitsDataTmp = NULL;
+	m_uipFitsDataTmp = NULL;
 	m_iImgCount		= 0;
 	m_iThreadStatus = 0;
 	m_vpPixelPre	= &(vPixel[1]);
@@ -300,8 +300,8 @@ void IPLDlg::OnCancel()
 		return;
 	}
 	// Release Fits temp data
-	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
-	m_ipFitsDataTmp = NULL;
+	if (m_uipFitsDataTmp) delete[] m_uipFitsDataTmp;
+	m_uipFitsDataTmp = NULL;
 	// Release OpenCV Mat
 	m_cvMat.release();
 	m_cvMat8U.release();
@@ -334,14 +334,14 @@ void IPLDlg::OnDropFiles(HDROP hDropInfo)
 bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 {
 	// 清理数据
-	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
-	m_ipFitsDataTmp = NULL;
+	if (m_uipFitsDataTmp) delete[] m_uipFitsDataTmp;
+	m_uipFitsDataTmp = NULL;
 	// 读取 FITS 文件
 	m_FSCFitsX.OpenFitsFile(lpszPath);
 	// 创建 FITS 数据临时存储空间
 	long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
-	m_ipFitsDataTmp = new int[m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight()];
-	memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+	m_uipFitsDataTmp = new int[m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight()];
+	memcpy_s(m_uipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
 	// 读取 FITS 文件 PixelCount 最大值和最小值
 	m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
 	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
@@ -350,7 +350,7 @@ bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 	m_cvMat.create(m_FSCFitsX.GetHeight(), m_FSCFitsX.GetWidth(), CV_16U);
 	for (int i = 0; i < m_FSCFitsX.GetHeight() * m_FSCFitsX.GetWidth(); i++)
 	{
-		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+		unsigned short usTmp = unsigned short(*(m_uipFitsDataTmp + i));
 		m_cvMat.at<unsigned short>(i) = usTmp;
 	}
 	m_cvMat8U.release();
@@ -362,7 +362,7 @@ bool IPLDlg::OpenFile_FITS(LPCTSTR lpszPath)
 
 	m_FSCDibX.Draw(m_pCDCImgMain, CPoint(0, 0), CSize(800, 800));
 	ListFitsHDU();
-	ListImgInfo();
+	//ListImgInfo();
 	// 计数器+1
 	m_iImgCount++;
 	return true;
@@ -386,7 +386,7 @@ bool IPLDlg::CreateDibX()
 		for (int j = 0; j < iWidth; j++)
 		{
 			//int iFValue = m_FSCFitsX.GetFitsData(j, i);
-			int iFValue = *(m_ipFitsDataTmp + i * iWidth + j);
+			int iFValue = *(m_uipFitsDataTmp + i * iWidth + j);
 			// 使用自动灰度阈值进行线性灰度增强
 			iFValue = ((float)iFValue - (float)m_iLowPixelCount) * dRate;
 			//iFValue = 255 * double(iFValue) / 65535;
@@ -420,7 +420,7 @@ bool IPLDlg::CreateDibX_BinaryConv(int iBinThreshoud)
 	{
 		for (int j = 0; j < iWidth; j++)
 		{
-			int iFValue = *(m_ipFitsDataTmp + i * iWidth + j);
+			int iFValue = *(m_uipFitsDataTmp + i * iWidth + j);
 			if (iFValue >= iBinThreshoud) iFValue = 255;
 			else iFValue = 0;
 			BYTE tempValue;
@@ -645,7 +645,7 @@ void IPLDlg::ComputeGrayLimit(double dLowPer, double dHighPer)
 	for (int i = 0; i < iSampleNum; i++)
 	{
 		//pSampleData[i] = m_FSCFitsX.GetFitsData(i * dRate);
-		pSampleData[i] = *(m_ipFitsDataTmp + int(i * dRate));
+		pSampleData[i] = *(m_uipFitsDataTmp + int(i * dRate));
 	}
 	std::nth_element(pSampleData, pSampleData + iLowNum, pSampleData + iSampleNum);
 	iLow = pSampleData[iLowNum];
@@ -662,16 +662,16 @@ void IPLDlg::Proc_LoadFile(LPCTSTR lpszPath)
 	DWORD dTimeB = GetTickCount();
 
 	// Release data
-	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
-	m_ipFitsDataTmp = NULL;
+	if (m_uipFitsDataTmp) delete[] m_uipFitsDataTmp;
+	m_uipFitsDataTmp = NULL;
 	// Load FITS file
 	m_FSCFitsX.OpenFitsFile(lpszPath);
 	// Create FITS temp data
 	int iWidth = m_FSCFitsX.GetWidth();
 	int iHeight = m_FSCFitsX.GetHeight();
 	long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
-	m_ipFitsDataTmp = new int[iWidth * iHeight];
-	memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+	m_uipFitsDataTmp = new int[iWidth * iHeight];
+	memcpy_s(m_uipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
 	// Get FITS PixelCount Maximun and Minimum
 	m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
 	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
@@ -680,11 +680,13 @@ void IPLDlg::Proc_LoadFile(LPCTSTR lpszPath)
 	m_cvMat.create(iHeight, iWidth, CV_16U);
 	for (int i = 0; i < iHeight * iWidth; i++)
 	{
-		m_cvMat.at<unsigned short>(i) = unsigned short(*(m_ipFitsDataTmp + i));
+		m_cvMat.at<unsigned short>(i) = unsigned short(*(m_uipFitsDataTmp + i));
 	}
 	// Create cvMatShow
 	m_cvMatShow.release();
 	m_cvMat.convertTo(m_cvMatShow, CV_8U, 1 / 255.0, 0.0);
+	// Test
+	//cv::imwrite(_T("G:\\DuktoFiles\\Output\\1_Ori.bmp"), m_cvMatShow);
 	// Create FSCDibX
 	cv::flip(m_cvMatShow, m_cvMatShow, 0);
 	m_FSCDibX.LoadFromBuffer(m_cvMatShow.data, iWidth, iHeight, 8);
@@ -717,26 +719,33 @@ void IPLDlg::Proc_OutStand()
 	int iHeight = m_FSCFitsX.GetHeight();
 
 	int iAve = m_FSCFitsX.GetAveragePixelCount();
-	int iMin = INT_MAX;
-	int iMax = INT_MIN;
+	unsigned int iMin = UINT_MAX;
+	unsigned int iMax = 0;
 	for (int i = 0; i < iHeight; i++)
 	{
 		for (int j = 0; j < iWidth; j++)
 		{
-			int *pValue = m_ipFitsDataTmp + i * iWidth + j;
-			int iValue = *pValue;
-			int S1 = pow(iValue - iAve, 2);
+			int *pValue = m_uipFitsDataTmp + i * iWidth + j;
+			//unsigned int iValue = *pValue;
+			/*int S1 = pow(iValue - iAve, 2);
+			*pValue = S1;
+			if (S1 < iMin) iMin = S1;
+			if (S1 > iMax) iMax = S1;*/
+			unsigned int S1 = pow(*pValue - iAve, 2);
+			if (S1 > UINT_MAX)
+				TRACE(_T("INT overflow.\n"));
 			*pValue = S1;
 			if (S1 < iMin) iMin = S1;
 			if (S1 > iMax) iMax = S1;
 		}
 	}
-	int iFSMin = INT_MAX;
-	int iFSMax = INT_MIN;
+
 	for (long i = 0; i < iHeight * iWidth; i++)
 	{
-		int *pValue = m_ipFitsDataTmp + i;
-		*pValue = 65535 * double(*pValue - iMin) / (*pValue - iMax);
+		int *pValue = m_uipFitsDataTmp + i;
+		int iTmp;
+		iTmp = 65535 * double((*pValue - iMin)) / double((*pValue - iMax));
+		*pValue = iTmp;
 		//*pValue = 65535 * double(*pValue - iMax) / (*pValue - iMin);
 		//if (*pValue < 0) *pValue = 0;
 		//if (*pValue > 65535) *pValue = 65535;
@@ -811,12 +820,12 @@ void IPLDlg::OnBnClickedBtnReset()
 {
 	// TODO:
 	// 清理数据
-	if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
-	m_ipFitsDataTmp = NULL;
+	if (m_uipFitsDataTmp) delete[] m_uipFitsDataTmp;
+	m_uipFitsDataTmp = NULL;
 	// 创建 FITS 数据临时存储空间
 	long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
-	m_ipFitsDataTmp = new int[m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight()];
-	memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+	m_uipFitsDataTmp = new int[m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight()];
+	memcpy_s(m_uipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
 	// 读取 FITS 文件 PixelCount 最大值和最小值
 	m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
 	m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
@@ -885,15 +894,14 @@ void IPLDlg::OnMenu_Analyse_OutStand()
 	int iHeight = m_FSCFitsX.GetHeight();
 
 	int iAve = m_FSCFitsX.GetAveragePixelCount();
-	int iMin = INT_MAX;
-	int iMax = INT_MIN;
+	unsigned int iMin = UINT_MAX;
+	unsigned int iMax = 0;
 	for (int i = 0; i < iHeight; i++)
 	{
 		for (int j = 0; j < iWidth; j++)
 		{
-			int *pValue = m_ipFitsDataTmp + i * iWidth + j;
-			int iValue = *pValue;
-			int S1 = pow(iValue - iAve, 2);
+			int *pValue = m_uipFitsDataTmp + i * iWidth + j;
+			unsigned int S1 = pow(*pValue - iAve, 2);
 			*pValue = S1;
 			if (S1 < iMin) iMin = S1;
 			if (S1 > iMax) iMax = S1;
@@ -903,19 +911,15 @@ void IPLDlg::OnMenu_Analyse_OutStand()
 	int iFSMax = INT_MIN;
 	for (long i = 0; i < iHeight * iWidth; i++)
 	{
-		int *pValue = m_ipFitsDataTmp + i;
-		*pValue = 65535 * double(*pValue - iMin) / (*pValue - iMax);
+		int *pValue = m_uipFitsDataTmp + i;
+		int iTmp;
+		iTmp = 65535 * double((*pValue - iMin)) / double((*pValue - iMax));
+		*pValue = iTmp;
 		//*pValue = 65535 * double(*pValue - iMax) / (*pValue - iMin);
 		//if (*pValue < 0) *pValue = 0;
 		//if (*pValue > 65535) *pValue = 65535;
 	}
 
-
-	CString tempStr;
-	tempStr.Format(_T("AvePixelCount = %d\n"), iAve);
-	int iLength = m_EditImgInfo.GetWindowTextLength();
-	m_EditImgInfo.SetSel(iLength, iLength);
-	m_EditImgInfo.ReplaceSel(tempStr);
 	// 计算 BMP 文件数据区的长度(Byte)
 	long lBmpDataSize = iWidth * iHeight;
 	// 创建 BMP 数据空间
@@ -926,7 +930,7 @@ void IPLDlg::OnMenu_Analyse_OutStand()
 	{
 		for (int j = 0; j < iWidth; j++)
 		{
-			int FS1 = *(m_ipFitsDataTmp + i * iWidth + j);
+			int FS1 = *(m_uipFitsDataTmp + i * iWidth + j);
 			FS1 = 255 * double(FS1) / 65535;
 			BYTE tempValue;
 			memset(&tempValue, 0, 1);
@@ -980,21 +984,21 @@ void IPLDlg::OnMenu_OpenCV_OpenImg()
 		if ((strFileType == "fit") || (strFileType == "fits"))
 		{
 			// 清理数据
-			if (m_ipFitsDataTmp) delete[] m_ipFitsDataTmp;
-			m_ipFitsDataTmp = NULL;
+			if (m_uipFitsDataTmp) delete[] m_uipFitsDataTmp;
+			m_uipFitsDataTmp = NULL;
 			// 读取 FITS 文件
 			m_FSCFitsX.OpenFitsFile(strFilePath);
 			// 创建 FITS 数据临时存储空间
 			long lDataSize = m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight() * sizeof(int);
-			m_ipFitsDataTmp = new int[m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight()];
-			memcpy_s(m_ipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
+			m_uipFitsDataTmp = new int[m_FSCFitsX.GetWidth() * m_FSCFitsX.GetHeight()];
+			memcpy_s(m_uipFitsDataTmp, lDataSize, m_FSCFitsX.GetFitsDataPtr(), lDataSize);
 			// 读取 FITS 文件 PixelCount 最大值和最小值
 			m_iMinPixelCount = m_FSCFitsX.GetMinPixelCount();
 			m_iMaxPixelCount = m_FSCFitsX.GetMaxPixelCount();
 			cv::Mat cvMa(m_FSCFitsX.GetHeight(), m_FSCFitsX.GetWidth(), CV_16U);
 			for (int i = 0; i < m_FSCFitsX.GetHeight() * m_FSCFitsX.GetWidth(); i++)
 			{
-				unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+				unsigned short usTmp = unsigned short(*(m_uipFitsDataTmp + i));
 				cvMa.at<unsigned short>(i)= usTmp;
 			}
 			cv::namedWindow("OpenCV Viewer", CV_WINDOW_NORMAL);
@@ -1043,7 +1047,7 @@ void IPLDlg::OnMenu_OpenCV_NolinearGE()
 	m_cvMat8U.create(m_FSCFitsX.GetHeight(), iWidth, CV_8U);
 	for (int i = 0; i < iHeight * iWidth; i++)
 	{
-		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+		unsigned short usTmp = unsigned short(*(m_uipFitsDataTmp + i));
 		if (usTmp <= m)
 			m_cvMat8U.at<unsigned char>(i) = 0;
 		else if (usTmp >= M)
@@ -1130,7 +1134,7 @@ void IPLDlg::OnBnClickedBtnProc()
 	m_cvMat8U.create(iHeight, iWidth, CV_8U);
 	for (int i = 0; i < iHeight * iWidth; i++)
 	{
-		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+		unsigned short usTmp = unsigned short(*(m_uipFitsDataTmp + i));
 		m_cvMat8U.at<unsigned char>(i) = usTmp / 255.0;
 	}
 	cv::Mat tmpMat;
@@ -1321,17 +1325,25 @@ void IPLDlg::Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* vpPixel, s
 	m_cvMat8U.create(iHeight, iWidth, CV_8U);
 	for (int i = 0; i < iHeight * iWidth; i++)
 	{
-		unsigned short usTmp = unsigned short(*(m_ipFitsDataTmp + i));
+		//unsigned short usTmp = unsigned short(*(m_uipFitsDataTmp + i));
+		//m_cvMat8U.at<unsigned char>(i) = usTmp / 255.0;
+		unsigned short usTmp = unsigned short(*(m_uipFitsDataTmp + i));
 		m_cvMat8U.at<unsigned char>(i) = usTmp / 255.0;
 	}
+	// Test
+	//cv::imwrite(_T("G:\\DuktoFiles\\Output\\2_显著性增强.bmp"), m_cvMat8U);
 	// OpenCV 二值化
 	cv::Mat tmpMat;
 	cv::threshold(m_cvMat8U, tmpMat, 5, 255, CV_THRESH_BINARY);
+	// Test
+	//cv::imwrite(_T("G:\\DuktoFiles\\Output\\3_二值化.bmp"), tmpMat);
 	// OpenCV 形态学滤波器膨胀图像
 	//cv::Mat element10(10, 10, CV_8U, cv::Scalar(255));
 	//cv::morphologyEx(tmpMat, tmpMat, cv::MORPH_CLOSE, element10);
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(20, 20));
 	cv::dilate(tmpMat, tmpMat, element);
+	// Test
+	//cv::imwrite(_T("G:\\DuktoFiles\\Output\\4_闭运算膨胀.bmp"), tmpMat);
 	// OpenCV 提取轮廓
 	vector<vector<cv::Point>> cvContours(512);
 	vector<Vec4i> hierarchy(512);
@@ -1357,6 +1369,8 @@ void IPLDlg::Proc_ExtractObject(int iIndex, std::vector<cv::Point2f>* vpPixel, s
 		cv::line(showMat, rPoint[3], rPoint[0], 0, 2);
 		vpPixel->push_back(rRect.center);
 	}
+	// Test
+	//cv::imwrite(_T("G:\\DuktoFiles\\Output\\5_轮廓提取.bmp"), showMat);
 	// 计算恒星时
 	double LST;
 	GetLocalSiderealTime(dLongti, sysTime, &LST);
@@ -1451,8 +1465,11 @@ void IPLDlg::Proc_SearchObject(int iIndex, double * pcRAPre, double * pcRACur, d
 	for (int i = 0; i < 1; i++)
 	{
 		int iObjIndex = m_vObjIK.at(i).Index;
-		cv::circle(m_cvMat8U, cv::Point((*vpPixelCur)[iObjIndex].x, (*vpPixelCur)[iObjIndex].y), 50, cv::Scalar(255), 1);
+		cv::circle(m_cvMat8U, cv::Point((*vpPixelCur)[iObjIndex].x, (*vpPixelCur)[iObjIndex].y), 120, cv::Scalar(255), 3);
 	}
+	// Test
+	//cv::imwrite(_T("G:\\DuktoFiles\\Output\\6_搜索目标.bmp"), m_cvMat8U);
+
 	CString csOutputImgPath;
 	csOutputImgPath.Format(_T("%s\\OBS_DATA\\%s.bmp"), m_csFitsDir, m_vFitsName.at(iIndex).Left(35));
 	cv::imwrite(csOutputImgPath.GetString(), m_cvMat8U);

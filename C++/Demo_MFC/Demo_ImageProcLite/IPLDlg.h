@@ -96,7 +96,7 @@ private:
 	FSC_FitsX m_FSCFitsX;
 	FSC_DibX m_FSCDibX;
 	FSC_DibX m_FSCDibX_Sub;
-	int* m_ipFitsDataTmp;
+	int* m_uipFitsDataTmp;
 	int m_iMinPixelCount;
 	int m_iMaxPixelCount;
 	int m_iLowPixelCount;
