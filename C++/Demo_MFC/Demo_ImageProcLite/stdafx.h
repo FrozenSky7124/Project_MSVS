@@ -69,4 +69,3 @@
 // Add GDI+ Support
 #include <comdef.h>
 #include <gdiplus.h>
-#pragma comment(lib, "gdiplus.lib")
