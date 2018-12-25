@@ -48,17 +48,14 @@
     <ClInclude Include="..\..\FrozenSky\DLL_FSC_FitsX\FSC_FitsX.h">
       <Filter>FSC_FitsX</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Gitee\CHO_Project\HeavenTrack_Beta\FrozenSkyFunc.h">
-      <Filter>FrozenSkyFunc</Filter>
-    </ClInclude>
-    <ClInclude Include="IPL_Macro.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Interface\BtnST.h">
       <Filter>Interface</Filter>
     </ClInclude>
     <ClInclude Include="Interface\BCMenu.h">
       <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="FrozenSkyFunc.h">
+      <Filter>FrozenSkyFunc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -76,9 +73,6 @@
     </ClCompile>
     <ClCompile Include="..\..\FrozenSky\DLL_FSC_FitsX\FSC_FitsX.cpp">
       <Filter>FSC_FitsX</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Gitee\CHO_Project\HeavenTrack_Beta\FrozenSkyFunc.cpp">
-      <Filter>FrozenSkyFunc</Filter>
     </ClCompile>
     <ClCompile Include="Interface\BtnST.cpp">
       <Filter>Interface</Filter>
