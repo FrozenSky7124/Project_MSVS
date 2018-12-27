@@ -10,6 +10,7 @@
 //        （5）位图相关判断；
 // 新增功能： 
 //        （1）从BYTE*类型的相机原始数据指针加载图像
+//        （2）显示位图的指定区域
 //======================================================================
 
 #pragma once
@@ -30,9 +31,6 @@ public:
 
     // 从文件加载位图
     BOOL LoadFromFile(LPCTSTR lpszPath);
-
-	// 从FITS文件加载，并转换为位图
-	BOOL LoadFromFitsFile(LPCTSTR lpszPath);
 
 	// Ex:从外部数据加载位图
 	BOOL LoadFromBuffer(BYTE* pBmpDataBuffer, LONG lWidth, LONG lHeight, UINT iBitCount = 8);
@@ -72,6 +70,9 @@ public:
       
     // 显示位图
     BOOL Draw(CDC *pDC, CPoint origin, CSize size);
+
+	// 显示位图的指定区域
+	BOOL CDib::Draw(CDC *pDC, CPoint srcOri, CSize srcSize, CPoint destOri, CSize destSize);
 
     // 24位彩色位图转8位灰度位图
     BOOL RgbToGrade();
