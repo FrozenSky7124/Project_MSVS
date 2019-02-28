@@ -99,7 +99,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		// Filter VT: 1.905 ~ 9.0
 		if (-1 == strVT.Find(_T("."))) continue;
 		double dVT = atof(strVT);
-		if (dVT < 1.905 || dVT > 12.0) continue;
+		//if (dVT < 1.905 || dVT > 12.0) continue;
 		// Filter mRA and mDE exclude empty value
 		if (-1 == strmRA.Find(_T("."))) continue;
 		if (-1 == strmDE.Find(_T("."))) continue;
