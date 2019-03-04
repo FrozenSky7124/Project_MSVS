@@ -46,7 +46,7 @@ public:
 
 	//=================================================
 	// @Method: Get FITS Data by position
-	// @Param: {long} lIndex (the ÒðµÙ¿ËË¿ of data)
+	// @Param : {long} lIndex (the ÒðµÙ¿ËË¿ of data)
 	// @Return: {int} (FITS file data, -1 when error)
 	//=================================================
 	int GetFitsData(long lIndex);
@@ -64,8 +64,10 @@ public:
 	int GetHeight();
 
 	//=================================================
-	// @Method: Get FITS data height
-	// @Return: {int} (FITS data height)
+	// @Method: Get OBS data
+	// @Param : {SYSTEMTIME} sysTime (DATE-OBS & TIME-OBS in UTC)
+	//          {double} RA (in hour)
+	//          {double} DEC (in deg)
 	//=================================================
 	void GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC);
 
