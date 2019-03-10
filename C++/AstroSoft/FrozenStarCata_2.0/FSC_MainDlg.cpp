@@ -51,7 +51,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	char *sql;
 	int rc;
 
-	rc = sqlite3_open("Tycho2_VT9_DEC-50+.db", &Sqlite3_dbCoon);
+	rc = sqlite3_open("Tycho2_VT12_DEC-50+_Fix.db", &Sqlite3_dbCoon);
 
 	if (rc)
 	{
@@ -64,7 +64,8 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	}
 
 	// Create TABLE
-	sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), VT numeric(6,3))";
+	//sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), VT numeric(6,3))";
+	sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), pmRA numeric(7,1), pmDE numeric(7,1), VT numeric(6,3))";
 	rc = sqlite3_exec(Sqlite3_dbCoon, sql, NULL, 0, &zErrMsg);
 	if (rc != SQLITE_OK)
 	{
@@ -94,19 +95,26 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		
 		pMainDlg->m_iCurMakeNo = i;
 		
-		// Filter DEC: Stars above Jilin in China
+		// Filter DEC: Stars above China
 		if (atof(strmDE) < -50.) continue;
 		// Filter VT: 1.905 ~ 9.0
 		if (-1 == strVT.Find(_T("."))) continue;
 		double dVT = atof(strVT);
-		//if (dVT < 1.905 || dVT > 12.0) continue;
+		if (dVT < 1.90 || dVT > 12.0) continue;
 		// Filter mRA and mDE exclude empty value
 		if (-1 == strmRA.Find(_T("."))) continue;
 		if (-1 == strmDE.Find(_T("."))) continue;
+		// Filter pmRA and pmDE exclude empty value
+		if (-1 == strpmRA.Find(_T("."))) continue;
+		if (-1 == strpmDE.Find(_T("."))) continue;
+		// Filter pmRA and pmDE exclude large value
+		double dpmRA = atof(strpmRA);
+		double dpmDE = atof(strpmDE);
+		if (dpmRA > 10.0 || dpmDE > 10.0 || dpmRA < -10.0 || dpmDE < -10.0) continue;
 
 		// Insert into database
 		CString szQuery;
-		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.3f)"), strID, atof(strmRA), atof(strmDE), dVT);
+		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.1f, %.1f, %.3f)"), strID, atof(strmRA), atof(strmDE), dpmRA, dpmDE, dVT);
 		rc = sqlite3_exec(Sqlite3_dbCoon, szQuery, NULL, 0, &zErrMsg);
 		if (rc != SQLITE_OK)
 		{
