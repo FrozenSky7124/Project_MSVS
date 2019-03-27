@@ -31,6 +31,8 @@ public:
 	//=================================================
 	bool OpenFitsFile(LPCTSTR lpszPath);
 
+	bool OpenFitsFileToCheckTime(LPCTSTR lpszPath, CString & csOutput);
+
 	//=================================================
 	// @Method: Get FITS Data Ptr
 	// @Return: {int*} (FITS file data pointer)

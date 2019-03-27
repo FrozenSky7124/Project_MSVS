@@ -116,6 +116,80 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 }
 
 
+bool FSC_FitsX::OpenFitsFileToCheckTime(LPCTSTR lpszPath, CString & csOutput)
+{
+	// store time string
+	csOutput = _T("");
+	bool bTimeErr = true;
+	// Release old data
+	if (m_pFitsData != NULL)
+	{
+		delete[] m_pFitsData;
+		m_pFitsData = NULL;
+	}
+	m_vHDUKey.clear();
+	m_vHDUValue.clear();
+
+	// Store FITS file path
+	strcpy(m_filePath, lpszPath);
+
+	// Open FITS file
+	CFile FitsFile;
+	if (!FitsFile.Open(m_filePath, CFile::modeRead | CFile::shareDenyWrite))
+	{
+		return false;
+	}
+	// Read FITS HDU Header (FITSUnitSize = 2880 Bytes)
+	BYTE FitsHeader[FITSUnitSize];
+	memset(&FitsHeader, 0, FITSUnitSize);
+	FitsFile.Read(&FitsHeader, FITSUnitSize);
+	// Load FITS HDU Header Key & Value
+	for (m_iHDUNum = 0; m_iHDUNum < FITSUnitSize / 80; m_iHDUNum++)
+	{
+		CString csTmpUnit;
+		CString csTmpKey;
+		CString csTmpValue;
+		CHAR tmpUnit[80];
+
+		memcpy_s(tmpUnit, 80, FitsHeader + m_iHDUNum * 80, 80);
+		tmpUnit[79] = '\0';
+		csTmpUnit = CString(tmpUnit);
+		csTmpKey = csTmpUnit.Left(8);
+		csTmpKey.TrimLeft();
+		csTmpKey.TrimRight();
+		csTmpValue = csTmpUnit.Mid(9);
+		csTmpValue.TrimLeft();
+		csTmpValue.TrimRight();
+		if (csTmpKey == _T("BITPIX")) m_iBITPIX = atoi(csTmpValue);
+		if (csTmpKey == _T("NAXIS1")) m_iNAXIS1 = atoi(csTmpValue);
+		if (csTmpKey == _T("NAXIS2")) m_iNAXIS2 = atoi(csTmpValue);
+		if (csTmpKey == _T("BSCALE")) m_dBSCALE = atof(csTmpValue);
+		if (csTmpKey == _T("BZERO"))  m_dBZERO = atof(csTmpValue);
+		if (csTmpKey == _T("DATE-OBS")) CalcOBSDate(csTmpValue, m_SysTime);
+		if (csTmpKey == _T("TIME-OBS"))
+		{
+			csOutput = csOutput + _T("TIME-OBS ") + csTmpValue + _T("\n");
+			bool bFlag = CalcOBSTime(csTmpValue, m_SysTime);
+			if (bFlag == false) bTimeErr = false;
+		}
+		if (csTmpKey == _T("RA")) m_dRA = CalcRA(csTmpValue);
+		if (csTmpKey == _T("DEC")) m_dDEC = CalcDEC(csTmpValue);
+		if (csTmpKey == _T("TIME-COM"))
+		{
+			csOutput = csOutput + _T("TIME-COM ") + csTmpValue;
+			SYSTEMTIME OT;
+			bool bFlag = CalcOBSTime(csTmpValue, OT);
+			if (bFlag == false) bTimeErr = false;
+		}
+		if (csTmpKey == _T("END")) break;
+		m_vHDUKey.push_back(csTmpKey);
+		m_vHDUValue.push_back(csTmpValue);
+	}
+	FitsFile.Close();
+	return bTimeErr;
+}
+
+
 int * FSC_FitsX::GetFitsDataPtr()
 {
 	return m_pFitsData;
