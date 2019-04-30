@@ -21,7 +21,7 @@ UINT WINAPI uiSendThread(LPVOID lpParam)
 	int iPkgCount = lFileLength / BLOCKSIZE;
 	if (lFileLength % BLOCKSIZE != 0) iPkgCount++;
 
-	pThis->m_addrSendto.sin_addr.S_un.S_addr = inet_addr(_T("10.0.0.111"));
+	pThis->m_addrSendto.sin_addr.S_un.S_addr = inet_addr(_T("192.168.1.58"));
 
 	for (int i = 0; i < iPkgCount; i++)
 	{
@@ -30,7 +30,7 @@ UINT WINAPI uiSendThread(LPVOID lpParam)
 		iRst = sendto(pThis->m_socket, (char*)(pThis->m_pFileData + i * BLOCKSIZE), iDataSend, 0, (SOCKADDR *)(&(pThis->m_addrSendto)), sizeof(pThis->m_addrSendto));
 		if (iRst == 0)
 			TRACE(_T("Error in sendto function. iRst == 0.\n"));
-		Sleep(10);
+		//Sleep(10);
 	}
 	return 0x00;
 }
