@@ -71,6 +71,7 @@ bool FSC_FitsX::OpenFitsFile(LPCTSTR lpszPath)
 		if (csTmpKey == _T("BZERO"))  m_dBZERO  = atof(csTmpValue);
 		if (csTmpKey == _T("DATE-OBS")) CalcOBSDate(csTmpValue, m_SysTime);
 		if (csTmpKey == _T("TIME-OBS")) CalcOBSTime(csTmpValue, m_SysTime);
+		if (csTmpKey == _T("IEXPTIME")) m_dExpTime = atof(csTmpValue);
 		if (csTmpKey == _T("RA")) m_dRA = CalcRA(csTmpValue);
 		if (csTmpKey == _T("DEC")) m_dDEC = CalcDEC(csTmpValue);
 		if (csTmpKey == _T("END")) break;
@@ -230,6 +231,12 @@ void FSC_FitsX::GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC)
 	sysTime = m_SysTime;
 	RA = m_dRA;
 	DEC = m_dDEC;
+}
+
+
+double FSC_FitsX::GetExpTime()
+{
+	return m_dExpTime;
 }
 
 

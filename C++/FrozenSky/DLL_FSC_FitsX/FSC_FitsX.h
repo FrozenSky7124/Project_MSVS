@@ -74,6 +74,12 @@ public:
 	void GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC);
 
 	//=================================================
+	// @Method: Get FITS exposure time
+	// @Return: {double} (FITS exposure time in second)
+	//=================================================
+	double GetExpTime();
+
+	//=================================================
 	// @Method: Calc FITS data OBS-DATE
 	// @Return: {bool} (Success or Fail)
 	//=================================================
@@ -148,6 +154,7 @@ private:
 	double m_dBZERO;                    // BZERO
 	double m_dRA;                       // RA(h)
 	double m_dDEC;                      // DEC(deg)
+	double m_dExpTime;                  // EXPTIME(s)
 	SYSTEMTIME m_SysTime;               // Date & Time
 
 	int m_iMinPixelCount;               // Min pixel data value
