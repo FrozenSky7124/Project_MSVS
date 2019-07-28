@@ -30,6 +30,7 @@ public:
 	// @Return: {bool} (Success or Failed)
 	//=================================================
 	bool OpenFitsFile(LPCTSTR lpszPath);
+	bool OpenFitsFile_KL4040(LPCTSTR lpszPath);
 
 	bool OpenFitsFileToCheckTime(LPCTSTR lpszPath, CString & csOutput);
 
@@ -72,6 +73,7 @@ public:
 	//          {double} DEC (in deg)
 	//=================================================
 	void GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC);
+	void GetOBSData_KL4040(SYSTEMTIME & sysTime, double & HA, double & DEC);
 
 	//=================================================
 	// @Method: Get FITS exposure time
@@ -84,6 +86,7 @@ public:
 	// @Return: {bool} (Success or Fail)
 	//=================================================
 	bool CalcOBSDate(CString & csDate, SYSTEMTIME & OT);
+	bool CalcOBSDate_KL4040(CString & csDate, SYSTEMTIME & OT);
 
 	//=================================================
 	// @Method: Calc FITS data OBS-TIME
@@ -96,6 +99,12 @@ public:
 	// @Return: {double} (RA h)
 	//=================================================
 	double CalcRA(CString & csRA);
+
+	//=================================================
+	// @Method: Calc FITS data HA
+	// @Return: {double} (HA h)
+	//=================================================
+	double CalcHA(CString & csHA);
 
 	//=================================================
 	// @Method: Calc FITS data DEC
@@ -153,6 +162,7 @@ private:
 	double m_dBSCALE;                   // BSCALE
 	double m_dBZERO;                    // BZERO
 	double m_dRA;                       // RA(h)
+	double m_dHA;                       // HourAngle(h)
 	double m_dDEC;                      // DEC(deg)
 	double m_dExpTime;                  // EXPTIME(s)
 	SYSTEMTIME m_SysTime;               // Date & Time
