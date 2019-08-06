@@ -427,7 +427,7 @@ double FSC_FitsX::CalcDEC(CString & csDEC)
 	double S = atof(csDEC.Mid(split2 + 1));
 
 	double DEC = D + M / 60. + S / 3600.;
-	if (0 == csDEC.Find(_T("-"))) DEC = -DEC;
+	if (-1 != csDEC.Find(_T("-"))) DEC = -DEC;
 	return DEC;
 }
 
