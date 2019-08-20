@@ -170,4 +170,6 @@ private:
 	int m_iMinPixelCount;               // Min pixel data value
 	int m_iMaxPixelCount;               // Max pixel data value
 	int m_iAveragePixelCount;           // Average pixel data value
+public:
+	int m_us;                           // Time ¦Ìs
 };

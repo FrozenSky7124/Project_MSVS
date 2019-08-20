@@ -388,7 +388,8 @@ bool FSC_FitsX::CalcOBSTime(CString & csTime, SYSTEMTIME & OT)
 	int iH = atoi(csTime.Mid(1));
 	int iM = atoi(csTime.Mid(4));
 	int iS = atoi(csTime.Mid(7));
-	int iMS = atoi(csTime.Mid(10));
+	int iMS = atoi(csTime.Mid(10, 3));
+	m_us = atoi(csTime.Mid(13));
 	if (iH < 0 || iH > 24 || iM < 0 || iM > 60 || iS < 0) return false;
 	OT.wHour = iH;
 	OT.wMinute = iM;
