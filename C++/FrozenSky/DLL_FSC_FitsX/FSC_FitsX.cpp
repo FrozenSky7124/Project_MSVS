@@ -168,7 +168,6 @@ bool FSC_FitsX::OpenFitsFile_KL4040(LPCTSTR lpszPath)
 		if (csTmpKey == _T("BSCALE")) m_dBSCALE = atof(csTmpValue);
 		if (csTmpKey == _T("BZERO"))  m_dBZERO = atof(csTmpValue);
 		if (csTmpKey == _T("DATE-OBS")) CalcOBSDate_KL4040(csTmpValue, m_SysTime);
-		//if (csTmpKey == _T("TIME-OBS")) CalcOBSTime(csTmpValue, m_SysTime);
 		if (csTmpKey == _T("EXPOSURE")) m_dExpTime = atof(csTmpValue);
 		if (csTmpKey == _T("HA")) m_dHA = CalcHA(csTmpValue);
 		if (csTmpKey == _T("DE")) m_dDEC = atof(csTmpValue);
