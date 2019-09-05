@@ -6,6 +6,20 @@
 #include "afxcmn.h"
 
 
+///=================================================
+/// Astronomy Constant
+///=================================================
+
+// 定义π
+#define PI 3.14159265
+
+// 定义角度转弧度乘数，即 π / 180 （弧度 = 角度 * ToRadian）
+#define ToRadian 0.01745329
+
+// 定义弧度转角度乘数，即 180 / π （角度 = 弧度 * ToAngle）
+#define ToAngle 57.29577951
+
+
 // FSC_MainDlg 对话框
 class FSC_MainDlg : public CDialog
 {
@@ -43,6 +57,9 @@ protected:
 	void InitUI();
 
 public:
+	// Transform mean position from J2000 to NOW
+	void MeanPositionTransform(double& mRa, double& mDec, double& pmRa, double& pmDec, double& year, double& fixRA, double& fixDE);
+
 	CFont m_FontYaHeiConsolas_S;
 	CListCtrl m_MainList;
 	CProgressCtrl m_MainProgBar;

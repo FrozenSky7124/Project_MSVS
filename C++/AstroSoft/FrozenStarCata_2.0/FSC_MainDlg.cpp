@@ -107,14 +107,19 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		// Filter pmRA and pmDE exclude empty value
 		if (-1 == strpmRA.Find(_T("."))) continue;
 		if (-1 == strpmDE.Find(_T("."))) continue;
-		// Filter pmRA and pmDE exclude large value
+		// Fix pmRA and pmDE
+		double dRa_Fixed, dDec_Fixed;
+		double dmRA = atof(strmRA);
+		double dmDE = atof(strmDE);
 		double dpmRA = atof(strpmRA);
 		double dpmDE = atof(strpmDE);
-		if (dpmRA > 10.0 || dpmDE > 10.0 || dpmRA < -10.0 || dpmDE < -10.0) continue;
+		double dyear = 19.0;
+		pMainDlg->MeanPositionTransform(dmRA, dmDE, dpmRA, dpmDE, dyear, dRa_Fixed, dDec_Fixed);
+		//if (dpmRA > 10.0 || dpmDE > 10.0 || dpmRA < -10.0 || dpmDE < -10.0) continue;
 
 		// Insert into database
 		CString szQuery;
-		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.1f, %.1f, %.3f)"), strID, atof(strmRA), atof(strmDE), dpmRA, dpmDE, dVT);
+		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.1f, %.1f, %.3f)"), strID, dRa_Fixed, dDec_Fixed, dpmRA, dpmDE, dVT);
 		rc = sqlite3_exec(Sqlite3_dbCoon, szQuery, NULL, 0, &zErrMsg);
 		if (rc != SQLITE_OK)
 		{
@@ -241,6 +246,14 @@ void FSC_MainDlg::InitUI()
 
 	// UI Proc Timer
 	SetTimer(1, 300, NULL);
+}
+
+
+void FSC_MainDlg::MeanPositionTransform(double& mRa, double& mDec, double& pmRa, double& pmDec, double& year, double& fixRA, double& fixDE)
+{
+	fixRA = mRa + (pmRa / 1000.0 / 3600.0) * year / cos(mDec*ToRadian);
+	fixDE = mDec + (pmDec / 1000.0 / 3600.0) * year;
+	return;
 }
 
 
