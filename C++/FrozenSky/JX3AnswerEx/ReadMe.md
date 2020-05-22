@@ -12,7 +12,7 @@
 
 ### 操作演示
 
-![Pic](http://t.cn/RSGPj2b)
+![Pic](https://i.loli.net/2020/05/22/fDTeMsPQwLSVU9a.gif)
 
 ### 下载地址
 
