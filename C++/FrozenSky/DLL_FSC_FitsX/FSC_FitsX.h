@@ -1,22 +1,40 @@
 /**********************************************************************
-* Name:      FSC_FitsX.h
+* Name:      FSC_FitsX
 * Function:  Open & Read FITS Format Files.
 * Author:    FrozenSky
 * Created:   2018-10-25
+* Updated:   2020-08-20
 * Copyright: FrozenSky@Avalon
-* License:   GPL
+* License:   MIT
 **********************************************************************/
 
 
-#include "afx.h"
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include "stdio.h"
+
+
+#define FITSUnitSize 2880
+
+#ifndef _FITSXTIME_
+#define _FITSXTIME_
+typedef struct _FITSXTIME
+{
+	unsigned short wYear;
+	unsigned short wMonth;
+	unsigned short wDayOfWeek;
+	unsigned short wDay;
+	unsigned short wHour;
+	unsigned short wMinute;
+	unsigned short wSecond;
+	unsigned short wMseconds;
+	unsigned short wUseconds;
+} FITSXTIME;
+#endif // !_FITSXTIME
 
 
 using namespace std;
-
-#define FITSUnitSize 2880
 
 class FSC_FitsX
 {
@@ -29,10 +47,8 @@ public:
 	// @Param: {LPCTSTR} lpszPath (FITS file path)
 	// @Return: {bool} (Success or Failed)
 	//=================================================
-	bool OpenFitsFile(LPCTSTR lpszPath);
+	bool OpenFitsFile(const char *pFilePath);
 	bool OpenFitsFile_KL4040(LPCTSTR lpszPath);
-
-	bool OpenFitsFileToCheckTime(LPCTSTR lpszPath, CString & csOutput);
 
 	//=================================================
 	// @Method: Get FITS Data Ptr
@@ -85,14 +101,14 @@ public:
 	// @Method: Calc FITS data OBS-DATE
 	// @Return: {bool} (Success or Fail)
 	//=================================================
-	bool CalcOBSDate(CString & csDate, SYSTEMTIME & OT);
+	bool CalcOBSDate(string & csDate, FITSXTIME & OT);
 	bool CalcOBSDate_KL4040(CString & csDate, SYSTEMTIME & OT);
 
 	//=================================================
 	// @Method: Calc FITS data OBS-TIME
 	// @Return: {bool} (Success or Fail)
 	//=================================================
-	bool CalcOBSTime(CString & csTime, SYSTEMTIME & OT);
+	bool CalcOBSTime(string & csTime, FITSXTIME & OT);
 
 	//=================================================
 	// @Method: Calc FITS data RA
@@ -165,11 +181,9 @@ private:
 	double m_dHA;                       // HourAngle(h)
 	double m_dDEC;                      // DEC(deg)
 	double m_dExpTime;                  // EXPTIME(s)
-	SYSTEMTIME m_SysTime;               // Date & Time
+	FITSXTIME m_SysTime;               // Date & Time
 
 	int m_iMinPixelCount;               // Min pixel data value
 	int m_iMaxPixelCount;               // Max pixel data value
 	int m_iAveragePixelCount;           // Average pixel data value
-public:
-	int m_us;                           // Time ¦Ìs
 };
