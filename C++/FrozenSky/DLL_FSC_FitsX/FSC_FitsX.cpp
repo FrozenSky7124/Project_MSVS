@@ -7,11 +7,11 @@ void GetHDUInfo(char *pTmp, string *Key, string *Value)
 	{
 		if (pTmp[pos1] != ' ') break;
 	}
-	for (pos2 = 10; pos2 < 80; pos2++)
+	for (pos2 = 9; pos2 < 80; pos2++)
 	{
 		if ((pTmp[pos2] != ' ') && (pTmp[pos2] != '\'')) break;
 	}
-	for (pos3 = 79; pos3 >= 10; pos3--)
+	for (pos3 = 79; pos3 >= 9; pos3--)
 	{
 		if ((pTmp[pos3] != ' ') && (pTmp[pos3] != '\'')) break;
 	}
@@ -59,19 +59,19 @@ bool FSC_FitsX::OpenFitsFile(const char *pFilePath)
 	// Open FITS file
 	FILE* fpFitsFile;
 	errno_t errFile;
+	size_t sizeRead;
 	errFile = fopen_s(&fpFitsFile, m_filePath, "rb");
 	if (errFile != 0)
 	{
 		return false;
 	}
 	// Read FITS HDU Header (FITSUnitSize = 2880 Bytes)
-	size_t sizeRead;
 	unsigned char FitsHeader[FITSUnitSize];
 	memset(&FitsHeader, 0, FITSUnitSize);
 	sizeRead = fread_s(FitsHeader, FITSUnitSize, FITSUnitSize, 1, fpFitsFile);
 	if (sizeRead != 1)
 	{
-		printf("Error in FSC_FitsX > OpenFitsFile > fread_s.\n");
+		printf("Error in FSC_FitsX > OpenFitsFile > fread_s FitsHeader.\n");
 	}
 	// Load FITS HDU Header Key & Value
 	for (m_iHDUNum = 0; m_iHDUNum < FITSUnitSize / 80; m_iHDUNum++)
@@ -89,22 +89,26 @@ bool FSC_FitsX::OpenFitsFile(const char *pFilePath)
 		if (sTmpKey == "BZERO")  m_dBZERO  = atof(sTmpValue.c_str());
 		if (sTmpKey == "DATE-OBS") CalcOBSDate(sTmpValue, m_SysTime);
 		if (sTmpKey == "TIME-OBS") CalcOBSTime(sTmpValue, m_SysTime);
-		if (sTmpKey == "IEXPTIME") m_dExpTime = atof(csTmpValue);
-		if (sTmpKey == "RA") m_dRA = CalcRA(csTmpValue);
-		if (sTmpKey == "DEC") m_dDEC = CalcDEC(csTmpValue);
+		if (sTmpKey == "IEXPTIME") m_dExpTime = atof(sTmpValue.c_str());
+		if (sTmpKey == "RA") m_dRA = CalcRA(sTmpValue);
+		if (sTmpKey == "DEC") m_dDEC = CalcDEC(sTmpValue);
 		if (sTmpKey == "END") break;
-		m_vHDUKey.push_back(csTmpKey);
-		m_vHDUValue.push_back(csTmpValue);
+		m_vHDUKey.push_back(sTmpKey);
+		m_vHDUValue.push_back(sTmpValue);
 	}
 	// Load FITS Data
 	int minPixelCount = 65535;
 	int maxPixelCount = 0;
 	int iPixelSize = m_iBITPIX / 8;
-	LONG lDataSize = iPixelSize * m_iNAXIS1 * m_iNAXIS2;
-	BYTE* lpFitsData = (BYTE*) new BYTE[lDataSize];
+	long lDataSize = iPixelSize * m_iNAXIS1 * m_iNAXIS2;
+	unsigned char* lpFitsData = (unsigned char*) new unsigned char[lDataSize];
 	m_pFitsData = (int*) new int[m_iNAXIS1 * m_iNAXIS2];
 	memset(lpFitsData, 0, lDataSize);
-	FitsFile.Read(lpFitsData, lDataSize);
+	sizeRead = fread_s(lpFitsData, lDataSize, lDataSize, 1, fpFitsFile);
+	if (sizeRead != 1)
+	{
+		printf("Error in FSC_FitsX > OpenFitsFile > fread_s lpFitsData.\n");
+	}
 	for (int i = 0; i < m_iNAXIS2; i++)
 	{
 		int iWidthSize = i * m_iNAXIS1 * iPixelSize;
@@ -140,11 +144,11 @@ bool FSC_FitsX::OpenFitsFile(const char *pFilePath)
 }
 
 
-bool FSC_FitsX::OpenFitsFile_KL4040(LPCTSTR lpszPath)
+bool FSC_FitsX::OpenFitsFile_KL4040(const char *lpszPath)
 {
-	BYTE bLow, bHigh;
-	SHORT sTmpValue;
-	INT iValue;
+	unsigned char bLow, bHigh;
+	short sTmpValue;
+	int iValue;
 
 	// Release old data
 	if (m_pFitsData != NULL)
@@ -159,54 +163,57 @@ bool FSC_FitsX::OpenFitsFile_KL4040(LPCTSTR lpszPath)
 	strcpy(m_filePath, lpszPath);
 
 	// Open FITS file
-	CFile FitsFile;
-	if (!FitsFile.Open(m_filePath, CFile::modeRead | CFile::shareDenyWrite))
+	FILE* fpFitsFile;
+	errno_t errFile;
+	size_t sizeRead;
+	errFile = fopen_s(&fpFitsFile, m_filePath, "rb");
+	if (errFile != 0)
 	{
 		return false;
 	}
 	// Read FITS HDU Header (FITSUnitSize = 2880 Bytes)
-	BYTE FitsHeader[FITSUnitSize];
+	unsigned char FitsHeader[FITSUnitSize];
 	memset(&FitsHeader, 0, FITSUnitSize);
-	FitsFile.Read(&FitsHeader, FITSUnitSize);
+	sizeRead = fread_s(FitsHeader, FITSUnitSize, FITSUnitSize, 1, fpFitsFile);
+	if (sizeRead != 1)
+	{
+		printf("Error in FSC_FitsX > OpenFitsFile > fread_s FitsHeader.\n");
+	}
 	// Load FITS HDU Header Key & Value
 	for (m_iHDUNum = 0; m_iHDUNum < FITSUnitSize / 80; m_iHDUNum++)
 	{
-		CString csTmpUnit;
-		CString csTmpKey;
-		CString csTmpValue;
-		CHAR tmpUnit[80];
+		char tmpUnit[80];
+		string sTmpKey, sTmpValue;
 
 		memcpy_s(tmpUnit, 80, FitsHeader + m_iHDUNum * 80, 80);
-		tmpUnit[79] = '\0';
-		csTmpUnit = CString(tmpUnit);
-		csTmpKey = csTmpUnit.Left(8);
-		csTmpKey.TrimLeft();
-		csTmpKey.TrimRight();
-		csTmpValue = csTmpUnit.Mid(9);
-		csTmpValue.TrimLeft();
-		csTmpValue.TrimRight();
-		if (csTmpKey == _T("BITPIX")) m_iBITPIX = atoi(csTmpValue);
-		if (csTmpKey == _T("NAXIS1")) m_iNAXIS1 = atoi(csTmpValue);
-		if (csTmpKey == _T("NAXIS2")) m_iNAXIS2 = atoi(csTmpValue);
-		if (csTmpKey == _T("BSCALE")) m_dBSCALE = atof(csTmpValue);
-		if (csTmpKey == _T("BZERO"))  m_dBZERO = atof(csTmpValue);
-		if (csTmpKey == _T("DATE-OBS")) CalcOBSDate_KL4040(csTmpValue, m_SysTime);
-		if (csTmpKey == _T("EXPOSURE")) m_dExpTime = atof(csTmpValue);
-		if (csTmpKey == _T("HA")) m_dHA = CalcHA(csTmpValue);
-		if (csTmpKey == _T("DE")) m_dDEC = atof(csTmpValue);
-		if (csTmpKey == _T("END")) break;
-		m_vHDUKey.push_back(csTmpKey);
-		m_vHDUValue.push_back(csTmpValue);
+		GetHDUInfo(tmpUnit, &sTmpKey, &sTmpValue);
+		
+		if (sTmpKey == "BITPIX") m_iBITPIX = atoi(sTmpValue.c_str());
+		if (sTmpKey == "NAXIS1") m_iNAXIS1 = atoi(sTmpValue.c_str());
+		if (sTmpKey == "NAXIS2") m_iNAXIS2 = atoi(sTmpValue.c_str());
+		if (sTmpKey == "BSCALE") m_dBSCALE = atof(sTmpValue.c_str());
+		if (sTmpKey == "BZERO")  m_dBZERO = atof(sTmpValue.c_str());
+		if (sTmpKey == "DATE-OBS") CalcOBSDate_KL4040(sTmpValue, m_SysTime);
+		if (sTmpKey == "EXPOSURE") m_dExpTime = atof(sTmpValue.c_str());
+		if (sTmpKey == "HA") m_dHA = CalcHA(sTmpValue);
+		if (sTmpKey == "DE") m_dDEC = atof(sTmpValue.c_str());
+		if (sTmpKey == "END") break;
+		m_vHDUKey.push_back(sTmpKey);
+		m_vHDUValue.push_back(sTmpValue);
 	}
 	// Load FITS Data
 	int minPixelCount = 65535;
 	int maxPixelCount = 0;
 	int iPixelSize = m_iBITPIX / 8;
-	LONG lDataSize = iPixelSize * m_iNAXIS1 * m_iNAXIS2;
-	BYTE* lpFitsData = (BYTE*) new BYTE[lDataSize];
+	long lDataSize = iPixelSize * m_iNAXIS1 * m_iNAXIS2;
+	unsigned char* lpFitsData = (unsigned char*) new unsigned char[lDataSize];
 	m_pFitsData = (int*) new int[m_iNAXIS1 * m_iNAXIS2];
 	memset(lpFitsData, 0, lDataSize);
-	FitsFile.Read(lpFitsData, lDataSize);
+	sizeRead = fread_s(lpFitsData, lDataSize, lDataSize, 1, fpFitsFile);
+	if (sizeRead != 1)
+	{
+		printf("Error in FSC_FitsX > OpenFitsFile_KL4040 > fread_s lpFitsData.\n");
+	}
 	for (int i = 0; i < m_iNAXIS2; i++)
 	{
 		int iWidthSize = i * m_iNAXIS1 * iPixelSize;
@@ -232,7 +239,12 @@ bool FSC_FitsX::OpenFitsFile_KL4040(LPCTSTR lpszPath)
 	//}
 
 	delete[] lpFitsData;
-	FitsFile.Close();
+	if (fpFitsFile)
+	{
+		errFile = fclose(fpFitsFile);
+		if (errFile != 0)
+			printf("Error in FSC_FitsX > OpenFitsFile_KL4040 > fclose.\n");
+	}
 	return true;
 }
 
@@ -272,7 +284,7 @@ int FSC_FitsX::GetHeight()
 }
 
 
-void FSC_FitsX::GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC)
+void FSC_FitsX::GetOBSData(FITSXTIME & sysTime, double & RA, double & DEC)
 {
 	sysTime = m_SysTime;
 	RA = m_dRA;
@@ -280,7 +292,7 @@ void FSC_FitsX::GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC)
 }
 
 
-void FSC_FitsX::GetOBSData_KL4040(SYSTEMTIME & sysTime, double & HA, double & DEC)
+void FSC_FitsX::GetOBSData_KL4040(FITSXTIME & sysTime, double & HA, double & DEC)
 {
 	sysTime = m_SysTime;
 	HA = m_dHA;
@@ -296,9 +308,9 @@ double FSC_FitsX::GetExpTime()
 
 bool FSC_FitsX::CalcOBSDate(string & csDate, FITSXTIME & OT)
 {
-	int iYear = atoi(csDate.c_str);
-	int iMonth = atoi(csDate.substr(5).c_str);
-	int iDay = atoi(csDate.substr(8).c_str);
+	int iYear = atoi(csDate.c_str());
+	int iMonth = atoi(csDate.substr(5).c_str());
+	int iDay = atoi(csDate.substr(8).c_str());
 	if (iYear < 0 || iMonth < 1 || iMonth > 12 || iDay < 1 || iDay > 32) return false;
 	OT.wYear = iYear;
 	OT.wMonth = iMonth;
@@ -307,25 +319,25 @@ bool FSC_FitsX::CalcOBSDate(string & csDate, FITSXTIME & OT)
 }
 
 
-bool FSC_FitsX::CalcOBSDate_KL4040(CString & csDate, SYSTEMTIME & OT)
+bool FSC_FitsX::CalcOBSDate_KL4040(string & csDate, FITSXTIME & OT)
 {
-	int iYear = atoi(csDate.Mid(1));
-	int iMonth = atoi(csDate.Mid(6));
-	int iDay = atoi(csDate.Mid(9));
+	int iYear = atoi(csDate.c_str());
+	int iMonth = atoi(csDate.substr(5).c_str());
+	int iDay = atoi(csDate.substr(8).c_str());
 	if (iYear < 0 || iMonth < 1 || iMonth > 12 || iDay < 1 || iDay > 32) return false;
 	OT.wYear = iYear;
 	OT.wMonth = iMonth;
 	OT.wDay = iDay;
 
-	int iH = atoi(csDate.Mid(12));
-	int iM = atoi(csDate.Mid(15));
-	int iS = atoi(csDate.Mid(18));
-	int iMS = atoi(csDate.Mid(21));
+	int iH  = atoi(csDate.substr(11).c_str());
+	int iM  = atoi(csDate.substr(14).c_str());
+	int iS  = atoi(csDate.substr(17).c_str());
+	int iMS = atoi(csDate.substr(20).c_str());
 	if (iH < 0 || iH > 24 || iM < 0 || iM > 60 || iS < 0) return false;
 	OT.wHour = iH;
 	OT.wMinute = iM;
 	OT.wSecond = iS;
-	OT.wMilliseconds = iMS;
+	OT.wMseconds = iMS;
 
 	return true;
 }
@@ -333,51 +345,54 @@ bool FSC_FitsX::CalcOBSDate_KL4040(CString & csDate, SYSTEMTIME & OT)
 
 bool FSC_FitsX::CalcOBSTime(string & csTime, FITSXTIME & OT)
 {
-	int iH = atoi(csTime.c_str);
-	int iM = atoi(csTime.substr(3).c_str);
-	int iS = atoi(csTime.substr(6).c_str);
-	int iMS = atoi(csTime.substr(9, 3).c_str);
-	int iUS = atoi(csTime.substr(12, 3).c_str);
+	int iH  = atoi(csTime.c_str());
+	int iM  = atoi(csTime.substr(3).c_str());
+	int iS  = atoi(csTime.substr(6).c_str());
+	int iMS = atoi(csTime.substr(9, 3).c_str());
+	int iUS = atoi(csTime.substr(12, 3).c_str());
 	if (iH < 0 || iH > 24 || iM < 0 || iM > 60 || iS < 0) return false;
 	OT.wHour = iH;
 	OT.wMinute = iM;
 	OT.wSecond = iS;
 	OT.wMseconds = iMS;
 	OT.wUseconds = iUS;
+
 	return true;
 }
 
 
-double FSC_FitsX::CalcRA(CString & csRA)
+double FSC_FitsX::CalcRA(string & csRA)
 {
-	int h = atoi(csRA.Mid(1));
-	int m = atoi(csRA.Mid(4));
-	double s = atof(csRA.Mid(7));
+	int h = atoi(csRA.c_str());
+	int m = atoi(csRA.substr(3).c_str());
+	double s = atof(csRA.substr(6).c_str());
 	return h + m / 60. + s / 3600.;
 }
 
 
-double FSC_FitsX::CalcHA(CString & csHA)
+double FSC_FitsX::CalcHA(string & csHA)
 {
-	double dHA = atof(csHA);
+	double dHA = atof(csHA.c_str());
 	dHA = dHA / 360.0 * 24.0;
 	return dHA;
 }
 
 
-double FSC_FitsX::CalcDEC(CString & csDEC)
+double FSC_FitsX::CalcDEC(string & csDEC)
 {
-	int split1 = csDEC.Find(_T(":"), 0);
-	int split2 = csDEC.Find(_T(":"), split1 + 1);
-	if (split1 == -1 || split2 == -1) throw _T("Error in func: GetDEC(CString & csDEC).");
-
-	int D = atoi(csDEC.Mid(1));
-	D = abs(D);
-	int M = atoi(csDEC.Mid(split1 + 1));
-	double S = atof(csDEC.Mid(split2 + 1));
-
-	double DEC = D + M / 60. + S / 3600.;
-	if (-1 != csDEC.Find(_T("-"))) DEC = -DEC;
+	double DEC;
+	int split1 = csDEC.find(':');
+	int split2 = csDEC.find(':', split1 + 1);
+	if ((split1 == -1) || (split2 == -1))
+	{
+		printf("Error in FSC_FitsX > CalcDEC > find().\n");
+		return 0.0;
+	}
+	int D    = abs(atoi(csDEC.c_str()));
+	int M    = atoi(csDEC.substr(split1 + 1).c_str());
+	double S = atof(csDEC.substr(split2 + 1).c_str());
+	double DEC = D + M / 60.0 + S / 3600.0;
+	if (csDEC.find('-') != -1) DEC = -DEC;
 	return DEC;
 }
 
@@ -415,15 +430,15 @@ int FSC_FitsX::GetHDUNum()
 }
 
 
-CString FSC_FitsX::GetHDUKey(int iPos)
+string FSC_FitsX::GetHDUKey(int iPos)
 {
-	if (iPos >= m_iHDUNum) return _T("");
+	if (iPos >= m_iHDUNum) return ("");
 	return m_vHDUKey.at(iPos);
 }
 
 
-CString FSC_FitsX::GetHDUValue(int iPos)
+string FSC_FitsX::GetHDUValue(int iPos)
 {
-	if (iPos >= m_iHDUNum) return _T("");
+	if (iPos >= m_iHDUNum) return ("");
 	return m_vHDUValue.at(iPos);
 }

@@ -10,6 +10,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include "stdio.h"
@@ -48,7 +49,7 @@ public:
 	// @Return: {bool} (Success or Failed)
 	//=================================================
 	bool OpenFitsFile(const char *pFilePath);
-	bool OpenFitsFile_KL4040(LPCTSTR lpszPath);
+	bool OpenFitsFile_KL4040(const char *lpszPath);
 
 	//=================================================
 	// @Method: Get FITS Data Ptr
@@ -88,8 +89,8 @@ public:
 	//          {double} RA (in hour)
 	//          {double} DEC (in deg)
 	//=================================================
-	void GetOBSData(SYSTEMTIME & sysTime, double & RA, double & DEC);
-	void GetOBSData_KL4040(SYSTEMTIME & sysTime, double & HA, double & DEC);
+	void GetOBSData(FITSXTIME & sysTime, double & RA, double & DEC);
+	void GetOBSData_KL4040(FITSXTIME & sysTime, double & HA, double & DEC);
 
 	//=================================================
 	// @Method: Get FITS exposure time
@@ -102,7 +103,7 @@ public:
 	// @Return: {bool} (Success or Fail)
 	//=================================================
 	bool CalcOBSDate(string & csDate, FITSXTIME & OT);
-	bool CalcOBSDate_KL4040(CString & csDate, SYSTEMTIME & OT);
+	bool CalcOBSDate_KL4040(string & csDate, FITSXTIME & OT);
 
 	//=================================================
 	// @Method: Calc FITS data OBS-TIME
@@ -114,19 +115,19 @@ public:
 	// @Method: Calc FITS data RA
 	// @Return: {double} (RA h)
 	//=================================================
-	double CalcRA(CString & csRA);
+	double CalcRA(string & csRA);
 
 	//=================================================
 	// @Method: Calc FITS data HA
 	// @Return: {double} (HA h)
 	//=================================================
-	double CalcHA(CString & csHA);
+	double CalcHA(string & csHA);
 
 	//=================================================
 	// @Method: Calc FITS data DEC
 	// @Return: {double} (DEC deg)
 	//=================================================
-	double CalcDEC(CString & csDEC);
+	double CalcDEC(string & csDEC);
 
 	//=================================================
 	// @Method: Get Min pixel data value
@@ -157,19 +158,19 @@ public:
 	// @Param: {int} (HDU Header Key Position)
 	// @Return: {CString} (HDU Header Key)
 	//=================================================
-	CString GetHDUKey(int iPos);
+	string GetHDUKey(int iPos);
 
 	//=================================================
 	// @Method: Get FITS HDU Header Value
 	// @Param: {int} (HDU Header Value Position)
 	// @Return: {CString} (HDU Header Value)
 	//=================================================
-	CString GetHDUValue(int iPos);
+	string GetHDUValue(int iPos);
 
 private:
 	char m_filePath[_MAX_PATH];         // FITS file name
-	vector<CString> m_vHDUKey;          // FITS HDU Header Key vector
-	vector<CString> m_vHDUValue;        // FITS HDU Header Value vector
+	vector<string> m_vHDUKey;           // FITS HDU Header Key vector
+	vector<string> m_vHDUValue;         // FITS HDU Header Value vector
 	int* m_pFitsData;                   // FITS Data vector
 	int m_iHDUNum;                      // FITS HDU Header Number (begin from 0)
 	int m_iBITPIX;                      // BITPIX
@@ -181,7 +182,7 @@ private:
 	double m_dHA;                       // HourAngle(h)
 	double m_dDEC;                      // DEC(deg)
 	double m_dExpTime;                  // EXPTIME(s)
-	FITSXTIME m_SysTime;               // Date & Time
+	FITSXTIME m_SysTime;                // Date & Time
 
 	int m_iMinPixelCount;               // Min pixel data value
 	int m_iMaxPixelCount;               // Max pixel data value
