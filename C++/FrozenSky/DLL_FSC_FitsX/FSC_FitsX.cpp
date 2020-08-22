@@ -15,9 +15,16 @@ void GetHDUInfo(char *pTmp, string *Key, string *Value)
 	{
 		if ((pTmp[pos3] != ' ') && (pTmp[pos3] != '\'')) break;
 	}
-
-	*Key   = string(pTmp, 0, pos1);
-	*Value = string(pTmp, pos2, pos3 - pos2 + 1);
+	if (pos2 <= pos3)
+	{
+		*Key = string(pTmp, 0, pos1 + 1);
+		*Value = string(pTmp, pos2, pos3 - pos2 + 1);
+	}
+	else
+	{
+		*Key = string(pTmp, 0, pos1 + 1);
+		*Value = string(" ");
+	}
 }
 
 FSC_FitsX::FSC_FitsX()
@@ -391,7 +398,7 @@ double FSC_FitsX::CalcDEC(string & csDEC)
 	int D    = abs(atoi(csDEC.c_str()));
 	int M    = atoi(csDEC.substr(split1 + 1).c_str());
 	double S = atof(csDEC.substr(split2 + 1).c_str());
-	double DEC = D + M / 60.0 + S / 3600.0;
+	DEC = D + M / 60.0 + S / 3600.0;
 	if (csDEC.find('-') != -1) DEC = -DEC;
 	return DEC;
 }
