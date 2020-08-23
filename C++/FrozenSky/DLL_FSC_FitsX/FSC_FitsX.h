@@ -13,10 +13,24 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "stdio.h"
 
+#define FITS_UNIT_SIZE  2880
+#define PATH_MAX_LENGTH 256
 
-#define FITSUnitSize 2880
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	//define something for Windows (32-bit and 64-bit, this part is common)
+	#ifdef _WIN64
+		//define something for Windows (64-bit only)
+	#else
+		//define something for Windows (32-bit only)
+	#endif
+#elif __linux__
+	//define something for linux
+	#include "string.h"
+	#include "stdio.h"
+#elif __unix__
+	//define something for unix
+#endif
 
 #ifndef _FITSXTIME_
 #define _FITSXTIME_
@@ -168,7 +182,7 @@ public:
 	string GetHDUValue(int iPos);
 
 private:
-	char m_filePath[_MAX_PATH];         // FITS file name
+	char m_filePath[PATH_MAX_LENGTH];         // FITS file name
 	vector<string> m_vHDUKey;           // FITS HDU Header Key vector
 	vector<string> m_vHDUValue;         // FITS HDU Header Value vector
 	int* m_pFitsData;                   // FITS Data vector

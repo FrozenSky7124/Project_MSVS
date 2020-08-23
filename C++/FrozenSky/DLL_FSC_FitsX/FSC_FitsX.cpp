@@ -65,28 +65,31 @@ bool FSC_FitsX::OpenFitsFile(const char *pFilePath)
 
 	// Open FITS file
 	FILE* fpFitsFile;
-	errno_t errFile;
+	int errFile;
 	size_t sizeRead;
-	errFile = fopen_s(&fpFitsFile, m_filePath, "rb");
-	if (errFile != 0)
+	//errFile = fopen_s(&fpFitsFile, m_filePath, "rb");
+	fpFitsFile = fopen(m_filePath, "rb");
+	if (fpFitsFile == NULL)
 	{
 		return false;
 	}
-	// Read FITS HDU Header (FITSUnitSize = 2880 Bytes)
-	unsigned char FitsHeader[FITSUnitSize];
-	memset(&FitsHeader, 0, FITSUnitSize);
-	sizeRead = fread_s(FitsHeader, FITSUnitSize, FITSUnitSize, 1, fpFitsFile);
+	// Read FITS HDU Header (FITS_UNIT_SIZE = 2880 Bytes)
+	unsigned char FitsHeader[FITS_UNIT_SIZE];
+	memset(&FitsHeader, 0, FITS_UNIT_SIZE);
+	//sizeRead = fread_s(FitsHeader, FITS_UNIT_SIZE, FITS_UNIT_SIZE, 1, fpFitsFile);
+	sizeRead = fread(FitsHeader, FITS_UNIT_SIZE, 1, fpFitsFile);
 	if (sizeRead != 1)
 	{
 		printf("Error in FSC_FitsX > OpenFitsFile > fread_s FitsHeader.\n");
 	}
 	// Load FITS HDU Header Key & Value
-	for (m_iHDUNum = 0; m_iHDUNum < FITSUnitSize / 80; m_iHDUNum++)
+	for (m_iHDUNum = 0; m_iHDUNum < FITS_UNIT_SIZE / 80; m_iHDUNum++)
 	{
 		char tmpUnit[80];
 		string sTmpKey, sTmpValue;
 
-		memcpy_s(tmpUnit, 80, FitsHeader + m_iHDUNum * 80, 80);
+		//memcpy_s(tmpUnit, 80, FitsHeader + m_iHDUNum * 80, 80);
+		memcpy(tmpUnit, FitsHeader + m_iHDUNum * 80, 80);
 		GetHDUInfo(tmpUnit, &sTmpKey, &sTmpValue);
 
 		if (sTmpKey == "BITPIX") m_iBITPIX = atoi(sTmpValue.c_str());
@@ -111,7 +114,8 @@ bool FSC_FitsX::OpenFitsFile(const char *pFilePath)
 	unsigned char* lpFitsData = (unsigned char*) new unsigned char[lDataSize];
 	m_pFitsData = (int*) new int[m_iNAXIS1 * m_iNAXIS2];
 	memset(lpFitsData, 0, lDataSize);
-	sizeRead = fread_s(lpFitsData, lDataSize, lDataSize, 1, fpFitsFile);
+	//sizeRead = fread_s(lpFitsData, lDataSize, lDataSize, 1, fpFitsFile);
+	sizeRead = fread(lpFitsData, lDataSize, 1, fpFitsFile);
 	if (sizeRead != 1)
 	{
 		printf("Error in FSC_FitsX > OpenFitsFile > fread_s lpFitsData.\n");
@@ -171,28 +175,31 @@ bool FSC_FitsX::OpenFitsFile_KL4040(const char *lpszPath)
 
 	// Open FITS file
 	FILE* fpFitsFile;
-	errno_t errFile;
+	int	errFile;
 	size_t sizeRead;
-	errFile = fopen_s(&fpFitsFile, m_filePath, "rb");
-	if (errFile != 0)
+	//errFile = (&fpFitsFile, m_filePath, "rb");
+	fpFitsFile = fopen(m_filePath, "rb");
+	if (fpFitsFile == NULL)
 	{
 		return false;
 	}
-	// Read FITS HDU Header (FITSUnitSize = 2880 Bytes)
-	unsigned char FitsHeader[FITSUnitSize];
-	memset(&FitsHeader, 0, FITSUnitSize);
-	sizeRead = fread_s(FitsHeader, FITSUnitSize, FITSUnitSize, 1, fpFitsFile);
+	// Read FITS HDU Header (FITS_UNIT_SIZE = 2880 Bytes)
+	unsigned char FitsHeader[FITS_UNIT_SIZE];
+	memset(&FitsHeader, 0, FITS_UNIT_SIZE);
+	//sizeRead = fread_s(FitsHeader, FITS_UNIT_SIZE, FITS_UNIT_SIZE, 1, fpFitsFile);
+	sizeRead = fread(FitsHeader, FITS_UNIT_SIZE, 1, fpFitsFile);
 	if (sizeRead != 1)
 	{
 		printf("Error in FSC_FitsX > OpenFitsFile > fread_s FitsHeader.\n");
 	}
 	// Load FITS HDU Header Key & Value
-	for (m_iHDUNum = 0; m_iHDUNum < FITSUnitSize / 80; m_iHDUNum++)
+	for (m_iHDUNum = 0; m_iHDUNum < FITS_UNIT_SIZE / 80; m_iHDUNum++)
 	{
 		char tmpUnit[80];
 		string sTmpKey, sTmpValue;
 
-		memcpy_s(tmpUnit, 80, FitsHeader + m_iHDUNum * 80, 80);
+		//memcpy_s(tmpUnit, 80, FitsHeader + m_iHDUNum * 80, 80);
+		memcpy(tmpUnit, FitsHeader + m_iHDUNum * 80, 80);
 		GetHDUInfo(tmpUnit, &sTmpKey, &sTmpValue);
 		
 		if (sTmpKey == "BITPIX") m_iBITPIX = atoi(sTmpValue.c_str());
@@ -216,7 +223,8 @@ bool FSC_FitsX::OpenFitsFile_KL4040(const char *lpszPath)
 	unsigned char* lpFitsData = (unsigned char*) new unsigned char[lDataSize];
 	m_pFitsData = (int*) new int[m_iNAXIS1 * m_iNAXIS2];
 	memset(lpFitsData, 0, lDataSize);
-	sizeRead = fread_s(lpFitsData, lDataSize, lDataSize, 1, fpFitsFile);
+	//sizeRead = fread_s(lpFitsData, lDataSize, lDataSize, 1, fpFitsFile);
+	sizeRead = fread(lpFitsData, lDataSize, 1, fpFitsFile);
 	if (sizeRead != 1)
 	{
 		printf("Error in FSC_FitsX > OpenFitsFile_KL4040 > fread_s lpFitsData.\n");
