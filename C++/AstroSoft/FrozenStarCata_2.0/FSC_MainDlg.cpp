@@ -51,7 +51,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	char *sql;
 	int rc;
 
-	rc = sqlite3_open("Tycho2_VT0_DEC-50+_PM100-.db", &Sqlite3_dbCoon);
+	rc = sqlite3_open("Tycho2_VT8-12_DEC-50+_PM0Fix.db", &Sqlite3_dbCoon);
 
 	if (rc)
 	{
@@ -100,7 +100,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		// Filter VT: 1.905 ~ 9.0
 		if (-1 == strVT.Find(_T("."))) continue;
 		double dVT = atof(strVT);
-		//if (dVT < 8.0 || dVT >= 13.0) continue;
+		if (dVT < 8.0 || dVT >= 13.0) continue;
 		// Filter mRA and mDE exclude empty value
 		if (-1 == strmRA.Find(_T("."))) continue;
 		if (-1 == strmDE.Find(_T("."))) continue;
@@ -114,10 +114,10 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		double dpmRA = atof(strpmRA);
 		double dpmDE = atof(strpmDE);
 		double dyear = 19.0;
-		if (dpmRA >= 100.0 || dpmDE >= 100.0 || dpmRA <= -100.0 || dpmDE <= -100.0) continue;
+		//if (dpmRA >= 100.0 || dpmDE >= 100.0 || dpmRA <= -100.0 || dpmDE <= -100.0) continue;
 		dRa_Fixed  = dmRA;
 		dDec_Fixed = dmDE;
-		//pMainDlg->MeanPositionTransform(dmRA, dmDE, dpmRA, dpmDE, dyear, dRa_Fixed, dDec_Fixed);
+		pMainDlg->MeanPositionTransform(dmRA, dmDE, dpmRA, dpmDE, dyear, dRa_Fixed, dDec_Fixed);
 
 		// Insert into database
 		CString szQuery;
