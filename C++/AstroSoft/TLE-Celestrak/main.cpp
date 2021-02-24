@@ -3,8 +3,11 @@
 #include <wininet.h>
 #include <fstream>
 #include <string>
+#include <algorithm>
 
 #define MAXSIZE 1024
+#define MAXNIDARRAY 1024
+
 #pragma comment(lib, "Wininet.lib")
 
 void urlopen(char* url)
@@ -103,29 +106,78 @@ int main(int argc, char* argv[])
 {
 	//urlopen("https://celestrak.com/satcat/tle.php?CATNR=20025");
 
-	int iNIDArray[1024];
+	int iNIDArray[MAXNIDARRAY];
+	int iNIDState[MAXNIDARRAY];
 	int nNIDCount = 0;
 	std::string strUrl, strTLE, strTemp;
 	FILE *outfile;
 	outfile = fopen("TLE.tle", "w");
 	readNIDList(iNIDArray, nNIDCount);
-	for (int i = 0; i < nNIDCount; i++)
+	std::fill(iNIDState, iNIDState + nNIDCount, 0);
+
+	//for (int i = 0; i < nNIDCount; i++)
+	//{
+	//	strTemp = "";
+	//	strUrl = "http://celestrak.com/satcat/tle.php?CATNR=" + std::to_string(iNIDArray[i]);
+	//	urlopen(strUrl.c_str(), strTemp);
+	//	if (strTemp.length() < 50) // check data size of tle string
+	//	{
+	//		printf("Internet error! Fail to load TLE:%6d.\n", iNIDArray[i]);
+	//		continue;
+	//	}
+	//	strTemp = "0 " + strTemp;
+	//	printf("%s", strTemp.c_str());
+	//	fprintf(outfile, "%s", strTemp.c_str());
+	//	Sleep(500);
+	//}
+
+	//Loop 3 times
+	printf("当前数据源： CelesTrak\n");
+	Sleep(1000);
+	printf("目标列表： TLE_list.txt\n");
+	Sleep(1000);
+	printf("模式： HTTP\n");
+	Sleep(1000);
+	printf("开始下载 TLE 数据...\n");
+	int nFinished = 0;
+	int iLoopTime = 0;
+	while (iLoopTime < 3)
 	{
-		strTemp = "";
-		strUrl = "http://celestrak.com/satcat/tle.php?CATNR=" + std::to_string(iNIDArray[i]);
-		urlopen(strUrl.c_str(), strTemp);
-		if (strTemp.length() < 50) // check data size of tle string
+		iLoopTime++;
+		//Get TLE data
+		for (int i = 0; i < nNIDCount; i++)
 		{
-			printf("Internet error! Fail to load TLE:%6d.\n", iNIDArray[i]);
-			continue;
+			if (iNIDState[i] == 1) continue;
+			strTemp = "";
+			strUrl = "http://celestrak.com/satcat/tle.php?CATNR=" + std::to_string(iNIDArray[i]);
+			urlopen(strUrl.c_str(), strTemp);
+			if (strTemp.length() < 50) // check data size of tle string
+			{
+				printf("\nInternet error! Fail to load TLE:%6d.\n", iNIDArray[i]);
+				continue;
+			}
+			strTemp = "0 " + strTemp;
+			//printf("%s", strTemp.c_str());
+			fprintf(outfile, "%s", strTemp.c_str());
+			iNIDState[i] = 1;
+			nFinished++;
+
+			//Processer
+			int n1 = int(50 * nFinished / nNIDCount);
+			int n2 = 50 - n1;
+			printf("\r| ");
+			for (int p = 0; p < n1; p++) printf(">");
+			for (int p = 0; p < n2; p++) printf("-");
+			printf(" | %3d \/%3d |", nFinished, nNIDCount);
+
+			Sleep(500);
 		}
-		strTemp = "0 " + strTemp;
-		printf("%s", strTemp.c_str());
-		fprintf(outfile, "%s", strTemp.c_str());
-		Sleep(500);
+		
 	}
+
 	fclose(outfile);
 
+	printf("\n数据下载完成\n\n");
 	system("pause");
 	return 0;
 }
