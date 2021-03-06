@@ -10,6 +10,13 @@
 
 #pragma comment(lib, "Wininet.lib")
 
+void GetFileName(char* cFileName, int size)
+{
+	SYSTEMTIME sysTime;
+	GetLocalTime(&sysTime);
+	sprintf_s(cFileName, size, "%04d%02d%02d.tle", sysTime.wYear, sysTime.wMonth, sysTime.wDay);
+}
+
 void urlopen(char* url)
 {
 	HINTERNET hSession = InternetOpen("UrlTest", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -110,8 +117,10 @@ int main(int argc, char* argv[])
 	int iNIDState[MAXNIDARRAY];
 	int nNIDCount = 0;
 	std::string strUrl, strTLE, strTemp;
+	char outFileName[128];
+	GetFileName(outFileName, 128);
 	FILE *outfile;
-	outfile = fopen("TLE.tle", "w");
+	outfile = fopen(outFileName, "w");
 	readNIDList(iNIDArray, nNIDCount);
 	std::fill(iNIDState, iNIDState + nNIDCount, 0);
 
@@ -177,7 +186,7 @@ int main(int argc, char* argv[])
 
 	fclose(outfile);
 
-	printf("\n数据下载完成\n\n");
+	printf("\n数据下载完成： %s\n\n", outFileName);
 	system("pause");
 	return 0;
 }
