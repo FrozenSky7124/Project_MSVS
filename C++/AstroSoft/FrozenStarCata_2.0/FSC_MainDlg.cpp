@@ -51,7 +51,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	char *sql;
 	int rc;
 
-	rc = sqlite3_open("Tycho2_VT8-12_DEC-50+_PM0Fix.db", &Sqlite3_dbCoon);
+	rc = sqlite3_open("Tycho2_Export.db", &Sqlite3_dbCoon);
 
 	if (rc)
 	{
@@ -114,10 +114,13 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 		double dpmRA = atof(strpmRA);
 		double dpmDE = atof(strpmDE);
 		double dyear = 19.0;
-		//if (dpmRA >= 100.0 || dpmDE >= 100.0 || dpmRA <= -100.0 || dpmDE <= -100.0) continue;
-		dRa_Fixed  = dmRA;
+		dRa_Fixed = dmRA;
 		dDec_Fixed = dmDE;
-		pMainDlg->MeanPositionTransform(dmRA, dmDE, dpmRA, dpmDE, dyear, dRa_Fixed, dDec_Fixed);
+		// Filter pmRA and pmDE
+		if (dpmRA >= 100.0 || dpmDE >= 100.0 || dpmRA <= -100.0 || dpmDE <= -100.0) continue;
+		//dRa_Fixed  = dmRA;
+		//dDec_Fixed = dmDE;
+		//pMainDlg->MeanPositionTransform(dmRA, dmDE, dpmRA, dpmDE, dyear, dRa_Fixed, dDec_Fixed);
 
 		// Insert into database
 		CString szQuery;
