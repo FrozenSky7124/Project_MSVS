@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/folder_32.png</file>
+        <file>images/save_32.png</file>
+        <file>images/search_32.png</file>
+        <file>images/page_text_32.png</file>
+    </qresource>
+</RCC>
