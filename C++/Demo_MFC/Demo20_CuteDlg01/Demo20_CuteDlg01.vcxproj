@@ -184,6 +184,8 @@
   <ItemGroup>
     <ClInclude Include="CuteDlg01.h" />
     <ClInclude Include="Demo20_CuteDlg01.h" />
+    <ClInclude Include="fzsButton.h" />
+    <ClInclude Include="PNGButton.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -191,6 +193,8 @@
   <ItemGroup>
     <ClCompile Include="CuteDlg01.cpp" />
     <ClCompile Include="Demo20_CuteDlg01.cpp" />
+    <ClCompile Include="fzsButton.cpp" />
+    <ClCompile Include="PNGButton.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -206,6 +210,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Demo20_CuteDlg01.ico" />
+    <Image Include="res\kqsleep.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

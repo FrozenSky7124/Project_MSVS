@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "PNGButton.h"
 
 // CuteDlg01 dialog
 class CuteDlg01 : public CDialogEx
@@ -42,4 +42,6 @@ public:
 	int m_iBkWidth;
 	int m_iBkHeight;
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	PNGButton m_PNGBtn;
+	afx_msg void OnBnClickedButtonKeqing();
 };

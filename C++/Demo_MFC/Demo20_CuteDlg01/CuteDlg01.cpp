@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CuteDlg01, CDialogEx)
 	ON_WM_CTLCOLOR()
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
+	ON_BN_CLICKED(IDC_BUTTON_Keqing, &CuteDlg01::OnBnClickedButtonKeqing)
 END_MESSAGE_MAP()
 
 
@@ -60,6 +61,10 @@ BOOL CuteDlg01::OnInitDialog()
 	//MoveWindow(0, 0, m_iBkWidth, m_iBkHeight);
 
 	::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, m_iBkWidth, m_iBkHeight, SWP_NOSIZE | SWP_NOMOVE);
+
+	// PNGButton Test
+	m_PNGBtn.Create(0, 0, this, IDC_BUTTON_Keqing, IDB_PNG_Keqing, IDB_PNG_Keqing);
+
 
 	//COLORREF maskColor = RGB(0, 0, 0);
 	//SetWindowLong(this->GetSafeHwnd(), GWL_EXSTYLE, GetWindowLong(this->GetSafeHwnd(), GWL_EXSTYLE | WS_EX_LAYERED));
@@ -93,6 +98,7 @@ void CuteDlg01::OnPaint()
 	}
 	else
 	{
+		/* 绘制透明PNG图片窗体
 		HDC hdcTmp = GetDC()->m_hDC;
 		m_hdcMem = CreateCompatibleDC(hdcTmp);
 		HBITMAP hBitMap = CreateCompatibleBitmap(hdcTmp, m_iBkWidth, m_iBkHeight);
@@ -121,6 +127,8 @@ void CuteDlg01::OnPaint()
 		DeleteObject(hBitMap);
 		DeleteDC(m_hdcMem);
 		m_hdcMem = NULL;
+		*/
+
 
 		/*
 		CPaintDC dc(this);
@@ -191,6 +199,7 @@ void CuteDlg01::OnDestroy()
 	// TODO
 	delete m_pImgBk;
 	m_pImgBk = NULL;
+	TRACE("OnDestroy\n");
 }
 
 
@@ -203,4 +212,11 @@ void CuteDlg01::OnLButtonDown(UINT nFlags, CPoint point)
 	SendMessage(WM_SYSCOMMAND, 0xF012, 0);
 
 	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+void CuteDlg01::OnBnClickedButtonKeqing()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	OnCancel();
 }
