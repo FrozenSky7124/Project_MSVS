@@ -44,4 +44,5 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	PNGButton m_PNGBtn;
 	afx_msg void OnBnClickedButtonKeqing();
+	PNGButton m_BtnSwd;
 };

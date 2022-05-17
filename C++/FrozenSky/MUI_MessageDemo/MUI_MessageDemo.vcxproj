@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3E19C867-DD81-4C96-8F81-3CE76A8BF550}</ProjectGuid>
-    <RootNamespace>Demo20_CuteDlg01</RootNamespace>
+    <ProjectGuid>{4391FD28-83DC-4FD1-B67F-B92954346E65}</ProjectGuid>
+    <RootNamespace>MUI_MessageDemo</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
@@ -94,7 +94,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>gdiplus.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -182,19 +181,17 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CuteDlg01.h" />
-    <ClInclude Include="Demo20_CuteDlg01.h" />
-    <ClInclude Include="fzsButton.h" />
-    <ClInclude Include="PNGButton.h" />
+    <ClInclude Include="MUI_Message.h" />
+    <ClInclude Include="MUI_MessageDemo.h" />
+    <ClInclude Include="MUI_MessageDemoDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CuteDlg01.cpp" />
-    <ClCompile Include="Demo20_CuteDlg01.cpp" />
-    <ClCompile Include="fzsButton.cpp" />
-    <ClCompile Include="PNGButton.cpp" />
+    <ClCompile Include="MUI_Message.cpp" />
+    <ClCompile Include="MUI_MessageDemo.cpp" />
+    <ClCompile Include="MUI_MessageDemoDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -203,25 +200,20 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Demo20_CuteDlg01.rc" />
+    <ResourceCompile Include="MUI_MessageDemo.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Demo20_CuteDlg01.rc2" />
+    <None Include="res\MUI_MessageDemo.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\btn01.png" />
-    <Image Include="res\btn01_Hover.png" />
-    <Image Include="res\Demo20_CuteDlg01.ico" />
-    <Image Include="res\kqsleep.png" />
-    <Image Include="res\sword-fill.png" />
-    <Image Include="res\sword-line.png" />
+    <Image Include="res\MUI_MessageDemo.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="Demo20_CuteDlg01.rc" />
+      <UserProperties RESOURCE_FILE="MUI_MessageDemo.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

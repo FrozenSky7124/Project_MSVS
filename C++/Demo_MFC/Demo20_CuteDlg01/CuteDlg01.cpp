@@ -64,6 +64,7 @@ BOOL CuteDlg01::OnInitDialog()
 
 	// PNGButton Test
 	m_PNGBtn.Create(0, 0, this, IDC_BUTTON_Keqing, IDB_PNG_Keqing, IDB_PNG_Keqing);
+	m_BtnSwd.Create(200, 0, this, IDC_BUTTON_Swd, IDB_PNG1, IDB_PNG2);
 
 
 	//COLORREF maskColor = RGB(0, 0, 0);

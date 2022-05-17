@@ -31,7 +31,7 @@ PNGButton::PNGButton(void) {
 	this->m_is_checked=false;
 	DrawBorder=false;
 	m_is_mouse_over	=	false; 
-	m_is_tracked	=	false;   
+	m_is_tracked = false;
 } 
 PNGButton::~PNGButton(void) { }
 IMPLEMENT_DYNCREATE(PNGButton, CWnd)  
@@ -96,7 +96,8 @@ void PNGButton::OnPaint()
 	gBuf->DrawImage(this->bg,0,0); 
 	//画鼠标指向时的亮色背景 或被选中时
 	if(DrawBorder|m_is_checked){
-		gBuf->DrawImage(hoverBg,0,0,0,0,mWidth,mHeight,Gdiplus::UnitPixel); 
+		gBuf->DrawImage(hoverBg, 0, 0, 0, 0, mWidth, mHeight, Gdiplus::UnitPixel);
+		//gBuf->DrawImage(this->hoverBg,0,0);
 		TRACE(L"DrawBorder\r\n");   
 	} 
 	delete gBuf;
