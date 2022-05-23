@@ -18,10 +18,10 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Demo20_CuteDlg01.h">
+    <ClInclude Include="Demo21_CuteUI.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CuteDlg01.h">
+    <ClInclude Include="CuteUIDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -33,63 +33,49 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="PNGButton.h">
+    <ClInclude Include="FS_Caption.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="fzsButton.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="KCBusyProgressCtrl.h">
+    <ClInclude Include="FS_Button.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Demo20_CuteDlg01.cpp">
+    <ClCompile Include="Demo21_CuteUI.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CuteDlg01.cpp">
+    <ClCompile Include="CuteUIDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="PNGButton.cpp">
+    <ClCompile Include="FS_Caption.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="fzsButton.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="KCBusyProgressCtrl.cpp">
+    <ClCompile Include="FS_Button.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Demo20_CuteDlg01.rc">
+    <ResourceCompile Include="Demo21_CuteUI.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Demo20_CuteDlg01.rc2">
+    <None Include="res\Demo21_CuteUI.rc2">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Demo20_CuteDlg01.ico">
+    <Image Include="res\Demo21_CuteUI.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bitmap1.bmp">
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\kqsleep.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="res\sword-fill.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="res\sword-line.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="res\btn01.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="res\btn01_Hover.png">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

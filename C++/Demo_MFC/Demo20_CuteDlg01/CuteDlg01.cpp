@@ -25,6 +25,7 @@ CuteDlg01::CuteDlg01(CWnd* pParent /*=NULL*/)
 void CuteDlg01::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STATIC1, m_ctlBProgress);
 }
 
 BEGIN_MESSAGE_MAP(CuteDlg01, CDialogEx)
@@ -66,6 +67,15 @@ BOOL CuteDlg01::OnInitDialog()
 	m_PNGBtn.Create(0, 0, this, IDC_BUTTON_Keqing, IDB_PNG_Keqing, IDB_PNG_Keqing);
 	m_BtnSwd.Create(200, 0, this, IDC_BUTTON_Swd, IDB_PNG1, IDB_PNG2);
 
+	m_bkBrush.CreateSolidBrush(RGB(51, 51, 51)); // ÉèÖÃ±³¾°»­Ë¢
+
+	m_ctlBProgress.SetNumSteps(40);
+	m_ctlBProgress.SetCurPos(50);
+	m_ctlBProgress.SetInterBlockPadding(3);
+	m_ctlBProgress.SetMode(BPC_MODE_BUSY);
+	m_ctlBProgress.SetColBkg(COLORREF(RGB(51, 51, 51)));
+	m_ctlBProgress.SetInterBlockPadding(1);
+	m_ctlBProgress.Start();
 
 	//COLORREF maskColor = RGB(0, 0, 0);
 	//SetWindowLong(this->GetSafeHwnd(), GWL_EXSTYLE, GetWindowLong(this->GetSafeHwnd(), GWL_EXSTYLE | WS_EX_LAYERED));
@@ -186,6 +196,8 @@ HBRUSH CuteDlg01::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	if (pWnd == this)
 	{
+		pDC->SetBkMode(TRANSPARENT);
+		return m_bkBrush;
 		//return m_bkBrush;
 	}
 

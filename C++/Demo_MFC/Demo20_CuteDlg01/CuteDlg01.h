@@ -4,6 +4,8 @@
 
 #pragma once
 #include "PNGButton.h"
+#include "KCBusyProgressCtrl.h"
+#include "afxwin.h"
 
 // CuteDlg01 dialog
 class CuteDlg01 : public CDialogEx
@@ -35,7 +37,7 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnDestroy();
 
-	CBrush m_bkBrush;
+	CBrush m_bkBrush; //±³¾°»­Ë¢
 	Gdiplus::Image * m_pImgBk;
 	HDC m_hdcMem;
 	BLENDFUNCTION m_Blend;
@@ -45,4 +47,5 @@ public:
 	PNGButton m_PNGBtn;
 	afx_msg void OnBnClickedButtonKeqing();
 	PNGButton m_BtnSwd;
+	CKCBusyProgressCtrl m_ctlBProgress;
 };

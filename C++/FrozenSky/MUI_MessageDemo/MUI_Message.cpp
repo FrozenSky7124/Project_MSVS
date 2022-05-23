@@ -12,7 +12,7 @@
 IMPLEMENT_DYNAMIC(MUI_Message, CDialogEx)
 
 MUI_Message::MUI_Message(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_MUI_MESSAGEDEMO_DIALOG, pParent)
+	: CDialogEx(IDD_DIALOG1, pParent)
 {
 
 }
