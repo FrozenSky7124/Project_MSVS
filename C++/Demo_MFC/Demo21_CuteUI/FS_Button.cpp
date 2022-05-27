@@ -12,7 +12,7 @@ IMPLEMENT_DYNAMIC(FS_Button, CButton)
 
 FS_Button::FS_Button()
 {
-	m_bMouseMove = FALSE;
+	m_bMouseHover = FALSE;
 }
 
 FS_Button::~FS_Button()
@@ -90,7 +90,7 @@ void FS_Button::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		//按钮被选择
 		m_imgButton.BitBlt(hMemDC, 0, 0, nW, nH, nW * 2, 0, SRCCOPY);
 	}
-	else if (/*lpDrawItemStruct->itemState & ODS_FOCUS || */m_bMouseMove)
+	else if (/*lpDrawItemStruct->itemState & ODS_FOCUS || */m_bMouseHover)
 	{
 		//焦点状态 //不判断焦点状态只判断鼠标滑过
 		m_imgButton.BitBlt(hMemDC, 0, 0, nW, nH, nW, 0, SRCCOPY);
@@ -136,6 +136,7 @@ void FS_Button::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 BEGIN_MESSAGE_MAP(FS_Button, CButton)
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSELEAVE()
+	ON_WM_MOUSEHOVER()
 END_MESSAGE_MAP()
 
 
@@ -148,10 +149,13 @@ END_MESSAGE_MAP()
 void FS_Button::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	m_bMouseMove = TRUE;
-	RECT rcBtn;
-	GetClientRect(&rcBtn);
-	InvalidateRect(&rcBtn);
+	TRACKMOUSEEVENT  tme = { 0 };
+	tme.cbSize = sizeof(TRACKMOUSEEVENT);
+	tme.dwFlags = TME_HOVER | TME_LEAVE;
+	tme.dwHoverTime = 50;
+	tme.hwndTrack = this->m_hWnd;
+	if (TrackMouseEvent(&tme)) {}
+	TRACE("OnMouseMove\n");
 	CButton::OnMouseMove(nFlags, point);
 }
 
@@ -159,9 +163,22 @@ void FS_Button::OnMouseMove(UINT nFlags, CPoint point)
 void FS_Button::OnMouseLeave()
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	m_bMouseMove = FALSE;
+	m_bMouseHover = FALSE;
 	RECT rcBtn;
 	GetClientRect(&rcBtn);
 	InvalidateRect(&rcBtn);
+	TRACE("OnMouseLeave\n");
 	CButton::OnMouseLeave();
+}
+
+
+void FS_Button::OnMouseHover(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	m_bMouseHover = TRUE;
+	RECT rcBtn;
+	GetClientRect(&rcBtn);
+	InvalidateRect(&rcBtn);
+	TRACE("OnMouseHover\n");
+	CButton::OnMouseHover(nFlags, point);
 }

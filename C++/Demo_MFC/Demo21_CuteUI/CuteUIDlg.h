@@ -1,4 +1,3 @@
-
 // CuteUIDlg.h : header file
 //
 

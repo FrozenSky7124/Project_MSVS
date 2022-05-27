@@ -27,7 +27,8 @@ public:
 	CString m_strImgPath; //按钮png路径，包括焦点，正常，按下3个状态
 	CString m_strImgParentPath; //父窗口背景图片背景路径，透明png需要使用
 
-	BOOL m_bMouseMove; //鼠标状态指示
+	BOOL m_bMouseHover; //鼠标悬停状态指示
+	afx_msg void OnMouseHover(UINT nFlags, CPoint point);
 };
 
 
