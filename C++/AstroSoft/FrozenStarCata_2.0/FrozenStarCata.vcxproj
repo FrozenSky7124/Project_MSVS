@@ -191,12 +191,16 @@
     <ClInclude Include="FrozenStarCata.h" />
     <ClInclude Include="FSC_MainDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SC_USNO_B1.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FrozenStarCata.cpp" />
     <ClCompile Include="FSC_MainDlg.cpp" />
+    <ClCompile Include="SC_USNO_B1.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

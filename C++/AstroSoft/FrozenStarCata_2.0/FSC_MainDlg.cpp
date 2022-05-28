@@ -6,6 +6,7 @@
 #include "FrozenStarCata.h"
 #include "FSC_MainDlg.h"
 #include "afxdialogex.h"
+#include "SC_USNO_B1.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -324,8 +325,38 @@ void FSC_MainDlg::OnBnClickedBtnSelectFile()
 
 void FSC_MainDlg::OnBnClickedBtnMake()
 {
+	int iRadioUSNOB1 = ((CButton *)GetDlgItem(IDC_RADIO_USNOB1))->GetCheck();
+	if (iRadioUSNOB1)
+	{
+		TRACE("USNOB1\n");
+		CString strFilePath;
+		GetDlgItemText(IDC_EditFilePath, strFilePath);
+		if (!PathFileExists(strFilePath))
+		{
+			MessageBoxEx(GetSafeHwnd(), _T("Star Catalogue file not found!"), _T("QAQ"), MB_ICONERROR, NULL);
+			return;
+		}
+		CFile fileStarCata;
+		if (!fileStarCata.Open(strFilePath, CFile::modeRead))
+		{
+			MessageBoxEx(GetSafeHwnd(), _T("Faild to open Star Catalogue file!"), _T("QAQ"), MB_ICONERROR, NULL);
+			return;
+		}
+		int fileLength = (int)fileStarCata.GetLength();
+		int iCount = fileLength / 80;
+		m_MainProgBar.SetRange32(0, iCount);
+		char* pData = new char[fileLength];
+		fileStarCata.Read(pData, fileLength);
+		fileStarCata.Close();
+		SC_USNO_B1 SC(pData);
+		double dRa = SC.makeRa(0);
+		double dDe = SC.makeDe(0);
+		TRACE("RA=%10.6f DE=%10.6f\n", dRa, dDe);
+	}
+	return;
 	// Create Make Thread	
 	m_hMakeThread = (HANDLE)_beginthreadex(NULL, 0, &uiProcFuncMake, this, 0, &m_uiMakeThreadID);
 	ASSERT(m_uiMakeThreadID);
 	SetThreadPriority(m_hMakeThread, THREAD_PRIORITY_HIGHEST);
 }
+
