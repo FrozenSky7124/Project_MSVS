@@ -13,6 +13,10 @@ IMPLEMENT_DYNAMIC(FS_Button, CButton)
 FS_Button::FS_Button()
 {
 	m_bMouseHover = FALSE;
+	m_iBtnImageState = 0;
+	m_iBkColorR = 0;
+	m_iBkColorG = 0;
+	m_iBkColorB = 0;
 }
 
 FS_Button::~FS_Button()
@@ -20,13 +24,23 @@ FS_Button::~FS_Button()
 
 }
 
-void FS_Button::SetImagePath(CString strImgPath, CString strParentImgPath)
+void FS_Button::SetBtnImage(CString strImgPath, CString strParentImgPath)
 {
 	m_strImgPath = strImgPath;
 	m_strImgParentPath = strParentImgPath;
+	m_iBtnImageState = 1;
 }
 
-bool FS_Button::InitMyButton(int nX, int nY, int nW, int nH, bool bIsPng)
+void FS_Button::SetBtnImage(CString strImgPath, int R, int G, int B)
+{
+	m_strImgPath = strImgPath;
+	m_iBkColorR = R;
+	m_iBkColorG = G;
+	m_iBkColorB = B;
+	m_iBtnImageState = 0;
+}
+
+bool FS_Button::InitButton(int nX, int nY, int nW, int nH, bool bIsPng)
 {
 	HRESULT hr = 0;
 	if (m_strImgPath.IsEmpty())	return false;
@@ -95,24 +109,37 @@ void FS_Button::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		//½¹µã×´Ì¬ //²»ÅÐ¶Ï½¹µã×´Ì¬Ö»ÅÐ¶ÏÊó±ê»¬¹ý
 		m_imgButton.BitBlt(hMemDC, 0, 0, nW, nH, nW, 0, SRCCOPY);
 	}
-	else 
+	else
 	{
 		//Ä¬ÈÏ×´Ì¬
-		CImage imgParent;
-		imgParent.Create(nW, nH, 32);
-		for (int i = 0; i < imgParent.GetWidth(); i++)
+		if (m_iBtnImageState == 0)
 		{
-			for (int j = 0; j < imgParent.GetHeight(); j++)
+			CImage imgParent;
+			imgParent.Create(nW, nH, 32);
+			for (int i = 0; i < imgParent.GetWidth(); i++)
 			{
-				byte * pbyte = (byte *)imgParent.GetPixelAddress(i, j);
-				pbyte[0] = pbyte[1] = pbyte[2] = 60;
-				pbyte[3] = 255;
+				for (int j = 0; j < imgParent.GetHeight(); j++)
+				{
+					byte * pbyte = (byte *)imgParent.GetPixelAddress(i, j);
+					pbyte[0] = m_iBkColorR;
+					pbyte[1] = m_iBkColorG;
+					pbyte[2] = m_iBkColorB;
+					pbyte[3] = 255;
+				}
 			}
+			//imgParent.Draw(hMemDC, 0, 0, nW, nH, rectTmp.left, rectTmp.top, nW, nH);
+			imgParent.Draw(hMemDC, 0, 0, nW, nH, 0, 0, nW, nH);
+			m_imgButton.AlphaBlend(hMemDC, 0, 0, nW, nH, 0, 0, nW, nH);
+			imgParent.Destroy();
 		}
-		//imgParent.Draw(hMemDC, 0, 0, nW, nH, rectTmp.left, rectTmp.top, nW, nH);
-		imgParent.Draw(hMemDC, 0, 0, nW, nH, 0, 0, nW, nH);
-		m_imgButton.AlphaBlend(hMemDC, 0, 0, nW, nH, 0, 0, nW, nH);
-		imgParent.Destroy();
+		else
+		{
+			CImage imgParent;
+			imgParent.Load(m_strImgParentPath);
+			imgParent.Draw(hMemDC, 0, 0, nW, nH, rectTmp.left, rectTmp.top, nW, nH);
+			m_imgButton.AlphaBlend(hMemDC, 0, 0, nW, nH, 0, 0, nW, nH);
+			imgParent.Destroy();
+		}
 	}
 
 	::BitBlt(lpDrawItemStruct->hDC, 0, 0, nW, nH, hMemDC, 0, 0, SRCCOPY);

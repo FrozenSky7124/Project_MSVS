@@ -97,10 +97,10 @@ BOOL CuteUIDlg::OnInitDialog()
 	bmpTmp.Attach(imgBk.Detach());
 	m_bkBrush.CreatePatternBrush(&bmpTmp);
 
-	m_btnMin.SetImagePath(_T(".\\res\\btn_minimize.png"), _T(".\\res\\Background.png"));
-	m_btnMin.InitMyButton(1280 - 27 * 2, 2, 27, 21, true);
-	m_btnClose.SetImagePath(_T(".\\res\\btn_close.png"), _T(".\\res/Background.png"));
-	m_btnClose.InitMyButton(1280 - 27 * 1, 2, 27, 21, true);
+	m_btnMin.SetBtnImage(_T(".\\res\\btn_minimize.png"), 60, 60, 60);
+	m_btnMin.InitButton(1280 - 27 * 2, 2, 27, 21, true);
+	m_btnClose.SetBtnImage(_T(".\\res\\btn_close.png"), 60, 60, 60);
+	m_btnClose.InitButton(1280 - 27 * 1, 2, 27, 21, true);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
