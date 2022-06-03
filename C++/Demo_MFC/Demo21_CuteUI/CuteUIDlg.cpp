@@ -52,6 +52,7 @@ void CuteUIDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_CAPTION, m_UICaption);
 	DDX_Control(pDX, IDC_BUTTON_MIN, m_btnMin);
 	DDX_Control(pDX, IDC_BUTTON_CLOSE, m_btnClose);
+	DDX_Control(pDX, IDC_BUTTON_START, m_BtnStart);
 }
 
 BEGIN_MESSAGE_MAP(CuteUIDlg, CDialog)
@@ -101,6 +102,8 @@ BOOL CuteUIDlg::OnInitDialog()
 	m_btnMin.InitButton(1280 - 27 * 2, 2, 27, 21, true);
 	m_btnClose.SetBtnImage(_T(".\\res\\btn_close.png"), 60, 60, 60);
 	m_btnClose.InitButton(1280 - 27 * 1, 2, 27, 21, true);
+	m_BtnStart.SetBtnImage(_T(".\\res\\UI_BtnStart.png"), 0, 0, 0);
+	m_BtnStart.InitButton(550, 520, 165, 45, false);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }

@@ -39,4 +39,5 @@ public:
 	CBrush m_bkBrush;
 	FS_Button m_btnMin;
 	FS_Button m_btnClose;
+	FS_Button m_BtnStart;
 };
