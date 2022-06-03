@@ -104,6 +104,11 @@ void FS_Button::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		//按钮被选择
 		m_imgButton.BitBlt(hMemDC, 0, 0, nW, nH, nW * 2, 0, SRCCOPY);
 	}
+	else if (lpDrawItemStruct->itemState & ODS_DISABLED)
+	{
+		//按钮被禁用
+		m_imgButton.BitBlt(hMemDC, 0, 0, nW, nH, nW * 3, 0, SRCCOPY);
+	}
 	else if (/*lpDrawItemStruct->itemState & ODS_FOCUS || */m_bMouseHover)
 	{
 		//焦点状态 //不判断焦点状态只判断鼠标滑过
