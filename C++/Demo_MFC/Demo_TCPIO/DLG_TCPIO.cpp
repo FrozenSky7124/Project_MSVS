@@ -22,7 +22,7 @@ UINT WINAPI uiThread_Accept(LPVOID lpParam)
 
 	if ((pThis->m_SocketConn = accept(pThis->m_SocketListen, (sockaddr *)&(pThis->m_Client_Addr), &iClientAddr_length)) == INVALID_SOCKET)
 	{
-		printf("SockConn accept failed !!!\n");
+		printf("SocketConn accept failed !!!\n");
 		closesocket(pThis->m_SocketConn);
 		WSACleanup();
 		return 1;
@@ -33,6 +33,7 @@ UINT WINAPI uiThread_Accept(LPVOID lpParam)
 	// Close listen socket when accept succeed
 	closesocket(pThis->m_SocketListen);
 
+	printf("Thread_Accept Terminated!\n");
 	return 0;
 }
 
@@ -43,13 +44,15 @@ UINT WINAPI uiThread_Recv(LPVOID lpParam)
 	while (pThis->m_SocketConn != INVALID_SOCKET)
 	{
 		int nRecvBytes = SOCKET_ERROR;
-		char cRecvBuf[32] = "";
+		char cRecvBuf[33] = "";
 		nRecvBytes = recv(pThis->m_SocketConn, cRecvBuf, 32, 0);
+		cRecvBuf[32] = '\0';
 		printf("Bytes Recv: %ld\n", nRecvBytes);
 		printf("%s\n", cRecvBuf);
 		if (nRecvBytes <= 0) break;
 	}
 
+	pThis->CloseSocketConn();
 	printf("Thread_Recv Terminated!\n");
 	return 0;
 }
@@ -69,6 +72,9 @@ DLG_TCPIO::DLG_TCPIO(CWnd* pParent /*=NULL*/)
 void DLG_TCPIO::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STATIC_1, m_Static_1);
+	DDX_Control(pDX, IDC_STATIC_2, m_Static_2);
+	DDX_Control(pDX, IDC_BUTTON_1, m_Button_1);
 }
 
 BEGIN_MESSAGE_MAP(DLG_TCPIO, CDialog)
@@ -94,6 +100,11 @@ BOOL DLG_TCPIO::OnInitDialog()
 	AllocConsole();
 	freopen("CONOUT$", "w+t", stdout);
 	freopen("CONIN$", "r+t", stdin);
+
+	// Init UI
+	m_Static_1.Init(0, 0, 0, 102, 204, 255, "ËÎÌו", 35);
+	m_Static_2.Init(0, 0, 0, 102, 204, 255, "ËÎÌו", 35);
+	m_Button_1.EnableWindow(false);
 
 	// Init Socket
 	if (0 == InitTCPSocket()) printf("Init TCP Socket success.\n");
@@ -139,7 +150,11 @@ HCURSOR DLG_TCPIO::OnQueryDragIcon()
 void DLG_TCPIO::OnCancel()
 {
 	// TODO:
-	if (m_SocketConn != NULL) closesocket(m_SocketConn);
+	if (m_SocketConn != NULL)
+	{
+		closesocket(m_SocketConn);
+		m_SocketConn = NULL;
+	}
 	WSACleanup();
 	FreeConsole();
 
@@ -148,10 +163,15 @@ void DLG_TCPIO::OnCancel()
 
 void DLG_TCPIO::OnBnClickedButton1()
 {
+	if (m_SocketConn == NULL || m_SocketConn == INVALID_SOCKET)
+	{
+		printf("SocketConn Invalid.\n");
+		return;
+	}
 	int nSentBytes = 0;
 	char cSendBuf[32] = "Server: Test Data.";
-	nSentBytes = send(m_SocketConn, cSendBuf, strlen(cSendBuf), 0);
-	printf("Bytes Sent: %ld\n", nSentBytes);
+	nSentBytes = send(m_SocketConn, cSendBuf, int(strlen(cSendBuf)), 0);
+	printf("Bytes Sent: %d\n", nSentBytes);
 }
 
 
@@ -207,5 +227,18 @@ int DLG_TCPIO::ThreadRecvBegin()
 {
 	UINT m_iThread_Recv;
 	HANDLE m_hThread_Recv = (HANDLE)_beginthreadex(NULL, 0, &uiThread_Recv, this, 0, &m_iThread_Recv);
+
+	m_Button_1.EnableWindow(true);
+	return 0;
+}
+
+int DLG_TCPIO::CloseSocketConn()
+{
+	if (m_SocketConn != NULL)
+	{
+		closesocket(m_SocketConn); // Close SocketConn when disconnected.
+		m_SocketConn = NULL;
+	}
+	m_Button_1.EnableWindow(false);
 	return 0;
 }

@@ -78,6 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\GitHub\Project_CHO\Library\MFC_FSUI;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -181,6 +182,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Project_CHO\Library\MFC_FSUI\FS_Static.h" />
     <ClInclude Include="Demo_TCPIO.h" />
     <ClInclude Include="DLG_TCPIO.h" />
     <ClInclude Include="Resource.h" />
@@ -188,6 +190,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\Project_CHO\Library\MFC_FSUI\FS_Static.cpp" />
     <ClCompile Include="Demo_TCPIO.cpp" />
     <ClCompile Include="DLG_TCPIO.cpp" />
     <ClCompile Include="stdafx.cpp">

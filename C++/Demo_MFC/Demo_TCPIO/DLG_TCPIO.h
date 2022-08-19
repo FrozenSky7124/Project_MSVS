@@ -1,9 +1,8 @@
-
 // DLG_TCPIO.h : header file
-//
-
 #pragma once
-
+#include "FS_Static.h"
+#include "D:\GitHub\Project_CHO\Library\MFC_FSUI\FS_Static.h"
+#include "afxwin.h"
 
 // DLG_TCPIO dialog
 class DLG_TCPIO : public CDialog
@@ -44,4 +43,9 @@ public:
 	UINT m_iThread_Accept;
 	int InitTCPSocket();
 	int ThreadRecvBegin();
+	int CloseSocketConn();
+	// UI
+	FS_Static m_Static_1;
+	FS_Static m_Static_2;
+	CButton m_Button_1;
 };
