@@ -1,26 +1,25 @@
 // DLG_TCPIO.h : header file
 #pragma once
 #include "FS_Static.h"
-#include "D:\GitHub\Project_CHO\Library\MFC_FSUI\FS_Static.h"
 #include "afxwin.h"
 
 // DLG_TCPIO dialog
 class DLG_TCPIO : public CDialog
 {
-// Construction
+	// Construction
 public:
 	DLG_TCPIO(CWnd* pParent = NULL);	// standard constructor
 
-// Dialog Data
+										// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_DEMO_TCPIO_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 
-// Implementation
+														// Implementation
 protected:
 	HICON m_hIcon;
 
@@ -28,6 +27,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedButton1();
 	virtual void OnCancel();
 	DECLARE_MESSAGE_MAP()
@@ -42,6 +42,7 @@ public:
 	HANDLE m_hThread_Accept;
 	UINT m_iThread_Accept;
 	int InitTCPSocket();
+	int ConnectToServer();
 	int ThreadRecvBegin();
 	int CloseSocketConn();
 	// UI

@@ -12,6 +12,9 @@
 #define new DEBUG_NEW
 #endif
 
+#define SERVER_IP_D "192.168.199.136"
+#define SERVER_IP   "192.168.5.48"
+#define SERVER_PORT 6868
 
 UINT WINAPI uiThread_Accept(LPVOID lpParam)
 {
@@ -53,7 +56,7 @@ UINT WINAPI uiThread_Recv(LPVOID lpParam)
 	}
 
 	pThis->CloseSocketConn();
-	printf("Thread_Recv Terminated!\n");
+	printf("[INFO ] > uiThread_Recv > connect closed. Terminated.\n");
 	return 0;
 }
 
@@ -81,6 +84,7 @@ BEGIN_MESSAGE_MAP(DLG_TCPIO, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_1, &DLG_TCPIO::OnBnClickedButton1)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -94,9 +98,9 @@ BOOL DLG_TCPIO::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	// TODO: Add extra initialization here
+									// TODO: Add extra initialization here
 
-	// Init Console
+									// Init Console
 	AllocConsole();
 	freopen("CONOUT$", "w+t", stdout);
 	freopen("CONIN$", "r+t", stdin);
@@ -107,7 +111,18 @@ BOOL DLG_TCPIO::OnInitDialog()
 	m_Button_1.EnableWindow(false);
 
 	// Init Socket
-	if (0 == InitTCPSocket()) printf("Init TCP Socket success.\n");
+	//if (0 == InitTCPSocket()) printf("Init TCP Socket success.\n");
+
+	// Init Socket Client
+	if (0 == ConnectToServer())
+	{
+		printf("[INFO ] > INIT > Connect to server OK.\n");
+		//ThreadRecvBegin();
+		m_Button_1.EnableWindow(true);
+		SetTimer(1, 300, NULL);
+	}
+	else
+		printf("[ERROR] > INIT > Connect to server Faild.\n");
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -147,12 +162,29 @@ HCURSOR DLG_TCPIO::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void DLG_TCPIO::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 
+	switch (nIDEvent)
+	{
+	case 1: // UI Proc Timer
+		SetDlgItemText(IDC_STATIC_1, "111111111111");
+		break;
+	case 2: // TBD
+		break;
+	default:
+		break;
+	}
+	CDialog::OnTimer(nIDEvent);
+}
+
 void DLG_TCPIO::OnCancel()
 {
 	// TODO:
 	if (m_SocketConn != NULL)
 	{
 		closesocket(m_SocketConn);
+		WSACleanup();
 		m_SocketConn = NULL;
 	}
 	WSACleanup();
@@ -161,24 +193,47 @@ void DLG_TCPIO::OnCancel()
 	CDialog::OnCancel();
 }
 
+/** START Button
+** Function: send '#start' to server and recv feedback data
+**/
 void DLG_TCPIO::OnBnClickedButton1()
 {
 	if (m_SocketConn == NULL || m_SocketConn == INVALID_SOCKET)
 	{
-		printf("SocketConn Invalid.\n");
+		printf("[ERROR] > OnBnClickedButton1(Start) > SocketConn Invalid.\n");
 		return;
 	}
+
 	int nSentBytes = 0;
-	char cSendBuf[32] = "Server: Test Data.";
+	char cSendBuf[32] = "#start";
 	nSentBytes = send(m_SocketConn, cSendBuf, int(strlen(cSendBuf)), 0);
-	printf("Bytes Sent: %d\n", nSentBytes);
+	printf("[INFO ] > OnBnClickedButton1(Start) > MSG Sent: %d\n", nSentBytes);
+
+	int iTimes = 0;
+	while (m_SocketConn != INVALID_SOCKET && iTimes < 3)
+	{
+		int nRecvBytes = SOCKET_ERROR;
+		char cRecvBuf[3] = "";
+		nRecvBytes = recv(m_SocketConn, cRecvBuf, 3, 0);
+		cRecvBuf[2] = '\0';
+		printf("[RECV ]: (%2d) %s\n", nRecvBytes, cRecvBuf);
+		if (strcmp(cRecvBuf, "ok") == 0 || strcmp(cRecvBuf, "no") == 0) break;
+		//if (nRecvBytes <= 0) break;
+		iTimes++;
+	}
+
+	if (m_SocketConn != INVALID_SOCKET || iTimes >= 3)
+		printf("[ERROR] > OnBnClickedButton1(Start) > no respone.\n");
+	// #stop  Õ£÷π
+	// #query ≤È—Ø
+
+	// Return: 'ok' ≥…π¶   'no'  ß∞‹
 }
 
-
 /**
- * Init TCP Socket
- * Return   : [-1]: failed   [0]: success
- */
+* Init TCP Socket
+* Return   : [-1]: failed   [0]: success
+*/
 int DLG_TCPIO::InitTCPSocket()
 {
 	// Init winsock data
@@ -197,8 +252,8 @@ int DLG_TCPIO::InitTCPSocket()
 	// Set server ip & port
 	memset(&m_Server_Addr, 0, sizeof(SOCKADDR_IN));
 	m_Server_Addr.sin_family = AF_INET;
-	m_Server_Addr.sin_port = htons(37124);
-	inet_pton(AF_INET, "192.168.5.48", &m_Server_Addr.sin_addr);
+	m_Server_Addr.sin_port = htons(SERVER_PORT);
+	inet_pton(AF_INET, SERVER_IP, &m_Server_Addr.sin_addr);
 	//m_Server_Addr.sin_addr.S_un.S_addr = inet_addr("192.168.5.48"); InetPton("192.168.5.48");
 	// Bind socket
 	if (bind(m_SocketListen, (sockaddr *)&m_Server_Addr, sizeof(sockaddr_in)) != 0)
@@ -223,6 +278,40 @@ int DLG_TCPIO::InitTCPSocket()
 	return 0;
 }
 
+/**
+* Connect To Server
+* Return   : [-1]: failed   [0]: success
+*/
+int DLG_TCPIO::ConnectToServer()
+{
+	// Init winsock data
+	if (WSAStartup(MAKEWORD(2, 2), &m_wsaData) != 0)
+	{
+		printf("WSAStartup failed !!!\n");
+		return -1;
+	}
+
+	// Set server ip & port
+	memset(&m_Server_Addr, 0, sizeof(SOCKADDR_IN));
+	m_Server_Addr.sin_family = AF_INET;
+	m_Server_Addr.sin_port = htons(SERVER_PORT);
+	inet_pton(AF_INET, SERVER_IP, &m_Server_Addr.sin_addr);
+	//m_Server_Addr.sin_addr.S_un.S_addr = inet_addr("192.168.5.48"); InetPton("192.168.5.48");
+
+	m_SocketConn = socket(AF_INET, SOCK_STREAM, 0);
+
+	int iRstConn = connect(m_SocketConn, (sockaddr *)&m_Server_Addr, sizeof(m_Server_Addr));
+	if (iRstConn < 0)
+	{
+		printf("[ERROR] > ConnectToServer > connect > errno £Ω %d\n", errno);
+		closesocket(m_SocketConn);
+		WSACleanup();
+		return -1;
+	}
+
+	return 0;
+}
+
 int DLG_TCPIO::ThreadRecvBegin()
 {
 	UINT m_iThread_Recv;
@@ -237,8 +326,11 @@ int DLG_TCPIO::CloseSocketConn()
 	if (m_SocketConn != NULL)
 	{
 		closesocket(m_SocketConn); // Close SocketConn when disconnected.
+		WSACleanup();
 		m_SocketConn = NULL;
 	}
 	m_Button_1.EnableWindow(false);
 	return 0;
 }
+
+
