@@ -182,6 +182,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Project_CHO\Library\MFC_FSUI\FS_Button.h" />
     <ClInclude Include="..\..\..\..\Project_CHO\Library\MFC_FSUI\FS_Static.h" />
     <ClInclude Include="Demo_TCPIO.h" />
     <ClInclude Include="DLG_TCPIO.h" />
@@ -190,6 +191,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\Project_CHO\Library\MFC_FSUI\FS_Button.cpp" />
     <ClCompile Include="..\..\..\..\Project_CHO\Library\MFC_FSUI\FS_Static.cpp" />
     <ClCompile Include="Demo_TCPIO.cpp" />
     <ClCompile Include="DLG_TCPIO.cpp" />

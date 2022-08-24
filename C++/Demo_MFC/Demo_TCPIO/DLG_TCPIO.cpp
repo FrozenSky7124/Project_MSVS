@@ -3,10 +3,10 @@
 //
 
 #include "stdafx.h"
-#include "Demo_TCPIO.h"
-#include "DLG_TCPIO.h"
 #include "afxdialogex.h"
 #include "ws2tcpip.h"
+#include "Demo_TCPIO.h"
+#include "DLG_TCPIO.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,6 +68,9 @@ DLG_TCPIO::DLG_TCPIO(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
+	// UI
+	m_winSzW = 200;
+	m_winSzH = 125;
 	m_SocketListen = NULL;
 	m_SocketConn = NULL;
 }
@@ -75,9 +78,11 @@ DLG_TCPIO::DLG_TCPIO(CWnd* pParent /*=NULL*/)
 void DLG_TCPIO::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STATIC_Caption, m_UI_Caption);
 	DDX_Control(pDX, IDC_STATIC_1, m_Static_1);
 	DDX_Control(pDX, IDC_STATIC_2, m_Static_2);
 	DDX_Control(pDX, IDC_BUTTON_1, m_Button_1);
+	DDX_Control(pDX, IDC_BUTTON_2, m_Button_2);
 }
 
 BEGIN_MESSAGE_MAP(DLG_TCPIO, CDialog)
@@ -106,9 +111,20 @@ BOOL DLG_TCPIO::OnInitDialog()
 	freopen("CONIN$", "r+t", stdin);
 
 	// Init UI
-	m_Static_1.Init(0, 0, 0, 102, 204, 255, "ËÎÌו", 35);
-	m_Static_2.Init(0, 0, 0, 102, 204, 255, "ËÎÌו", 35);
+	CRect rect;
+	GetClientRect(&rect);
+	m_winSzW = rect.right - rect.left;
+	m_winSzH = rect.bottom - rect.top;
+	m_UI_Caption.Init(102, 204, 255, 60, 60, 60, _T("Bender"), 20); // set title bar "Bitsumishi"
+	m_UI_Caption.InitPos(1, 1, m_winSzW - 2, 24); // move title bar
+	m_Static_1.Init(0, 0, 0, 102, 204, 255, "Bitsumishi", 35);
+	m_Static_2.Init(0, 0, 0, 102, 204, 255, "Bitsumishi", 35);
+	m_Button_1.SetBtnImage(_T(".\\res\\UI_BtnStart.png"), 0, 0, 0);
+	m_Button_1.InitButton(m_winSzW / 2 - 165 - 20, m_winSzH * 0.6, 165, 45, false);
 	m_Button_1.EnableWindow(false);
+	m_Button_2.SetBtnImage(_T(".\\res\\UI_BtnStop.png"),  0, 0, 0);
+	m_Button_2.InitButton(m_winSzW / 2 + 0   + 20, m_winSzH * 0.6, 165, 45, false);
+	m_Button_2.EnableWindow(false);
 
 	// Init Socket
 	//if (0 == InitTCPSocket()) printf("Init TCP Socket success.\n");
@@ -119,6 +135,7 @@ BOOL DLG_TCPIO::OnInitDialog()
 		printf("[INFO ] > INIT > Connect to server OK.\n");
 		//ThreadRecvBegin();
 		m_Button_1.EnableWindow(true);
+		m_Button_2.EnableWindow(true);
 		SetTimer(1, 300, NULL);
 	}
 	else
@@ -152,6 +169,12 @@ void DLG_TCPIO::OnPaint()
 	}
 	else
 	{
+		// Draw Background & Border
+		CRect rect;
+		CPaintDC dc(this);
+		GetClientRect(&rect);
+		dc.FillSolidRect(&rect, RGB(102, 102, 102)); // draw mainWin border
+		dc.FillSolidRect(rect.left + 1, rect.top + 1, m_winSzW - 2, m_winSzH - 2, RGB(51, 51, 51)); // draw mainWin background
 		CDialog::OnPaint();
 	}
 }
@@ -168,7 +191,7 @@ void DLG_TCPIO::OnTimer(UINT_PTR nIDEvent)
 	switch (nIDEvent)
 	{
 	case 1: // UI Proc Timer
-		SetDlgItemText(IDC_STATIC_1, "111111111111");
+		//SetDlgItemText(IDC_STATIC_1, "111111111111");
 		break;
 	case 2: // TBD
 		break;
