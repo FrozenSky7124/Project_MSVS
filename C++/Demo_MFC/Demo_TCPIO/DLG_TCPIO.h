@@ -4,6 +4,7 @@
 #include "afxwin.h"
 #include "FS_Static.h"
 #include "FS_Button.h"
+#include "D:\GitHub\Project_CHO\Library\MFC_FSUI\FS_Static.h"
 
 // DLG_TCPIO dialog
 class DLG_TCPIO : public CDialog
@@ -43,13 +44,16 @@ public:
 	SOCKADDR_IN m_Client_Addr;
 	HANDLE m_hThread_Accept;
 	UINT m_iThread_Accept;
-	int InitTCPSocket();
+	int InitTCPServer();
 	int ConnectToServer();
 	int ThreadRecvBegin();
+	int MsgProc(char* msg);
 	int CloseSocketConn();
+	
 	// UI
 	UINT m_winSzW, m_winSzH;
 	FS_Static m_UI_Caption;
+	FS_Static m_UI_State;
 	FS_Static m_Static_1;
 	FS_Static m_Static_2;
 	FS_Button m_Button_1;

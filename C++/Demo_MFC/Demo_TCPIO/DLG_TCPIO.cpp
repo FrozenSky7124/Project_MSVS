@@ -13,7 +13,7 @@
 #endif
 
 #define SERVER_IP_D "192.168.199.136"
-#define SERVER_IP   "192.168.5.48"
+#define SERVER_IP   "127.0.0.1"
 #define SERVER_PORT 6868
 
 UINT WINAPI uiThread_Accept(LPVOID lpParam)
@@ -49,10 +49,10 @@ UINT WINAPI uiThread_Recv(LPVOID lpParam)
 		int nRecvBytes = SOCKET_ERROR;
 		char cRecvBuf[33] = "";
 		nRecvBytes = recv(pThis->m_SocketConn, cRecvBuf, 32, 0);
-		cRecvBuf[32] = '\0';
-		printf("Bytes Recv: %ld\n", nRecvBytes);
-		printf("%s\n", cRecvBuf);
 		if (nRecvBytes <= 0) break;
+		cRecvBuf[nRecvBytes] = '\0';
+		printf("[RECV ]: (%2d) %s\n", nRecvBytes, cRecvBuf);
+		pThis->MsgProc(cRecvBuf);
 	}
 
 	pThis->CloseSocketConn();
@@ -83,6 +83,7 @@ void DLG_TCPIO::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_2, m_Static_2);
 	DDX_Control(pDX, IDC_BUTTON_1, m_Button_1);
 	DDX_Control(pDX, IDC_BUTTON_2, m_Button_2);
+	DDX_Control(pDX, IDC_STATIC_State, m_UI_State);
 }
 
 BEGIN_MESSAGE_MAP(DLG_TCPIO, CDialog)
@@ -103,9 +104,9 @@ BOOL DLG_TCPIO::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-									// TODO: Add extra initialization here
+	// TODO: Add extra initialization here
 
-									// Init Console
+	// Init Console
 	AllocConsole();
 	freopen("CONOUT$", "w+t", stdout);
 	freopen("CONIN$", "r+t", stdin);
@@ -116,14 +117,16 @@ BOOL DLG_TCPIO::OnInitDialog()
 	m_winSzW = rect.right - rect.left;
 	m_winSzH = rect.bottom - rect.top;
 	m_UI_Caption.Init(102, 204, 255, 60, 60, 60, _T("Bender"), 20); // set title bar "Bitsumishi"
-	m_UI_Caption.InitPos(1, 1, m_winSzW - 2, 24); // move title bar
+	m_UI_Caption.InitPos(1, 1, m_winSzW - 2, 24);                   // move title bar
+	m_UI_State.Init(255, 255, 255, 104, 33, 122, _T("Bender"), 15); // set status bar
+	m_UI_State.InitPos(1, m_winSzH - 21, m_winSzW - 2, 20);         // move status bar
 	m_Static_1.Init(0, 0, 0, 102, 204, 255, "Bitsumishi", 35);
 	m_Static_2.Init(0, 0, 0, 102, 204, 255, "Bitsumishi", 35);
 	m_Button_1.SetBtnImage(_T(".\\res\\UI_BtnStart.png"), 0, 0, 0);
-	m_Button_1.InitButton(m_winSzW / 2 - 165 - 20, m_winSzH * 0.6, 165, 45, false);
+	m_Button_1.InitButton(m_winSzW / 2 - 165 - 20, m_winSzH * 0.65, 165, 45, false);
 	m_Button_1.EnableWindow(false);
 	m_Button_2.SetBtnImage(_T(".\\res\\UI_BtnStop.png"),  0, 0, 0);
-	m_Button_2.InitButton(m_winSzW / 2 + 0   + 20, m_winSzH * 0.6, 165, 45, false);
+	m_Button_2.InitButton(m_winSzW / 2 + 0   + 20, m_winSzH * 0.65, 165, 45, false);
 	m_Button_2.EnableWindow(false);
 
 	// Init Socket
@@ -133,13 +136,17 @@ BOOL DLG_TCPIO::OnInitDialog()
 	if (0 == ConnectToServer())
 	{
 		printf("[INFO ] > INIT > Connect to server OK.\n");
-		//ThreadRecvBegin();
+		ThreadRecvBegin();
 		m_Button_1.EnableWindow(true);
 		m_Button_2.EnableWindow(true);
 		SetTimer(1, 300, NULL);
 	}
 	else
+	{
 		printf("[ERROR] > INIT > Connect to server Faild.\n");
+		m_UI_State.Init(255, 255, 255, 230, 57, 70, _T("Bender"), 15);
+		m_UI_State.SetWindowTextA(" Failed to connect server.");
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -207,7 +214,6 @@ void DLG_TCPIO::OnCancel()
 	if (m_SocketConn != NULL)
 	{
 		closesocket(m_SocketConn);
-		WSACleanup();
 		m_SocketConn = NULL;
 	}
 	WSACleanup();
@@ -230,23 +236,8 @@ void DLG_TCPIO::OnBnClickedButton1()
 	int nSentBytes = 0;
 	char cSendBuf[32] = "#start";
 	nSentBytes = send(m_SocketConn, cSendBuf, int(strlen(cSendBuf)), 0);
-	printf("[INFO ] > OnBnClickedButton1(Start) > MSG Sent: %d\n", nSentBytes);
+	printf("[INFO ] > MSG Sent: %d\n", nSentBytes);
 
-	int iTimes = 0;
-	while (m_SocketConn != INVALID_SOCKET && iTimes < 3)
-	{
-		int nRecvBytes = SOCKET_ERROR;
-		char cRecvBuf[3] = "";
-		nRecvBytes = recv(m_SocketConn, cRecvBuf, 3, 0);
-		cRecvBuf[2] = '\0';
-		printf("[RECV ]: (%2d) %s\n", nRecvBytes, cRecvBuf);
-		if (strcmp(cRecvBuf, "ok") == 0 || strcmp(cRecvBuf, "no") == 0) break;
-		//if (nRecvBytes <= 0) break;
-		iTimes++;
-	}
-
-	if (m_SocketConn != INVALID_SOCKET || iTimes >= 3)
-		printf("[ERROR] > OnBnClickedButton1(Start) > no respone.\n");
 	// #stop  Õ£÷π
 	// #query ≤È—Ø
 
@@ -254,10 +245,10 @@ void DLG_TCPIO::OnBnClickedButton1()
 }
 
 /**
-* Init TCP Socket
+* Init TCP Server
 * Return   : [-1]: failed   [0]: success
 */
-int DLG_TCPIO::InitTCPSocket()
+int DLG_TCPIO::InitTCPServer()
 {
 	// Init winsock data
 	if (WSAStartup(MAKEWORD(2, 2), &m_wsaData) != 0)
@@ -344,6 +335,43 @@ int DLG_TCPIO::ThreadRecvBegin()
 	return 0;
 }
 
+int DLG_TCPIO::MsgProc(char* msg)
+{
+	int iMsgLen = strlen(msg);
+	if (iMsgLen <= 0) return -1;
+
+	char* pMsg = new char[iMsgLen + 1];
+	ZeroMemory(pMsg, iMsgLen + 1);
+	memcpy_s(pMsg, iMsgLen + 1, msg, iMsgLen + 1);
+	if (0 == strcmp(pMsg, "ok"))
+	{
+		printf("[INFO ] MsgProc > ------- OK -------\n");
+		m_UI_State.Init(255, 255, 255, 104, 33, 122, _T("Bender"), 15);
+		m_UI_State.SetWindowTextA(" Server > OK");
+	}
+	else if (0 == strcmp(pMsg, "no"))
+	{
+		printf("[INFO ] MsgProc > ------- NO -------\n");
+		m_UI_State.Init(255, 255, 255, 230, 57, 70, _T("Bender"), 15);
+		m_UI_State.SetWindowTextA(" Server > NO");
+	}
+	else if (NULL != strstr(pMsg, "###"))
+	{
+		printf("[WARN ] MsgProc > ------ DATA ------\n");
+		m_UI_State.Init(255, 255, 255, 104, 33, 122, _T("Bender"), 15);
+		m_UI_State.SetWindowTextA(" Ready");
+	}
+	else
+	{
+		printf("[WARN ] MsgProc > ------- ?? -------\n");
+		m_UI_State.Init(255, 255, 255, 202, 81, 0,   _T("Bender"), 15);
+		m_UI_State.SetWindowTextA(" Server > ???????");
+	}
+
+	delete[] pMsg;
+	return 0;
+}
+
 int DLG_TCPIO::CloseSocketConn()
 {
 	if (m_SocketConn != NULL)
@@ -353,6 +381,7 @@ int DLG_TCPIO::CloseSocketConn()
 		m_SocketConn = NULL;
 	}
 	m_Button_1.EnableWindow(false);
+	m_Button_2.EnableWindow(false);
 	return 0;
 }
 
