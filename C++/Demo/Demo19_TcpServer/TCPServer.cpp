@@ -95,3 +95,27 @@ bool TCPServer::Accept()
 	/*ThreadRecvBegin();*/
 	return true;
 }
+
+int TCPServer::Receive(char* cBuff, int iMaxRecv)
+{
+	if (m_client == INVALID_SOCKET) return -1;
+	int iRecvBytes = SOCKET_ERROR;
+	iRecvBytes = recv(m_client, cBuff, iMaxRecv, 0);
+	return iRecvBytes;
+}
+
+bool TCPServer::Close()
+{
+	if (m_client != INVALID_SOCKET)
+	{
+		closesocket(m_socket);
+		m_client = INVALID_SOCKET;
+	}
+	if (m_socket != INVALID_SOCKET)
+	{
+		closesocket(m_socket);
+		m_socket = INVALID_SOCKET;
+	}
+	WSACleanup();
+	return true;
+}

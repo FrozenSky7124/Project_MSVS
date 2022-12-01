@@ -16,6 +16,8 @@ namespace FSNet
 		bool Bind(const char* ip, int port);
 		bool Listen(int backlog);
 		bool Accept();
+		int  Receive(char* cBuff, int iMaxRecv);
+		bool Close();
 	protected:
 	private:
 		WSADATA m_wsaData;
