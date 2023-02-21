@@ -17,6 +17,9 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 {
 	FSC_MainDlg* pMainDlg = static_cast<FSC_MainDlg*>(lpParam);
 	CListCtrl* pMainList = static_cast<CListCtrl*>(&(pMainDlg->m_MainList));
+	CButton* pBtnMake = static_cast<CButton*>(pMainDlg->GetDlgItem(IDC_BtnMake));
+
+	pBtnMake->EnableWindow(FALSE);
 
 	// Read Star Catalogue
 	CString strFilePath;
@@ -146,6 +149,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	//pMainList->SetItemText(pMainDlg->m_iCurMakeNo, 5, strVT);
 	
 	delete[] pData;
+	pBtnMake->EnableWindow(TRUE);
 	MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Star Catalogue Making Success!"), _T("QwQ"), MB_ICONINFORMATION, NULL);
 	return 0;
 }
@@ -353,10 +357,15 @@ void FSC_MainDlg::OnBnClickedBtnMake()
 		double dDe = SC.makeDe(0);
 		TRACE("RA=%10.6f DE=%10.6f\n", dRa, dDe);
 	}
-	return;
-	// Create Make Thread	
-	m_hMakeThread = (HANDLE)_beginthreadex(NULL, 0, &uiProcFuncMake, this, 0, &m_uiMakeThreadID);
-	ASSERT(m_uiMakeThreadID);
-	SetThreadPriority(m_hMakeThread, THREAD_PRIORITY_HIGHEST);
+	
+	int iRadioTYC2 = ((CButton *)GetDlgItem(IDC_RADIO_TYC2))->GetCheck();
+	if (iRadioTYC2)
+	{
+		// Create Make Thread	
+		m_hMakeThread = (HANDLE)_beginthreadex(NULL, 0, &uiProcFuncMake, this, 0, &m_uiMakeThreadID);
+		ASSERT(m_uiMakeThreadID);
+		SetThreadPriority(m_hMakeThread, THREAD_PRIORITY_HIGHEST);
+	}
+
 }
 
