@@ -20,6 +20,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	CButton* pBtnMake = static_cast<CButton*>(pMainDlg->GetDlgItem(IDC_BtnMake));
 
 	pBtnMake->EnableWindow(FALSE);
+	pMainDlg->m_iDataCount = 0;
 
 	// Read Star Catalogue
 	CString strFilePath;
@@ -135,6 +136,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 			TRACE(_T("SQL_EXEC Error: %s\n"), zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
+		pMainDlg->m_iDataCount++;
 	}
 	// Transaction COMMIT
 	sqlite3_exec(Sqlite3_dbCoon, "COMMIT;", 0, 0, 0);
@@ -161,6 +163,7 @@ FSC_MainDlg::FSC_MainDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_MainDlg, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_iDataCount = 0;
 }
 
 void FSC_MainDlg::DoDataExchange(CDataExchange* pDX)
@@ -168,6 +171,7 @@ void FSC_MainDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST, m_MainList);
 	DDX_Control(pDX, IDC_ProgMain, m_MainProgBar);
+	DDX_Control(pDX, IDC_STATIC_INFO, m_MainStatic);
 }
 
 BEGIN_MESSAGE_MAP(FSC_MainDlg, CDialog)
@@ -269,11 +273,14 @@ void FSC_MainDlg::MeanPositionTransform(double& mRa, double& mDec, double& pmRa,
 
 void FSC_MainDlg::OnTimer(UINT_PTR nIDEvent)
 {
+	CString tmp;
 	// TODO:
 	switch (nIDEvent)
 	{
 	case 1: // UI Proc Timer
 		m_MainProgBar.SetPos(m_iCurMakeNo);
+		tmp.Format(_T("NData: %d"), m_iDataCount);
+		SetDlgItemTextA(IDC_STATIC_INFO, tmp);
 		break;
 	default:
 		break;

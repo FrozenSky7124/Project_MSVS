@@ -4,6 +4,7 @@
 
 #pragma once
 #include "afxcmn.h"
+#include "afxwin.h"
 
 
 ///=================================================
@@ -63,8 +64,10 @@ public:
 	CFont m_FontYaHeiConsolas_S;
 	CListCtrl m_MainList;
 	CProgressCtrl m_MainProgBar;
+	CStatic m_MainStatic;       //Static INFO
 
 	int m_iCurMakeNo;           //Cur Process
+	int m_iDataCount;           //Count of Data
 
 	HANDLE m_hMakeThread;       //MakeThread Handle
 	UINT m_uiMakeThreadID;      //MakeThread ID
