@@ -164,7 +164,7 @@ bool TCPServer::Close()
 {
 	if (m_client != INVALID_SOCKET)
 	{
-		closesocket(m_socket);
+		closesocket(m_client);
 		m_client = INVALID_SOCKET;
 	}
 	if (m_socket != INVALID_SOCKET)
