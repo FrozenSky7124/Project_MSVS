@@ -6,6 +6,11 @@
 
 using namespace FSNet;
 
+/**************************************************************************************************
+ * TCPServer::TCPServer -- The constructor for TCPServer
+ * 
+ *     Initialize m_socketAddr and m_clientAddr as INVALID_SOCKET.
+ *================================================================================================*/
 TCPServer::TCPServer()
 {
 	m_socket = INVALID_SOCKET;
@@ -14,6 +19,12 @@ TCPServer::TCPServer()
 	memset(&m_clientAddr, 0, sizeof(SOCKADDR_IN));
 }
 
+/**************************************************************************************************
+ * TCPServer::~TCPServer -- The Destructor for TCPServer
+ *
+ *     If socket still open then close it. Initialize m_socketAddr and m_clientAddr as 
+ *     INVALID_SOCKET. Cleanup the windows socket.
+ *================================================================================================*/
 TCPServer::~TCPServer()
 {
 	if (m_socket != INVALID_SOCKET)
@@ -24,6 +35,11 @@ TCPServer::~TCPServer()
 	WSACleanup();
 }
 
+/**************************************************************************************************
+ * TCPServer::StartUp -- StartUp Windows Sockets
+ *
+ *     Call WSAStartup() to Startup Windows Sockets.
+ *================================================================================================*/
 bool TCPServer::StartUp()
 {
 	if (WSAStartup(MAKEWORD(2, 2), &m_wsaData) != NO_ERROR)
@@ -35,6 +51,11 @@ bool TCPServer::StartUp()
 	return true;
 }
 
+/**************************************************************************************************
+ * TCPServer::Open -- Setup and Open tcp socket
+ *
+ *     Setup socket protocol to TCP and open socket. Using Blocking mode.
+ *================================================================================================*/
 bool TCPServer::Open()
 {
 	m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -55,6 +76,14 @@ bool TCPServer::Open()
 	*/
 }
 
+/**************************************************************************************************
+ * TCPServer::Bind -- Bind the socket
+ *
+ *     Bind socket to custom ip:port. Initialize m_socketAddr.
+ *
+ * INPUT: ip -- The ip address of server.
+ *        port -- The number of server listen port.
+ *================================================================================================*/
 bool TCPServer::Bind(const char* ip, int port)
 {
 	// Set server ip & port
@@ -70,6 +99,13 @@ bool TCPServer::Bind(const char* ip, int port)
 	return true;
 }
 
+/**************************************************************************************************
+ * TCPServer::Listen -- Listen the socket
+ *
+ *     Socket run as listen mode.
+ *
+ * INPUT: backlog -- log level
+ *================================================================================================*/
 bool TCPServer::Listen(int backlog)
 {
 	if (listen(m_socket, backlog) == SOCKET_ERROR)
@@ -81,6 +117,12 @@ bool TCPServer::Listen(int backlog)
 	return true;
 }
 
+/**************************************************************************************************
+ * TCPServer::Accept -- Accept connect of client
+ *
+ *     Accept client connection. Store client information in m_clientAddr struct and store 
+ *     socket in m_client.
+ *================================================================================================*/
 bool TCPServer::Accept()
 {
 	int iClientAddr_length = sizeof(sockaddr_in);
@@ -96,6 +138,15 @@ bool TCPServer::Accept()
 	return true;
 }
 
+/**************************************************************************************************
+ * TCPServer::Receive -- Receive data from client.
+ *
+ *     Receive data from client, return length of received data.
+ *
+ * INTPUT: cBuff -- The pointer to store received data.
+ *         iMaxRecv -- Max length to receive.
+ * OUTPUT: iRecvBytes -- The length of received data in Bytes. -1 is Error. 0 is Client close.
+ *================================================================================================*/
 int TCPServer::Receive(char* cBuff, int iMaxRecv)
 {
 	if (m_client == INVALID_SOCKET) return -1;
@@ -104,6 +155,11 @@ int TCPServer::Receive(char* cBuff, int iMaxRecv)
 	return iRecvBytes;
 }
 
+/**************************************************************************************************
+ * TCPServer::Close -- Close TCPServer.
+ * 
+ *     Close TCPServer and release socket resource.
+ *================================================================================================*/
 bool TCPServer::Close()
 {
 	if (m_client != INVALID_SOCKET)
