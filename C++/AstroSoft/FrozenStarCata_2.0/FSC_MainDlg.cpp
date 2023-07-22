@@ -7,6 +7,7 @@
 #include "FSC_MainDlg.h"
 #include "afxdialogex.h"
 #include "SC_USNO_B1.h"
+#include "SC_GaiaDR3.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -365,6 +366,25 @@ void FSC_MainDlg::OnBnClickedBtnMake()
 		TRACE("RA=%10.6f DE=%10.6f\n", dRa, dDe);
 	}
 	
+	int iRadioGAIADR3 = ((CButton *)GetDlgItem(IDC_RADIO_GAIADR3))->GetCheck();
+	if (iRadioGAIADR3)
+	{
+		TRACE("GAIA-DR3\n");
+		CString strFilePath;
+		GetDlgItemText(IDC_EditFilePath, strFilePath);
+		if (!PathFileExists(strFilePath))
+		{
+			MessageBoxEx(GetSafeHwnd(), _T("Star Catalogue file not found!"), _T("QAQ"), MB_ICONERROR, NULL);
+			return;
+		}
+		SC_GAIA_DR3 SC;
+		int r = SC.loadFile(const_cast<char*>(strFilePath.GetString()));
+		SC.test();
+		SC.test();
+		SC.test();
+		SC.test();
+	}
+
 	int iRadioTYC2 = ((CButton *)GetDlgItem(IDC_RADIO_TYC2))->GetCheck();
 	if (iRadioTYC2)
 	{
