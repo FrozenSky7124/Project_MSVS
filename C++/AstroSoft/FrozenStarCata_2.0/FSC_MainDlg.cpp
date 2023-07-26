@@ -379,10 +379,13 @@ void FSC_MainDlg::OnBnClickedBtnMake()
 		}
 		SC_GAIA_DR3 SC;
 		int r = SC.loadFile(const_cast<char*>(strFilePath.GetString()));
-		SC.test();
-		SC.test();
-		SC.test();
-		SC.test();
+		
+		char starID[32];
+		double starRa, starDe, starPMRa, starPMDe, starMag;
+		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
+		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
+		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
+		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
 	}
 
 	int iRadioTYC2 = ((CButton *)GetDlgItem(IDC_RADIO_TYC2))->GetCheck();
