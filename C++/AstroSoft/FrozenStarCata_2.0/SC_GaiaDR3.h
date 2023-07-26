@@ -1,5 +1,6 @@
 #pragma once
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef _SC_GAIA_DR3_
@@ -15,9 +16,14 @@ private:
 	char* m_pFilePath;
 	FILE* m_pFILE;
 
+	char m_starID[32] = "";
+	double m_starRa, m_starDe;
+	double m_starPMRa, m_starPMDe;
+	double m_starMag;
+
 public:
 	int loadFile(char* filePath);
-	int test();
+	int test(char* ID, double& Ra, double& De, double& pmRa, double& pmDe, double& Mag);
 };
 
 #endif _SC_GAIA_DR3_
