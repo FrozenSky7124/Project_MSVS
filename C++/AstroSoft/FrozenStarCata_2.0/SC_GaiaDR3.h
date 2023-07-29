@@ -23,7 +23,8 @@ private:
 
 public:
 	int loadFile(char* filePath);
-	int test(char* ID, double& Ra, double& De, double& pmRa, double& pmDe, double& Mag);
+	int testFile();
+	int nextData(char* ID, double& Ra, double& De, double& pmRa, double& pmDe, double& Mag);
 };
 
 #endif _SC_GAIA_DR3_

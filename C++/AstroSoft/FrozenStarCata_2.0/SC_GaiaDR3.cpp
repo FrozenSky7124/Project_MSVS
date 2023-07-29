@@ -35,7 +35,26 @@ int SC_GAIA_DR3::loadFile(char* filePath)
 	return 0;
 }
 
-int SC_GAIA_DR3::test(char* ID, double& Ra, double& De, double& pmRa, double& pmDe, double& Mag)
+int SC_GAIA_DR3::testFile()
+{
+	int result = 0;
+	unsigned int lineLen = 256;
+	const char* verifyStr = "source_id,ra,dec,pmra,pmdec,phot_g_mean_mag\n";
+	char* line = new char[lineLen];
+	if (fgets(line, lineLen * sizeof(char), m_pFILE))
+	{
+		if (strlen(line) == 0) result = -1;
+		else
+			if (0 != strcmp(line, verifyStr)) result = -1;
+	}
+	else
+		result = -1;
+
+	delete[] line;
+	return result;
+}
+
+int SC_GAIA_DR3::nextData(char* ID, double& Ra, double& De, double& pmRa, double& pmDe, double& Mag)
 {
 	int result = 0;
 	unsigned int lineLen = 256;
