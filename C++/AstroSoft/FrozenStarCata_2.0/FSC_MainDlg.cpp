@@ -157,6 +157,98 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	return 0;
 }
 
+UINT WINAPI uiProcFuncMake_GaiaDR3(LPVOID lpParam)
+{
+	FSC_MainDlg* pMainDlg = static_cast<FSC_MainDlg*>(lpParam);
+	CListCtrl* pMainList = static_cast<CListCtrl*>(&(pMainDlg->m_MainList));
+	CButton* pBtnMake = static_cast<CButton*>(pMainDlg->GetDlgItem(IDC_BtnMake));
+
+	pBtnMake->EnableWindow(FALSE);
+	pMainDlg->m_iDataCount = 0;
+
+	CFile fileStarCata;
+	fileStarCata.Open(pMainDlg->m_strFilePath, CFile::modeRead);
+	int fileLength = (int)fileStarCata.GetLength();
+	fileStarCata.Close();
+	int iPredictMaxCount = fileLength / 100; // predict the max count of catalog records
+	pMainDlg->m_MainProgBar.SetRange32(0, iPredictMaxCount);
+
+	SC_GAIA_DR3 SC;
+	int r = SC.loadFile(const_cast<char*>(pMainDlg->m_strFilePath.GetString()));
+	r = SC.testFile();
+	if (r != 0)
+	{
+		TRACE(_T("[ERR] uiProcFuncMake_GaiaDR3 > SC.testFile()\n"));
+		return -1;
+	}
+
+	// Open Database
+	sqlite3 *Sqlite3_dbCoon;
+	char *zErrMsg = 0;
+	char *sql;
+	int rc;
+
+	rc = sqlite3_open("GaiaDR3_Export.db", &Sqlite3_dbCoon);
+
+	if (rc)
+	{
+		MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Can't open GaiaDR3 database."), _T("QAQ"), MB_OK | MB_ICONERROR, 0);
+		return -1;
+	}
+	else
+	{
+		TRACE(_T("Open database successfully.\n"));
+	}
+
+	// Create TABLE
+	sql = "CREATE TABLE Tycho2_all(StarID varchar(32), RA numeric(12,8), DEC numeric(12,8), pmRA numeric(7,1), pmDE numeric(7,1), VT numeric(6,3))";
+	rc = sqlite3_exec(Sqlite3_dbCoon, sql, NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK)
+	{
+		TRACE(_T("SQL_EXEC Error: %s\n"), zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	// Transaction BEGIN
+	sqlite3_exec(Sqlite3_dbCoon, "BEGIN;", 0, 0, 0);
+
+	char starID[32];
+	int iCurData = 0;
+	double starRa, starDe, starPMRa, starPMDe, starMag;
+	while (r == 0)
+	{
+		r = SC.nextData(starID, starRa, starDe, starPMRa, starPMDe, starMag);
+		if (r < 0) break;
+		iCurData++;
+		pMainDlg->m_iCurMakeNo = (iCurData > iPredictMaxCount) ? iPredictMaxCount : iCurData;
+
+		if (starDe < -50.) continue;                    // Filter DEC: Stars above China
+		if (starMag < 4.0 || starMag >= 11.0) continue; // Filter VT: 1.905 ~ 9.0
+		if (starPMRa >= 100.0 || starPMRa <= -100.0) continue; // Filter pmRA and pmDE
+		if (starPMDe >= 100.0 || starPMDe <= -100.0) continue; // Filter pmRA and pmDE
+
+		// Insert into database
+		CString szQuery;
+		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.1f, %.1f, %.3f)"), 
+			starID, starRa, starDe, starPMRa, starPMDe, starMag);
+		rc = sqlite3_exec(Sqlite3_dbCoon, szQuery, NULL, 0, &zErrMsg);
+		if (rc != SQLITE_OK)
+		{
+			TRACE(_T("SQL_EXEC Error: %s\n"), zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+		pMainDlg->m_iDataCount++;
+	}
+
+	// Transaction COMMIT
+	sqlite3_exec(Sqlite3_dbCoon, "COMMIT;", 0, 0, 0);
+	// Close Database
+	sqlite3_close(Sqlite3_dbCoon);
+
+	pBtnMake->EnableWindow(TRUE);
+	MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Star Catalogue Making Success!"), _T("QwQ"), MB_ICONINFORMATION, NULL);
+	return 0;
+}
 
 // FSC_MainDlg ¶Ô»°¿ò
 
@@ -370,22 +462,16 @@ void FSC_MainDlg::OnBnClickedBtnMake()
 	if (iRadioGAIADR3)
 	{
 		TRACE("GAIA-DR3\n");
-		CString strFilePath;
-		GetDlgItemText(IDC_EditFilePath, strFilePath);
-		if (!PathFileExists(strFilePath))
+		GetDlgItemText(IDC_EditFilePath, m_strFilePath);
+		if (!PathFileExists(m_strFilePath))
 		{
 			MessageBoxEx(GetSafeHwnd(), _T("Star Catalogue file not found!"), _T("QAQ"), MB_ICONERROR, NULL);
 			return;
 		}
-		SC_GAIA_DR3 SC;
-		int r = SC.loadFile(const_cast<char*>(strFilePath.GetString()));
-		
-		char starID[32];
-		double starRa, starDe, starPMRa, starPMDe, starMag;
-		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
-		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
-		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
-		SC.test(starID, starRa, starDe, starPMRa, starPMDe, starMag);
+		// Create Make Thread	
+		m_hMakeThread = (HANDLE)_beginthreadex(NULL, 0, &uiProcFuncMake_GaiaDR3, this, 0, &m_uiMakeThreadID);
+		ASSERT(m_uiMakeThreadID);
+		SetThreadPriority(m_hMakeThread, THREAD_PRIORITY_HIGHEST);
 	}
 
 	int iRadioTYC2 = ((CButton *)GetDlgItem(IDC_RADIO_TYC2))->GetCheck();

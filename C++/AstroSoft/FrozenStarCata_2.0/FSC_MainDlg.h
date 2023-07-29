@@ -58,6 +58,8 @@ protected:
 	void InitUI();
 
 public:
+	CString m_strFilePath;      //store StarCata file path
+	
 	// Transform mean position from J2000 to NOW
 	void MeanPositionTransform(double& mRa, double& mDec, double& pmRa, double& pmDec, double& year, double& fixRA, double& fixDE);
 
@@ -71,4 +73,5 @@ public:
 
 	HANDLE m_hMakeThread;       //MakeThread Handle
 	UINT m_uiMakeThreadID;      //MakeThread ID
+
 };
