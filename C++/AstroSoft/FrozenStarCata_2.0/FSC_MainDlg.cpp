@@ -168,10 +168,17 @@ UINT WINAPI uiProcFuncMake_GaiaDR3(LPVOID lpParam)
 
 	CFile fileStarCata;
 	fileStarCata.Open(pMainDlg->m_strFilePath, CFile::modeRead);
-	int fileLength = (int)fileStarCata.GetLength();
+	ULONGLONG fileLength = fileStarCata.GetLength();
 	fileStarCata.Close();
-	int iPredictMaxCount = fileLength / 100; // predict the max count of catalog records
-	pMainDlg->m_MainProgBar.SetRange32(0, iPredictMaxCount);
+
+	ULONGLONG iPredictMaxCount = fileLength / 100; // predict the max count of catalog records
+	int iPredictBase = 0;
+	while (iPredictMaxCount > INT32_MAX)
+	{
+		iPredictMaxCount /= 10;
+		iPredictBase++;
+	} 
+	pMainDlg->m_MainProgBar.SetRange32(0, (int)iPredictMaxCount);
 
 	SC_GAIA_DR3 SC;
 	int r = SC.loadFile(const_cast<char*>(pMainDlg->m_strFilePath.GetString()));
@@ -220,10 +227,10 @@ UINT WINAPI uiProcFuncMake_GaiaDR3(LPVOID lpParam)
 		r = SC.nextData(starID, starRa, starDe, starPMRa, starPMDe, starMag);
 		if (r < 0) break;
 		iCurData++;
-		pMainDlg->m_iCurMakeNo = (iCurData > iPredictMaxCount) ? iPredictMaxCount : iCurData;
+		pMainDlg->m_iCurMakeNo = (iCurData / (int)pow(10, iPredictBase)) > (int)iPredictMaxCount ? (int)iPredictMaxCount : (iCurData / (int)pow(10, iPredictBase));
 
 		if (starDe < -50.) continue;                    // Filter DEC: Stars above China
-		if (starMag < 4.0 || starMag >= 11.0) continue; // Filter VT: 1.905 ~ 9.0
+		if (starMag < 4.0 || starMag >= 17.0) continue; // Filter VT: 1.905 ~ 9.0
 		if (starPMRa >= 100.0 || starPMRa <= -100.0) continue; // Filter pmRA and pmDE
 		if (starPMDe >= 100.0 || starPMDe <= -100.0) continue; // Filter pmRA and pmDE
 
