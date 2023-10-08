@@ -13,6 +13,20 @@
 
 #pragma once
 
+#include <iostream>
+#include "Windows.h"
 
+class FSC_Serial
+{
+public:
+	FSC_Serial();
+	~FSC_Serial();
+
+	int Open(const std::string & strPortNo, bool bOverlapped);
+private:
+	HANDLE m_hComm; // 存储已经打开的串口句柄
+	BOOL m_bOverlapped;
+	char m_strPortNo[32];
+};
 
 #endif

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <iostream>
+#include "FSC_Serial.h"
 
 // SerialToolDlg dialog
 class SerialToolDlg : public CDialogEx

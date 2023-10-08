@@ -7,8 +7,6 @@
 #include "SerialToolDlg.h"
 #include "afxdialogex.h"
 
-#include <iostream>
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -92,7 +90,7 @@ HCURSOR SerialToolDlg::OnQueryDragIcon()
 
 void SerialToolDlg::OnClicked_BtnOpen()
 {
-	HANDLE hSerial;
+/*	HANDLE hSerial;
 	hSerial = CreateFile(L"\\\\.\\COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL,
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hSerial == INVALID_HANDLE_VALUE)
@@ -108,4 +106,8 @@ void SerialToolDlg::OnClicked_BtnOpen()
 		TRACE("Serial port open.\n");
 		// Configure the serial port settings...
 	}
+*/
+	FSC_Serial Serial;
+	int iRst = Serial.Open("COM2", false);
+	TRACE("Serial.Open iRst = %d.\n", iRst);
 }
