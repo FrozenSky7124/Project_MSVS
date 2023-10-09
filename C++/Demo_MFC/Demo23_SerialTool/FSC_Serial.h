@@ -1,6 +1,6 @@
 /**********************************************************************
 * Name:      FSC_Serial
-* Function:  Serial port communication
+* Function:  Simple serial port communication
 * Author:    FrozenSky
 * Created:   2018-06-01
 * Updated:   2023-10-07
@@ -23,10 +23,20 @@ public:
 	~FSC_Serial();
 
 	int Open(const std::string & strPortNo, bool bOverlapped);
+	int Close();
+	int SetSerialPort(DWORD dwBaudRate, BYTE bParity, BYTE bByteSize, BYTE bStopBits, DWORD dwFlagParity = 1);
+	int Read(BYTE* byteBuff, DWORD dwNbToRead, DWORD* dwNbRead);
+
+	HANDLE GetHandle();
+
 private:
-	HANDLE m_hComm; // å­˜å‚¨å·²ç»æ‰“å¼€çš„ä¸²å£å¥æŸ„
-	BOOL m_bOverlapped;
-	char m_strPortNo[32];
+	HANDLE m_hComm;       // ¶Ë¿Ú¾ä±ú
+	BOOL m_bOverlapped;   // ÊÇ·ñÊ¹ÓÃÒì²½IO
+	CHAR m_strPortNo[32]; // ¶Ë¿ÚºÅ
+	DCB m_dcb;            // ¶Ë¿Ú²ÎÊı½á¹¹Ìå
+	OVERLAPPED m_osRead;
+	OVERLAPPED m_osWrite;
+	OVERLAPPED m_osWait;
 };
 
 #endif

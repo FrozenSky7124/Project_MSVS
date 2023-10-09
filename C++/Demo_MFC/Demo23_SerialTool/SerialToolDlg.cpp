@@ -90,24 +90,33 @@ HCURSOR SerialToolDlg::OnQueryDragIcon()
 
 void SerialToolDlg::OnClicked_BtnOpen()
 {
-/*	HANDLE hSerial;
-	hSerial = CreateFile(L"\\\\.\\COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hSerial == INVALID_HANDLE_VALUE)
-	{
-		if (GetLastError() == ERROR_FILE_NOT_FOUND)
-		{
-			TRACE("Serial port does not exist.\n");
-		}
-		TRACE("Error opening serial port.\n");
-	}
-	else
-	{
-		TRACE("Serial port open.\n");
-		// Configure the serial port settings...
-	}
-*/
 	FSC_Serial Serial;
-	int iRst = Serial.Open("COM2", false);
+	int iRst;
+	iRst = Serial.Open("COM4", false);
 	TRACE("Serial.Open iRst = %d.\n", iRst);
+	iRst = Serial.SetSerialPort(115200, 0, 8, 0);
+	TRACE("Serial.SetSerialPort iRst = %d.\n", iRst);
+
+	COMMTIMEOUTS CommTimeOuts;
+	GetCommTimeouts(Serial.GetHandle(), &CommTimeOuts);
+	CommTimeOuts.ReadIntervalTimeout = 50;
+	CommTimeOuts.ReadTotalTimeoutMultiplier = 0;
+	CommTimeOuts.ReadTotalTimeoutConstant = 1000;
+	SetCommTimeouts(Serial.GetHandle(), &CommTimeOuts);
+
+	int rc = 0;
+	while (rc < 5)
+	{
+		byte byteBuff[32];
+		unsigned long NbBytesRead;
+		Serial.Read(byteBuff, 32, &NbBytesRead);
+		if (NbBytesRead > 0)
+		{
+			byteBuff[NbBytesRead - 1] = '\0';
+			TRACE("recv %2d %s\n", NbBytesRead, byteBuff);
+		}
+		rc++;
+	}
+	iRst = Serial.Close();
+	TRACE("Serial.Close iRst = %d.\n", iRst);
 }

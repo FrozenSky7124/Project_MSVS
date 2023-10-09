@@ -4,65 +4,166 @@
 FSC_Serial::FSC_Serial()
 {
 	m_hComm = INVALID_HANDLE_VALUE;
+	m_bOverlapped = FALSE;
+	strcpy_s(m_strPortNo, sizeof("COM0"), "COM0");
+	memset(&m_osRead,  0, sizeof(OVERLAPPED));
+	memset(&m_osWrite, 0, sizeof(OVERLAPPED));
+	memset(&m_osWait,  0, sizeof(OVERLAPPED));
 }
 
 FSC_Serial::~FSC_Serial()
 {
+	Close();
 }
 
 
 /**
- * Open Serial
- * Function : æ‰“å¼€æŒ‡å®šçš„ä¸²å£
+ * Function : ´ò¿ªÖ¸¶¨µÄ¶Ë¿Ú£¨Í¬²½»òÒì²½Ä£Ê½£©£¬³É¹¦ºó¶ÁÈ¡¶Ë¿Ú²ÎÊı½á¹¹Ìå
  * Parameter:
- *     _IN_  strPortNo  : ç«¯å£åç§°ï¼ˆä¸²å£å·ï¼‰ å¦‚ï¼š "COM1"
- *     _IN_  dpArrayObs : Obs stars array (TYPE_double * 2 * nObs)
- *     _IN_  nObs : Obs stars count
- *     _IN_  dpArrayNav : Nav stars array (TYPE_double * 2 * nNav) (in radian)
- *     _IN_  nNav : Nav stars count
- * Return   : [-1]: æ‰“å¼€å¤±è´¥
- *            [ 1]: å·²å­˜åœ¨å¥æŸ„ï¼ˆç«¯å£å·²ç»æ‰“å¼€ï¼‰
+ *      _IN_  strPortNo   : ¶Ë¿ÚÃû³Æ£¨¶Ë¿ÚºÅ£© Èç£º "COM1"
+ *      _IN_  bOverlapped : ÊÇ·ñÊ¹ÓÃÒì²½IO
+ * Return   : [-1] ´ò¿ªÊ§°Ü
+ *            [ 1] ÒÑ´æÔÚ¾ä±ú£¨¶Ë¿ÚÒÑ¾­´ò¿ª£©
+ *            [ 0] ´ò¿ª³É¹¦
  * Updated  : 2023-10-09 @FrozenSky
  */
 int FSC_Serial::Open(const std::string & strPortNo, bool bOverlapped)
 {
-	// ç«¯å£å¥æŸ„æœªæ­£å¸¸é‡Šæ”¾ï¼ˆç«¯å£å·²ç»æ‰“å¼€äº†ï¼‰
+	// ¶Ë¿Ú¾ä±úÎ´Õı³£ÊÍ·Å£¨¶Ë¿ÚÒÑ¾­´ò¿ªÁË£©
 	if (m_hComm != INVALID_HANDLE_VALUE)
 		return 1;
-	// æ˜¯å¦ä½¿ç”¨å¼‚æ­¥
+	// ÊÇ·ñÊ¹ÓÃÒì²½
 	if (!bOverlapped)
 	{
-		m_hComm = CreateFile(strPortNo.c_str(), // ç«¯å£åç§° (COMx)
-			GENERIC_READ | GENERIC_WRITE,       // ç«¯å£å±æ€§ä¸ºå¯è¯»å†™
-			0,                                  // ç«¯å£è®¾å¤‡å¿…é¡»è¢«ç‹¬å æ€§çš„è®¿é—®
-			NULL,                               // æ— å®‰å…¨å±æ€§
-			OPEN_EXISTING,                      // ç«¯å£è®¾å¤‡å¿…é¡»ä½¿ç”¨OPEN_EXISTINGå‚æ•°
-			FILE_ATTRIBUTE_NORMAL,              // åŒæ­¥å¼ I/O
-			0);                                 // å¯¹äºç«¯å£è®¾å¤‡è€Œè¨€æ­¤å‚æ•°å¿…é¡»ä¸º0
+		m_hComm = CreateFile(strPortNo.c_str(), // ¶Ë¿ÚÃû³Æ (COMx)
+			GENERIC_READ | GENERIC_WRITE,       // ¶Ë¿ÚÊôĞÔÎª¿É¶ÁĞ´
+			0,                                  // ¶Ë¿ÚÉè±¸±ØĞë±»¶ÀÕ¼ĞÔµÄ·ÃÎÊ
+			NULL,                               // ÎŞ°²È«ÊôĞÔ
+			OPEN_EXISTING,                      // ¶Ë¿ÚÉè±¸±ØĞëÊ¹ÓÃOPEN_EXISTING²ÎÊı
+			FILE_ATTRIBUTE_NORMAL,              // Í¬²½Ê½ I/O
+			0);                                 // ¶ÔÓÚ¶Ë¿ÚÉè±¸¶øÑÔ´Ë²ÎÊı±ØĞëÎª0
 	}
 	else
 	{
 		;
-		m_hComm = CreateFile(strPortNo.c_str(), // ç«¯å£åç§° (COMx)
-			GENERIC_READ | GENERIC_WRITE,       // ç«¯å£å±æ€§ä¸ºå¯è¯»å†™
-			0,                                  // ç«¯å£è®¾å¤‡å¿…é¡»è¢«ç‹¬å æ€§çš„è®¿é—®
-			NULL,                               // æ— å®‰å…¨å±æ€§
-			OPEN_EXISTING,                      // ç«¯å£è®¾å¤‡å¿…é¡»ä½¿ç”¨OPEN_EXISTINGå‚æ•°
+		m_hComm = CreateFile(strPortNo.c_str(), // ¶Ë¿ÚÃû³Æ (COMx)
+			GENERIC_READ | GENERIC_WRITE,       // ¶Ë¿ÚÊôĞÔÎª¿É¶ÁĞ´
+			0,                                  // ¶Ë¿ÚÉè±¸±ØĞë±»¶ÀÕ¼ĞÔµÄ·ÃÎÊ
+			NULL,                               // ÎŞ°²È«ÊôĞÔ
+			OPEN_EXISTING,                      // ¶Ë¿ÚÉè±¸±ØĞëÊ¹ÓÃOPEN_EXISTING²ÎÊı
 			FILE_ATTRIBUTE_NORMAL | 
-			FILE_FLAG_OVERLAPPED,               // å¼‚æ­¥å¼ I/O
-			0);                                 // å¯¹äºç«¯å£è®¾å¤‡è€Œè¨€æ­¤å‚æ•°å¿…é¡»ä¸º0
+			FILE_FLAG_OVERLAPPED,               // Òì²½Ê½ I/O
+			0);                                 // ¶ÔÓÚ¶Ë¿ÚÉè±¸¶øÑÔ´Ë²ÎÊı±ØĞëÎª0
 
-		/*m_osRead.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		m_osRead.hEvent  = CreateEvent(NULL, FALSE, FALSE, NULL);
 		m_osWrite.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-		m_osWait.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);*/
+		m_osWait.hEvent  = CreateEvent(NULL, FALSE, FALSE, NULL);
 	}
-	m_bOverlapped = bOverlapped;
 
-	// æ‰“å¼€å¤±è´¥
+	// ´ò¿ªÊ§°Ü
+	if (m_hComm == INVALID_HANDLE_VALUE)
+	{
+		if (GetLastError() == ERROR_FILE_NOT_FOUND)
+			0 == 0; // [TODO] ¶Ë¿Ú²»´æÔÚ
+		return -1;
+	}
+
+	// ´ò¿ª³É¹¦ ±£´æ¶Ë¿Ú¾ä±úĞÅÏ¢
+	m_bOverlapped = bOverlapped;
+	strcpy_s(m_strPortNo, sizeof(strPortNo.c_str()), strPortNo.c_str());
+	GetCommState(m_hComm, &m_dcb);
+	return 0;
+}
+
+
+/**
+ * Function : ¹Ø±Õ¶Ë¿Ú
+ * Return   : [-1] ¹Ø±Õ¶Ë¿Ú³öÏÖÎÊÌâ£¬¶Ë¿Ú¾ä±úÎ´Õı³£ÊÍ·Å
+ *            [ 1] ¸Ã¶Ë¿ÚÒÑ¾­¹Ø±ÕÁË
+ *            [ 0] ¹Ø±Õ³É¹¦£¬¾ä±úÒÑÊÍ·Å
+ * Updated  : 2023-10-09 @FrozenSky
+ */
+int FSC_Serial::Close()
+{
+	if (m_hComm == INVALID_HANDLE_VALUE)
+		return 1;
+	if (m_hComm != INVALID_HANDLE_VALUE)
+	{
+		if (!CloseHandle(m_hComm))
+			return -1;
+		m_hComm = INVALID_HANDLE_VALUE;
+	}
+	return 0;
+}
+
+
+/**
+ * Function : ´ò¿ªÖ¸¶¨µÄ¶Ë¿Ú£¨Í¬²½»òÒì²½Ä£Ê½£©£¬³É¹¦ºó¶ÁÈ¡¶Ë¿Ú²ÎÊı½á¹¹Ìå
+ * Parameter:
+ *      _IN_  dwBaudRate  : ²¨ÌØÂÊ CBR_115200 ... (see WinBase.h)
+ *      _IN_  bParity     : ÆæÅ¼Ğ£Ñé·½·¨ 0-4 = NOPARITY, ODDPARITY, EVENPARITY, MARKPARITY, SPACEPARITY
+ *      _IN_  bByteSize   : Êı×ÖÎ» 4-8
+ *      _IN_  bStopBits   : Í£Ö¹Î» 0,1,2 = ONESTOPBIT, ONE5STOPBITS, TWOSTOPBITS
+ *      _IN_  dwFlagParity: ÆæÅ¼Ğ£ÑéÎ»ÊÇ·ñÔÊĞí
+ * Return   : [-2] ÉèÖÃ¶Ë¿Ú²ÎÊı³ö´í
+ *            [-1] ¶Ë¿Ú¾ä±úÎŞĞ§£¨¶Ë¿ÚÎ´´ò¿ª£©
+ *            [ 0] ÉèÖÃ³É¹¦
+ * Updated  : 2023-10-09 @FrozenSky
+ */
+int FSC_Serial::SetSerialPort(DWORD dwBaudRate, BYTE bParity, BYTE bByteSize, BYTE bStopBits, DWORD dwFlagParity)
+{
 	if (m_hComm == INVALID_HANDLE_VALUE)
 		return -1;
-	/*GetCommState(m_hComm, &m_dcb);*/
-	/*m_csPortNo = tcPortNo;*/
-	strcpy_s(m_strPortNo, sizeof(strPortNo.c_str()), strPortNo.c_str());
+	GetCommState(m_hComm, &m_dcb);
+	m_dcb.BaudRate = dwBaudRate;       // ²¨ÌØÂÊ CBR_115200 ...
+	m_dcb.Parity   = bParity;          // ÆæÅ¼Ğ£Ñé·½·¨ 0-4 = NOPARITY, ODDPARITY, EVENPARITY, MARKPARITY, SPACEPARITY
+	m_dcb.ByteSize = bByteSize;        // Êı×ÖÎ» 4-8
+	m_dcb.StopBits = bStopBits;        // Í£Ö¹Î» 0,1,2 = ONESTOPBIT, ONE5STOPBITS, TWOSTOPBITS
+	m_dcb.fParity  = 1;                // ÆæÅ¼Ğ£ÑéÎ»ÊÇ·ñÔÊĞí
+	if (!SetCommState(m_hComm, &m_dcb))
+	{
+		GetCommState(m_hComm, &m_dcb);
+		return -2;
+	}
+	PurgeComm(m_hComm, PURGE_TXCLEAR | PURGE_RXCLEAR); // Çå³ı¶Ë¿ÚµÄÊäÈëÊä³ö»º³åÇø
 	return 0;
+}
+
+
+/**
+ * Function : ¶ÁÈ¡×Ö½ÚÊı¾İ£¬Ö¸¶¨Òª¶ÁÈ¡µÄÊı¾İ³¤¶È£¬Êä³ö³É¹¦¶ÁÈ¡µ½µÄÊı¾İ³¤¶È
+ *            ·ÇÒì²½½«Ôì³É×èÈû£¬ĞèÒªÉèÖÃ¶Á³ö³¬Ê±Ê±¼ä (see struct: COMMTIMEOUTS in WinBase.h)
+ * Parameter:
+ *     _OUT_  byteBuff    : ´æ´¢¶Á³öÊı¾İ
+ *      _IN_  dwNbToRead  : Òª¶ÁÈ¡µÄÊı¾İ×î´ó³¤¶È
+ *     _OUT_  dwNbRead    : ³É¹¦¶Á³öµÄÊı¾İ³¤¶È
+ * Return   : [-2] ¶Á³ö´íÎó
+ *            [-1] ¶Ë¿Ú¾ä±úÎŞĞ§£¨¶Ë¿ÚÎ´´ò¿ª£©
+ *            [ 0] ¶Á³ö³É¹¦
+ * Updated  : 2023-10-09 @FrozenSky
+ */
+int FSC_Serial::Read(BYTE* byteBuff, DWORD dwNbToRead, DWORD* dwNbRead)
+{
+	if (m_hComm == INVALID_HANDLE_VALUE)
+		return -1;
+	if (!m_bOverlapped)
+	{
+		BOOL bReadStat = ReadFile(m_hComm, byteBuff, dwNbToRead, dwNbRead, NULL);
+		if (!bReadStat)
+		{
+			PurgeComm(m_hComm, PURGE_RXABORT | PURGE_RXCLEAR);
+			return -2;
+		}
+	}
+	return 0;
+}
+
+
+/**
+ * Function : Other member function
+ */
+
+HANDLE FSC_Serial::GetHandle()
+{
+	return m_hComm;
 }
