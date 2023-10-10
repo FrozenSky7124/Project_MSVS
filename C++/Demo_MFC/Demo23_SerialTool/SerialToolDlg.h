@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "FSC_Serial.h"
+#include "afxwin.h"
 
 // SerialToolDlg dialog
 class SerialToolDlg : public CDialogEx
@@ -19,7 +20,7 @@ public:
 	enum { IDD = IDD_DEMO23_SERIALTOOL_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 
@@ -30,8 +31,12 @@ protected:
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
+	virtual void OnCancel();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
+	FSC_Serial* m_pSerial;
+	HANDLE m_hThreadRead;
 	afx_msg void OnClicked_BtnOpen();
+	CEdit m_Info;
 };

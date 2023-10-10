@@ -12,8 +12,33 @@
 #endif
 
 
-// SerialToolDlg dialog
+UINT WINAPI uiFuncRead(LPVOID lpParam)
+{
+	SerialToolDlg* pThis = (SerialToolDlg*)lpParam;
+	FSC_Serial* pSerial = pThis->m_pSerial;
 
+	while (true)
+	{
+		byte byteBuff[129];
+		unsigned long NbBytesRead = 0;
+		pSerial->Read(byteBuff, 128, &NbBytesRead);
+		if (NbBytesRead > 0)
+		{
+			byteBuff[NbBytesRead] = '\0';
+			TRACE("recv %2d %s\n", NbBytesRead, byteBuff);
+			unsigned long textLength = pThis->m_Info.GetWindowTextLength();
+			pThis->m_Info.SetSel(textLength, textLength, FALSE);
+			pThis->m_Info.ReplaceSel("\r\n" + CString(byteBuff));
+		}
+		if (byteBuff[0] == 0xFF)
+			break;
+	}
+
+	return 0;
+}
+
+
+// SerialToolDlg dialog
 
 
 SerialToolDlg::SerialToolDlg(CWnd* pParent /*=NULL*/)
@@ -25,6 +50,7 @@ SerialToolDlg::SerialToolDlg(CWnd* pParent /*=NULL*/)
 void SerialToolDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_EDIT_INFO, m_Info);
 }
 
 BEGIN_MESSAGE_MAP(SerialToolDlg, CDialogEx)
@@ -79,6 +105,18 @@ void SerialToolDlg::OnPaint()
 	}
 }
 
+void SerialToolDlg::OnCancel()
+{
+	int iRst = m_pSerial->Close();
+	TRACE("Serial.Close iRst = %d.\n", iRst);
+	if (m_pSerial != NULL)
+	{
+		delete m_pSerial;
+		m_pSerial = NULL;
+	}
+	CDialogEx::OnCancel();
+}
+
 // The system calls this function to obtain the cursor to display while the user drags
 //  the minimized window.
 HCURSOR SerialToolDlg::OnQueryDragIcon()
@@ -87,36 +125,18 @@ HCURSOR SerialToolDlg::OnQueryDragIcon()
 }
 
 
-
 void SerialToolDlg::OnClicked_BtnOpen()
 {
-	FSC_Serial Serial;
+	m_pSerial = new FSC_Serial();
 	int iRst;
-	iRst = Serial.Open("COM4", false);
+	iRst = m_pSerial->Open("COM4", false);
 	TRACE("Serial.Open iRst = %d.\n", iRst);
-	iRst = Serial.SetSerialPort(115200, 0, 8, 0);
+	iRst = m_pSerial->SetSerialPort(CBR_115200, NOPARITY, 8, ONESTOPBIT);
 	TRACE("Serial.SetSerialPort iRst = %d.\n", iRst);
+	iRst = m_pSerial->SetTimeout(10, 0, 10);
+	TRACE("Serial.SetTimeout iRst = %d.\n", iRst);
 
-	COMMTIMEOUTS CommTimeOuts;
-	GetCommTimeouts(Serial.GetHandle(), &CommTimeOuts);
-	CommTimeOuts.ReadIntervalTimeout = 50;
-	CommTimeOuts.ReadTotalTimeoutMultiplier = 0;
-	CommTimeOuts.ReadTotalTimeoutConstant = 1000;
-	SetCommTimeouts(Serial.GetHandle(), &CommTimeOuts);
-
-	int rc = 0;
-	while (rc < 5)
-	{
-		byte byteBuff[32];
-		unsigned long NbBytesRead;
-		Serial.Read(byteBuff, 32, &NbBytesRead);
-		if (NbBytesRead > 0)
-		{
-			byteBuff[NbBytesRead - 1] = '\0';
-			TRACE("recv %2d %s\n", NbBytesRead, byteBuff);
-		}
-		rc++;
-	}
-	iRst = Serial.Close();
-	TRACE("Serial.Close iRst = %d.\n", iRst);
+	UINT uiThreadRead;
+	m_hThreadRead = (HANDLE)_beginthreadex(NULL, 0, &uiFuncRead, this, 0, &uiThreadRead);
 }
+

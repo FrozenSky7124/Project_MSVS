@@ -25,6 +25,7 @@ public:
 	int Open(const std::string & strPortNo, bool bOverlapped);
 	int Close();
 	int SetSerialPort(DWORD dwBaudRate, BYTE bParity, BYTE bByteSize, BYTE bStopBits, DWORD dwFlagParity = 1);
+	int SetTimeout(DWORD dwRIT, DWORD dwRTTM, DWORD dwRTTC);
 	int Read(BYTE* byteBuff, DWORD dwNbToRead, DWORD* dwNbRead);
 
 	HANDLE GetHandle();

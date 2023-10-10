@@ -98,7 +98,7 @@ int FSC_Serial::Close()
 
 
 /**
- * Function : 打开指定的端口（同步或异步模式），成功后读取端口参数结构体
+ * Function : 设置端口参数(DCB)
  * Parameter:
  *      _IN_  dwBaudRate  : 波特率 CBR_115200 ... (see WinBase.h)
  *      _IN_  bParity     : 奇偶校验方法 0-4 = NOPARITY, ODDPARITY, EVENPARITY, MARKPARITY, SPACEPARITY
@@ -126,6 +126,33 @@ int FSC_Serial::SetSerialPort(DWORD dwBaudRate, BYTE bParity, BYTE bByteSize, BY
 		return -2;
 	}
 	PurgeComm(m_hComm, PURGE_TXCLEAR | PURGE_RXCLEAR); // 清除端口的输入输出缓冲区
+	return 0;
+}
+
+
+/**
+ * Function : 设置端口超时(COMMTIMEOUTS)
+ * Parameter:
+ *      _IN_  dwRIT       : 设置 ReadIntervalTimeout 读取间隔超时
+ *      _IN_  dwRTTM      : 设置 ReadTotalTimeoutMultiplier 读取总超时系数
+ *      _IN_  dwRTTC      : 设置 ReadTotalTimeoutConstant 读取总超时常数
+ * Return   : [-2] 设置端口参数出错
+ *            [-1] 端口句柄无效（端口未打开）
+ *            [ 0] 设置成功
+ * Updated  : 2023-10-10 @FrozenSky
+ */
+int FSC_Serial::SetTimeout(DWORD dwRIT, DWORD dwRTTM, DWORD dwRTTC)
+{
+	if (m_hComm == INVALID_HANDLE_VALUE)
+		return -1;
+	COMMTIMEOUTS CommTimeOuts;
+	GetCommTimeouts(m_hComm, &CommTimeOuts);
+	CommTimeOuts.ReadIntervalTimeout = dwRIT;
+	CommTimeOuts.ReadTotalTimeoutMultiplier = dwRTTM;
+	CommTimeOuts.ReadTotalTimeoutConstant = dwRTTC;
+	if (!SetCommTimeouts(m_hComm, &CommTimeOuts))
+		return -2;
+	PurgeComm(m_hComm, PURGE_RXABORT | PURGE_RXCLEAR);
 	return 0;
 }
 
