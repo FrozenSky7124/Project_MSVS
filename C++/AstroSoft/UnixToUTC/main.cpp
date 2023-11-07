@@ -66,25 +66,29 @@ void calculate(long long seconds, int timezone, st_UTC * utctime)
 
 int main(void)
 {
-	time_t timep;
-	struct tm* p;
-	timep = 0x60D398AC;//time(&timep);
-	p = localtime(&timep);
-	timep = mktime(p);
+	long long UnixTimeStamp = 1582873200;
+
+	/* Local Time (Now) */
+	time_t timep = time(&timep);
 	struct tm *mytm = localtime(&timep);
-	//printf(" %d,  %d,   %d,   %d,  Minute is %d,  Second is %d\r\n", mytm->tm_year+1900, mytm->tm_mon + 1, mytm->tm_mday, mytm->tm_hour, mytm->tm_min, mytm->tm_sec);
+	printf("Local Time (Now):    %04d-%02d-%02d %02d:%02d:%02d\r\n", mytm->tm_year+1900, mytm->tm_mon + 1, mytm->tm_mday, mytm->tm_hour, mytm->tm_min, mytm->tm_sec);
 
+	/* Local Time (Custom) */
+	time_t timec = UnixTimeStamp;
+	struct tm* tmc = localtime(&timec);
+	printf("Local Time (Custom): %04d-%02d-%02d %02d:%02d:%02d\r\n", tmc->tm_year + 1900, tmc->tm_mon + 1, tmc->tm_mday, tmc->tm_hour, tmc->tm_min, tmc->tm_sec);
+	
+	/* Unix To UTC 1 (Custom) */
 	st_UTC t1;
-	calculate(1582873200, 8, &t1);
-	printf("%04d-%02d-%02d %02d-%02d-%02d\r\n", t1.year, t1.month, t1.day, t1.hour, t1.minute, t1.second);
+	calculate(UnixTimeStamp, 0, &t1);
+	printf("UTC          : %04d-%02d-%02d %02d-%02d-%02d\r\n", t1.year, t1.month, t1.day, t1.hour, t1.minute, t1.second);
 
-
-	time_t unix_timestamp = 1582873200;
+	/* Unix To UTC 2 (Custom) */
+	time_t unix_timestamp = UnixTimeStamp;
 	struct tm *tmdate = localtime(&unix_timestamp);
-	printf("Local Time is : asctime =%s", asctime(tmdate));
-	printf("  GMT Time is : gmtime  =%s", asctime(gmtime(&unix_timestamp)));
+	printf("UTC (gmttime): %s", asctime(gmtime(&unix_timestamp)));
 
-	printf("[0x%08X]   %04d-%02d-%02d %02d-%02d-%02d\r\n", int(unix_timestamp), tmdate->tm_year + 1900, tmdate->tm_mon + 1, tmdate->tm_mday,
+	printf("[0x%08X] : %04d-%02d-%02d %02d-%02d-%02d\r\n", int(unix_timestamp), tmdate->tm_year + 1900, tmdate->tm_mon + 1, tmdate->tm_mday,
 		tmdate->tm_hour, tmdate->tm_min, tmdate->tm_sec);
 
 	getchar();
