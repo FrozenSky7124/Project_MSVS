@@ -68,6 +68,7 @@ public:
 	CProgressCtrl m_MainProgBar;
 	CStatic m_MainStatic;       //Static INFO
 
+	bool m_bMaintenance;        //Maintenance Mode
 	int m_iCurMakeNo;           //Cur Process
 	int m_iDataCount;           //Count of Data
 

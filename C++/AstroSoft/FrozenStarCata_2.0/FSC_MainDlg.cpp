@@ -70,8 +70,15 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	}
 
 	// Create TABLE
-	//sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), VT numeric(6,3))";
-	sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), pmRA numeric(7,1), pmDE numeric(7,1), VT numeric(6,3))";
+	if (pMainDlg->m_bMaintenance == true)
+	{
+		sql = "CREATE TABLE Tycho2_all(RA numeric(12,8), DEC numeric(12,8), pmRA numeric(7,1), pmDE numeric(7,1))";
+	}
+	else
+	{
+		sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), pmRA numeric(7,1), pmDE numeric(7,1), VT numeric(6,3))";
+		//sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), VT numeric(6,3))";
+	}
 	rc = sqlite3_exec(Sqlite3_dbCoon, sql, NULL, 0, &zErrMsg);
 	if (rc != SQLITE_OK)
 	{
@@ -130,7 +137,14 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 
 		// Insert into database
 		CString szQuery;
-		szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.1f, %.1f, %.3f)"), strID, dRa_Fixed, dDec_Fixed, dpmRA, dpmDE, dVT);
+		if (pMainDlg->m_bMaintenance == true)
+		{
+			szQuery.Format(_T("INSERT INTO Tycho2_all VALUES (%.8f, %.8f, %.1f, %.1f)"), dRa_Fixed, dDec_Fixed, dpmRA, dpmDE);
+		}
+		else
+		{
+			szQuery.Format(_T("INSERT INTO Tycho2_all VALUES ('%s', %.8f, %.8f, %.1f, %.1f, %.3f)"), strID, dRa_Fixed, dDec_Fixed, dpmRA, dpmDE, dVT);
+		}
 		rc = sqlite3_exec(Sqlite3_dbCoon, szQuery, NULL, 0, &zErrMsg);
 		if (rc != SQLITE_OK)
 		{
@@ -153,6 +167,7 @@ UINT WINAPI uiProcFuncMake(LPVOID lpParam)
 	
 	delete[] pData;
 	pBtnMake->EnableWindow(TRUE);
+	pMainDlg->m_bMaintenance = false;
 	MessageBoxEx(pMainDlg->GetSafeHwnd(), _T("Star Catalogue Making Success!"), _T("QwQ"), MB_ICONINFORMATION, NULL);
 	return 0;
 }
@@ -264,6 +279,7 @@ FSC_MainDlg::FSC_MainDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_iDataCount = 0;
+	m_bMaintenance = false;
 }
 
 void FSC_MainDlg::DoDataExchange(CDataExchange* pDX)
@@ -391,33 +407,9 @@ void FSC_MainDlg::OnTimer(UINT_PTR nIDEvent)
 
 void FSC_MainDlg::OnBnClickedBtnCreateDB()
 {
-	sqlite3 *Sqlite3_dbCoon;
-	char *zErrMsg = 0;
-	char *sql;
-	int rc;
-
-	rc = sqlite3_open("Tycho2_VT9_DEC-50+.db", &Sqlite3_dbCoon);
-
-	if (rc)
-	{
-		MessageBoxEx(GetSafeHwnd(), _T("Can't open Tycho2 database."), _T("QAQ"), MB_OK | MB_ICONERROR, 0);
-		return;
-	}
-	else
-	{
-		TRACE(_T("Open database successfully.\n"));
-	}
-
-	// Create TABLE
-	sql = "CREATE TABLE Tycho2_all(StarID varchar(15), RA numeric(12,8), DEC numeric(12,8), VT numeric(6,3))";
-	rc = sqlite3_exec(Sqlite3_dbCoon, sql, NULL, 0, &zErrMsg);
-	if (rc != SQLITE_OK)
-	{
-		TRACE(_T("SQL_EXEC Error: %s\n"), zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
-
-	sqlite3_close(Sqlite3_dbCoon);
+	m_bMaintenance = true;
+	
+	OnBnClickedBtnMake();
 }
 
 
