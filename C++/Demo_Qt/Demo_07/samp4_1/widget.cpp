@@ -26,3 +26,31 @@ void Widget::on_btnCalc_clicked()
     ui->lineEditAll->setText(str);
 }
 
+
+void Widget::on_btnConvDec_clicked()
+{
+    QString str;
+    str = ui->editDec->text();
+    int iDec = str.toInt();
+    str = str.setNum(iDec, 2);
+    str = str.toUpper();
+    ui->editBin->setText(str);
+    str = str.setNum(iDec, 16);
+    str = str.toUpper();
+    ui->editHex->setText(str);
+}
+
+
+void Widget::on_btnConvBin_clicked()
+{
+    QString str;
+    str = ui->editBin->text();
+    bool ok;
+    int iBin = str.toInt(&ok, 2);
+    str = QString::number(iBin, 10);
+    ui->editDec->setText(str);
+    str = QString::number(iBin, 16);
+    str = str.toUpper();
+    ui->editHex->setText(str);
+}
+

@@ -18,6 +18,10 @@ public:
 private slots:
     void on_btnCalc_clicked();
 
+    void on_btnConvDec_clicked();
+
+    void on_btnConvBin_clicked();
+
 private:
     Ui::Widget *ui;
 };
