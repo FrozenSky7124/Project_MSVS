@@ -20,13 +20,12 @@ CString GetDateTime()
 {
 	char cDateTime[64];
 	memset(cDateTime, 0, 64);
-	time_t _tTime;
-	struct tm *ptmTime;
-	time(&_tTime);
-	ptmTime = localtime(&_tTime);
-	//printf("Local Time: %02d-%02d-%02d\n", ptmTime->tm_year + 1900, ptmTime->tm_mon + 1, ptmTime->tm_mday);
+	struct tm now_time;
+	time_t time_seconds = time(0);
+	localtime_s(&now_time, &time_seconds);
+	//printf("Local Time: %02d-%02d-%02d\n", now_time.tm_year + 1900, now_time.tm_mon + 1, now_time.tm_mday);
 	sprintf_s(cDateTime, "%02d-%02d-%02d %02d:%02d:%02d", 
-		ptmTime->tm_year + 1900, ptmTime->tm_mon + 1, ptmTime->tm_mday, ptmTime->tm_hour, ptmTime->tm_min, ptmTime->tm_sec);
+		now_time.tm_year + 1900, now_time.tm_mon + 1, now_time.tm_mday, now_time.tm_hour, now_time.tm_min, now_time.tm_sec);
 	return cDateTime;
 }
 
@@ -187,7 +186,7 @@ void PowerAlertUI::InitUI()
 
 void PowerAlertUI::Monitor()
 {
-	CEditPrintf(m_Edit1, GetDateTime() + _T("   OnTimer.\r\n"));
+	//CEditPrintf(m_Edit1, GetDateTime() + _T("   OnTimer.\r\n"));
 
 	if (m_AlertStatus == 1)
 		return;
