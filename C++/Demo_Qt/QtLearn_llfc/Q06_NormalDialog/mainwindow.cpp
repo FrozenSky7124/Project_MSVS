@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+	m_iCount = 0;
 }
 
 MainWindow::~MainWindow()
@@ -76,4 +77,46 @@ void MainWindow::on_btnMessage_clicked()
     QMessageBox::information(this, tr("通知"), tr("Information"), QMessageBox::Ok);
     QMessageBox::warning(this,     tr("警告"), tr("Warning"),     QMessageBox::Ok);
     QMessageBox::critical(this,    tr("关键"), tr("Critical"),    QMessageBox::Ok);
+}
+
+void MainWindow::on_btnProgress_clicked()
+{
+	m_pProgressDlg = new QProgressDialog(tr("正在复制"), tr("取消复制"), 0, 5000, this);
+	m_pProgressDlg->setWindowTitle(tr("ProgressDialog"));
+	m_pProgressDlg->setWindowModality(Qt::ApplicationModal);
+	m_pProgressDlg->setMinimumSize(400, 80);
+	m_pProgressDlg->resize(400, 80);
+	m_pTimer = new QTimer(this);
+	connect(m_pTimer, &QTimer::timeout, this, &MainWindow::on_updateProgressDialog);
+	connect(m_pProgressDlg, &QProgressDialog::canceled, this, &MainWindow::on_cancelProgressDialog);
+	m_pTimer->start(2);
+}
+
+void MainWindow::on_updateProgressDialog()
+{
+	m_iCount++;
+
+	if (m_iCount > 5000)
+	{
+		m_pTimer->stop();
+		delete m_pTimer;
+		m_pTimer = nullptr;
+		delete m_pProgressDlg;
+		m_pProgressDlg = nullptr;
+		m_iCount = 0;
+		return;
+	}
+	
+	m_pProgressDlg->setValue(m_iCount);
+}
+
+void MainWindow::on_cancelProgressDialog()
+{
+	m_pTimer->stop();
+	delete m_pTimer;
+	m_pTimer = nullptr;
+	delete m_pProgressDlg;
+	m_pProgressDlg = nullptr;
+	m_iCount = 0;
+	return;
 }
