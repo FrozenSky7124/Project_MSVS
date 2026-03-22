@@ -38,6 +38,8 @@ private slots:
 
 	void on_cancelProgressDialog();
 
+	void on_btnWizard_clicked();
+
 private:
     Ui::MainWindow *ui;
 	QProgressDialog *m_pProgressDlg;

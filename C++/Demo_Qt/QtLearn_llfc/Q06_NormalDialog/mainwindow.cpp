@@ -7,6 +7,11 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QWizard>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QButtonGroup>
+#include <QRadioButton>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -119,4 +124,41 @@ void MainWindow::on_cancelProgressDialog()
 	m_pProgressDlg = nullptr;
 	m_iCount = 0;
 	return;
+}
+
+void MainWindow::on_btnWizard_clicked()
+{
+	QWizard wiz(this);
+	wiz.setWindowTitle(tr("Wizard Window"));
+	auto pWizPage1 = new QWizardPage();
+	pWizPage1->setTitle(tr("ArkNights:Endfield"));
+	auto pLabel1 = new QLabel();
+	pLabel1->setText(tr("欢迎来到终末地协议核心引导界面！"));
+	auto pLayoutPage1 = new QVBoxLayout();
+	pLayoutPage1->addWidget(pLabel1);
+	pWizPage1->setLayout(pLayoutPage1);
+	wiz.addPage(pWizPage1);
+
+	auto pWizPage2 = new QWizardPage();
+	pWizPage2->setTitle(tr("LOGIN"));
+	auto pLabel2 = new QLabel();
+	pLabel2->setText(tr("请选择登录用户："));
+	auto pBtnG1 = new QButtonGroup(pWizPage2);
+	auto pRtn1 = new QRadioButton();
+	pRtn1->setText(tr("管理员"));
+	pBtnG1->addButton(pRtn1);
+	auto pRtn2 = new QRadioButton();
+	pRtn2->setText(tr("佩丽卡"));
+	pBtnG1->addButton(pRtn2);
+	auto pRtn3 = new QRadioButton();
+	pRtn3->setText(tr("陈千语"));
+	pBtnG1->addButton(pRtn3);
+	auto pLayoutPage2 = new QVBoxLayout();
+	pLayoutPage2->addWidget(pLabel2);
+	for (int i = 0; i < pBtnG1->buttons().size(); i++)
+		pLayoutPage2->addWidget(pBtnG1->buttons()[i]);
+	pWizPage2->setLayout(pLayoutPage2);
+	wiz.addPage(pWizPage2);
+
+	wiz.exec(); // show wiz as model mode
 }

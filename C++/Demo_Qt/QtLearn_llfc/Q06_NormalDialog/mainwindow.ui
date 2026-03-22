@@ -118,6 +118,19 @@
      <string>Progress</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btnWizard">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>110</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Wizard</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
