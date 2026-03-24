@@ -19,12 +19,25 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>64</width>
+      <width>141</width>
       <height>64</height>
      </rect>
     </property>
     <property name="text">
-     <string>show</string>
+     <string>Open Child Dialog</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="BtnQLineEditDemo">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>0</y>
+      <width>141</width>
+      <height>64</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>QLineEdit Demo</string>
     </property>
    </widget>
   </widget>
@@ -53,4 +66,7 @@
   <include location="QWindowDemo.qrc"/>
  </resources>
  <connections/>
+ <slots>
+  <slot>on_BtnQLineEditDemo_clicked()</slot>
+ </slots>
 </ui>

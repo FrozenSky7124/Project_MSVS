@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_QWindowDemo.h"
 #include "ChildForm1.h"
+#include "QLineEditForm.h"
 
 class QWindowDemo : public QMainWindow
 {
@@ -19,4 +20,5 @@ private:
 public slots:
 	void showChildDialog();
 	void showMainForm();
+	void showQLineEditForm();
 };

@@ -14,6 +14,7 @@ QWindowDemo::QWindowDemo(QWidget *parent)
 	QObject::connect(ui.BtnShowChildDlg, &QPushButton::clicked, this, &QWindowDemo::showChildDialog);
 	QObject::connect(pChildForm1, &ChildForm1::SIG_showMainForm, this, &QWindowDemo::showMainForm);
 	//QObject::connect(pChildForm1, SIGNAL(SIG_showMainForm()), this, SLOT(showMainForm()));
+	QObject::connect(ui.BtnQLineEditDemo, &QPushButton::clicked, this, &QWindowDemo::showQLineEditForm);
 
 	qDebug() << "[INF] QWindowDemo > QWindowDemo()";
 }
@@ -38,4 +39,11 @@ void QWindowDemo::showChildDialog()
 void QWindowDemo::showMainForm()
 {
 	this->show();
+}
+
+void QWindowDemo::showQLineEditForm()
+{
+	QLineEditForm form;
+	form.setWindowModality(Qt::WindowModality::ApplicationModal);
+	form.exec();
 }
