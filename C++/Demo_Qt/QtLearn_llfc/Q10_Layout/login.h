@@ -2,6 +2,9 @@
 #define LOGIN_H
 
 #include <QDialog>
+#include <QVector>
+#include <QDebug>
+#include "register.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,8 +22,11 @@ public:
 
 private slots:
     void on_btnRegister_clicked();
+    void on_UserRegister(const UserData & userdata);
 
 private:
     Ui::Login *ui;
+
+    QVector<UserData> vUserList;
 };
 #endif // LOGIN_H
