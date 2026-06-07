@@ -22,6 +22,9 @@ private slots:
 
     void on_actionDock_D_triggered();
 
+    void on_actionEdit_Open_triggered();
+
+    void setText(const QString& str);
 private:
     Ui::MainMenu *ui;
 };

@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>res/newFile.png</file>
         <file>res/dock.png</file>
+        <file>res/edit.png</file>
     </qresource>
 </RCC>

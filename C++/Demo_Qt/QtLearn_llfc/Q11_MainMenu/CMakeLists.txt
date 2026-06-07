@@ -39,6 +39,7 @@ else()
         add_executable(Q11_MainMenu
             ${PROJECT_SOURCES}
             res.qrc
+            MyAction.h MyAction.cpp
         )
     endif()
 endif()
@@ -56,7 +57,7 @@ set_target_properties(Q11_MainMenu PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+    WIN32_EXECUTABLE OFF
 )
 
 include(GNUInstallDirs)
