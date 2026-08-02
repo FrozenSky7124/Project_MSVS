@@ -2,6 +2,7 @@
 #include "./ui_MainWindow.h"
 #include <QTextFrame>
 #include <QDebug>
+#include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -38,6 +39,31 @@ MainWindow::MainWindow(QWidget *parent)
     action_font->setCheckable(true);
     QObject::connect(action_font, &QAction::toggled, this, &MainWindow::setTextFont);
     ui->toolBar->addAction(action_font);
+
+    QAction *action_textTable = new QAction(tr("Table"), this);
+    QAction *action_textList  = new QAction(tr("List"),  this);
+    QAction *action_textImage = new QAction(tr("Image"), this);
+    QObject::connect(action_textTable, &QAction::triggered, this, &MainWindow::insertTable);
+    QObject::connect(action_textList , &QAction::triggered, this, &MainWindow::insertList );
+    QObject::connect(action_textImage, &QAction::triggered, this, &MainWindow::insertImage);
+    ui->toolBar->addAction(action_textTable);
+    ui->toolBar->addAction(action_textList );
+    ui->toolBar->addAction(action_textImage);
+
+    QAction *action_textFind = new QAction(tr("Find"), this);
+    QObject::connect(action_textFind, &QAction::triggered, this, &MainWindow::textFind);
+    ui->toolBar->addAction(action_textFind);
+
+    pFindDlg = new QDialog(this);
+    pFindDlg->setWindowTitle(tr("Find"));
+    pLineEdit = new QLineEdit(pFindDlg);
+    QPushButton *pBtn = new QPushButton(pFindDlg);
+    pBtn->setText(tr("FindNext"));
+    QObject::connect(pBtn, &QPushButton::clicked, this, &MainWindow::textFindNext);
+    QVBoxLayout *pVLayout = new QVBoxLayout();
+    pVLayout->addWidget(pLineEdit);
+    pVLayout->addWidget(pBtn);
+    pFindDlg->setLayout(pVLayout);
 }
 
 MainWindow::~MainWindow()
@@ -94,10 +120,57 @@ void MainWindow::setTextFont(bool checked)
         charFormat.setFontUnderline(true);
         cursor.setCharFormat(charFormat);
         //ui->textEdit->insertPlainText("AlignCenter!");
-        cursor.insertText(tr("AlignCenter!"));
+        cursor.insertText(tr("测试一下！"));
     }
     else
     {
+        QTextCursor cursor = ui->textEdit->textCursor();
+        QTextBlockFormat blockFormat;
+        blockFormat.setAlignment(Qt::AlignLeft);
+        cursor.insertBlock(blockFormat);
+        QTextCharFormat charFormat;
+        cursor.setCharFormat(charFormat);
+        cursor.insertText(tr("测试一下！"));
+    }
+}
 
+void MainWindow::insertTable()
+{
+    QTextCursor cursor = ui->textEdit->textCursor();
+    QTextTableFormat tableFormat;
+    tableFormat.setCellSpacing(2);
+    tableFormat.setCellPadding(10);
+    cursor.insertTable(3, 2, tableFormat);
+}
+
+void MainWindow::insertList()
+{
+    QTextCursor cursor = ui->textEdit->textCursor();
+    QTextListFormat listFormat;
+    listFormat.setStyle(QTextListFormat::ListDecimal);
+    cursor.insertList(listFormat);
+}
+
+void MainWindow::insertImage()
+{
+    QTextCursor cursor = ui->textEdit->textCursor();
+    QTextImageFormat imageFormat;
+    imageFormat.setName(":/Amiya_carrot.gif");
+    cursor.insertImage(imageFormat);
+}
+
+void MainWindow::textFind()
+{
+    pFindDlg->show();
+}
+
+void MainWindow::textFindNext()
+{
+    QString str = pLineEdit->text();
+    bool isFind = ui->textEdit->find(str, QTextDocument::FindBackward);
+    if (isFind)
+    {
+        qDebug() << tr("Find! Row: %1 Col: %2").arg(ui->textEdit->textCursor().blockNumber())
+                                                .arg(ui->textEdit->textCursor().columnNumber());
     }
 }

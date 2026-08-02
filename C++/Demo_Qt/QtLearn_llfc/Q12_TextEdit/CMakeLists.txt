@@ -38,6 +38,7 @@ else()
     else()
         add_executable(Q12_TextEdit
             ${PROJECT_SOURCES}
+            res.qrc
         )
     endif()
 endif()
