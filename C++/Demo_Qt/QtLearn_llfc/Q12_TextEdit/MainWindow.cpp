@@ -3,6 +3,9 @@
 #include <QTextFrame>
 #include <QDebug>
 #include <QVBoxLayout>
+#include "MySyntaxHighlighter.h"
+#include <QMimeData>
+#include <QTextCodec>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -64,6 +67,13 @@ MainWindow::MainWindow(QWidget *parent)
     pVLayout->addWidget(pLineEdit);
     pVLayout->addWidget(pBtn);
     pFindDlg->setLayout(pVLayout);
+
+    auto pMySyntax = new MySyntaxHighlighter(ui->textEditHL->document());
+
+    // Drag & Drop
+    setAcceptDrops(true);
+    ui->textEdit->setAcceptDrops(false);
+    ui->textEditHL->setAcceptDrops(false);
 }
 
 MainWindow::~MainWindow()
@@ -172,5 +182,41 @@ void MainWindow::textFindNext()
     {
         qDebug() << tr("Find! Row: %1 Col: %2").arg(ui->textEdit->textCursor().blockNumber())
                                                 .arg(ui->textEdit->textCursor().columnNumber());
+    }
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    const QMimeData *mimeData = event->mimeData();
+    if (mimeData->hasUrls())
+    {
+        qDebug() << "Event URL: " << mimeData->urls()[0] << Qt::endl;
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    const QMimeData *mimeData = event->mimeData();
+    if (mimeData->hasUrls())
+    {
+        QString filePath = mimeData->urls()[0].toLocalFile();
+        if (!filePath.isEmpty())
+        {
+            QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+            QFile file(filePath);
+            if (!file.open(QIODevice::ReadOnly)) return;
+            QTextCodec::setCodecForLocale(codec);
+            QTextStream in(&file);
+            ui->textEditHL->setText(in.readAll());
+        }
+    }
+    else
+    {
+        event->ignore();
     }
 }

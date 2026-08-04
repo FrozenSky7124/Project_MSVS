@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QDragEnterEvent>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -29,6 +30,10 @@ public slots:
     void insertImage();
     void textFind();
     void textFindNext();
+
+protected:
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dropEvent(QDropEvent *event);
 
 private:
     Ui::MainWindow *ui;
